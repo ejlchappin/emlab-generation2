@@ -21,7 +21,7 @@ Note: it is possible to make a compiled version and run it without Netbeans, whe
 ## Selecting scenario and making changes
 The default scenario is selected when you open the model the first time. All code can be found under ‘source packages’. Data are under ‘resources / data’.
 
-You can change some defaults settings for running the simulation by opening the file under the package ‘emlab.gen.engine’ with the name ‘Startup.java’. Under the line: *Default parameters*. You can modify the number of runs that are performed (default 1), how many are executed in parallel (default 4), and the scenario that is run (default DefaultScenario). 
+You can change some defaults settings for running the simulation by opening the file under the package ‘emlab.gen.engine’ with the name ‘Startup.java’. Under the line: *Default parameters*. You can modify the number of runs that are performed (default 10), how many are executed in parallel (default 4), and the scenario that is run (default DefaultScenario). 
 
 *The scenarios* are located under the package ‘emlab.gen.scenarios’. The model also comes with a scenario covering the Netherlands and one with The Netherlands and Germany, resp. ‘Scenario_NL’ and ‘Scenario_NL_DE’.
 
