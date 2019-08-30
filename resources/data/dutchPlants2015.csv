@@ -1,0 +1,62 @@
+Name,Technology,Location,Age,Owner,Capacity,Efficiency
+Borssele,Nuclear PGT,nlNode,37,Energy Producer NL A,485,0.33
+AL-1,CCGT,nlNode,9,Energy Producer International B,62,0.64
+AL-2,CCGT,nlNode,8,Energy Producer NL B,55,0.54
+Centrale Bergum (CB10),CCGT,nlNode,13,Energy Producer International C,72,0.45
+Centrale Bergum (CB20),CCGT,nlNode,8,Energy Producer International A,72,0.45
+Centrale Diemen (DM33),CCGT,nlNode,20,Energy Producer NL A,249,0.5
+Centrale Diemen (DM34),CCGT,nlNode,8,Energy Producer International B,435,0.59
+Centrale Hemweg (HW-9),CCGT,nlNode,14,Energy Producer NL B,432,0.49
+Centrale Lage Weide,CCGT,nlNode,17,Energy Producer International C,247,0.5
+Centrale Merwedekanaal,CCGT,nlNode,29,Energy Producer International A,227,0.38
+Centrale RoCa (RoCa3),CCGT,nlNode,25,Energy Producer NL A,218,0.27
+Centrale Swentibold,CCGT,nlNode,15,Energy Producer International B,225,0.35
+Centrale Velsen (VN24),CCGT,nlNode,11,Energy Producer NL B,459,0.38
+Centrale Velsen (VN25),CCGT,nlNode,7,Energy Producer International C,375,0.38
+Clauscentrale (A),CCGT,nlNode,6,Energy Producer International A,640,0.59
+Clauscentrale (C1),CCGT,nlNode,8,Energy Producer NL A,310,0.59
+Clauscentrale (C2),CCGT,nlNode,29,Energy Producer International B,310,0.59
+Clauscentrale (C3),CCGT,nlNode,15,Energy Producer NL B,310,0.59
+Delesto (Del1),CCGT,nlNode,23,Energy Producer International C,180,0.77
+Delesto (Del2),CCGT,nlNode,3,Energy Producer International A,350,0.77
+EDH,CCGT,nlNode,16,Energy Producer NL A,112,0.52
+Eemscentrale (EC20),CCGT,nlNode,5,Energy Producer International B,131,0.52
+Eemscentrale (EC3),CCGT,nlNode,19,Energy Producer NL B,359,0.52
+Eemscentrale (EC4),CCGT,nlNode,17,Energy Producer International C,359,0.52
+Eemscentrale (EC5),CCGT,nlNode,17,Energy Producer International A,361,0.52
+Eemscentrale (EC6),CCGT,nlNode,12,Energy Producer NL A,359,0.52
+Eemscentrale (EC7),CCGT,nlNode,12,Energy Producer International B,360,0.52
+Enecogen,CCGT,nlNode,20,Energy Producer NL B,860,0.59
+ERICA,CCGT,nlNode,7,Energy Producer International C,63,0.5
+KLAZI,CCGT,nlNode,23,Energy Producer International A,63,0.5
+LD12,CCGT,nlNode,19,Energy Producer NL A,83,0.5
+LWE5,CCGT,nlNode,7,Energy Producer International B,265,0.5
+LWE6,CCGT,nlNode,13,Energy Producer NL B,247,0.56
+Magnum Centrale (10),CCGT,nlNode,11,Energy Producer International C,437,0.58
+Magnum Centrale (20),CCGT,nlNode,26,Energy Producer International A,437,0.58
+Magnum Centrale (30),CCGT,nlNode,13,Energy Producer NL A,437,0.58
+Maxima Centrale (FL4),CCGT,nlNode,11,Energy Producer International B,435,0.59
+Maxima Centrale (FL5),CCGT,nlNode,18,Energy Producer NL B,437,0.59
+MK11,CCGT,nlNode,4,Energy Producer International C,103,0.49
+Moerdijk 1,CCGT,nlNode,26,Energy Producer International A,350,0.4
+Moerdijk 2,CCGT,nlNode,23,Energy Producer NL A,450,0.58
+Rijnmond II,CCGT,nlNode,17,Energy Producer International B,427,0.5
+Rijnmond1,CCGT,nlNode,28,Energy Producer NL B,800,0.5
+UCML,CCGT,nlNode,9,Energy Producer International C,79,0.19
+Amercentrale (A9),Coal PSC,nlNode,26,Energy Producer International A,640,0.4
+Centrale Hemweg (HW-8),Coal PSC,nlNode,23,Energy Producer NL A,650,0.41
+Centrale Maasvlakte (MV3),Coal PSC,nlNode,3,Energy Producer International B,1068,0.46
+Centrale Rotterdam (MPP3),Coal PSC,nlNode,3,Energy Producer NL B,731,0.46
+Eemshaven,Coal PSC,nlNode,3,Energy Producer International C,1560,0.46
+OnshoreGroningen,Onshore wind PGT,nlNode,4,Energy Producer International A,447,1
+OnshoreFriesland,Onshore wind PGT,nlNode,4,Energy Producer NL A,187,1
+OnshoreFlevoland,Onshore wind PGT,nlNode,4,Energy Producer International B,1188,1
+OnshoreNoord-Holland,Onshore wind PGT,nlNode,4,Energy Producer NL B,355,1
+OnshoreZuid-Holland,Onshore wind PGT,nlNode,4,Energy Producer International C,357,1
+OnshoreZeeland,Onshore wind PGT,nlNode,4,Energy Producer International A,363,1
+OnshoreNoord-Brabant,Onshore wind PGT,nlNode,4,Energy Producer NL A,192,1
+OnshoreOther provinces,Onshore wind PGT,nlNode,4,Energy Producer International B,195,1
+NoordzeeWind (OWEZ),Offshore wind PGT,nlNode,4,Energy Producer NL B,108,1
+Offshore Prinses Amaliapark,Offshore wind PGT,nlNode,10,Energy Producer International C,120,1
+Offshore Luchterduinen,Offshore wind PGT,nlNode,3,Energy Producer International A,129,1
+Offshore Gemini,Offshore wind PGT,nlNode,1,Energy Producer NL A,600,1
