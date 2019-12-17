@@ -42,12 +42,14 @@ public class Startup {
         Logger.getGlobal().warning("Run id is " + runID);
 
         /* Default parameters */
-        long numberOfIterations = 10;
+        long numberOfIterations = 1;
         long numberOfParallelJobs = 4;
 
         
-        //String scenarioName = "DefaultScenario";
-        String scenarioName = "Scenario_NL_DE";
+        String scenarioName = "DefaultScenario";
+        //String scenarioName = "Scenario_NL";
+        //String scenarioName = "Scenario_NL_intermittent";
+        //String scenarioName = "Scenario_NL_DE";
         //String scenarioName = "Scenario_NL_hourly";
 
         String modelRole = "EMlabModelRole";
@@ -121,11 +123,12 @@ public class Startup {
                 Logger.getGlobal().warning("Starting worker for iteration " + iteration);
                 ScheduleWorker worker = new ScheduleWorker(runID, iteration, scenarioName, modelRole, reporter);
                 activeWorkers.add(worker);
-                worker.execute();
+                    worker.execute();
             }
 
             //Remove workers that are done.
             for (ScheduleWorker worker : activeWorkers) {
+               
                 if (worker.isDone()) {
                     Logger.getGlobal().warning("Worker was found completed.");
                     doneWorkers.add(worker);

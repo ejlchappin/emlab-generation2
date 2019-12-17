@@ -70,7 +70,12 @@ public class Schedule {
                 timer = new Timer();
                 timer.reset();
                 timer.start();
-                mainRole.act(reps.emlabModel);
+                try{
+                   mainRole.act(reps.emlabModel);
+                } catch (Exception e) {
+                    Logger.getGlobal().warning("Error in executing Main Role ");
+                    e.printStackTrace();
+                }
                 timer.stop();
                 logger.log(Level.WARNING, "Tick took {0} seconds.", timer.seconds());
                 reporter.report(this);

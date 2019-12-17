@@ -16,14 +16,12 @@ import emlab.gen.domain.gis.Zone;
 import emlab.gen.domain.market.electricity.IntermittentTechnologyNodeLoadFactor;
 import emlab.gen.domain.market.electricity.Segment;
 import emlab.gen.domain.market.electricity.SegmentLoad;
-import emlab.gen.domain.technology.Interconnector;
 import emlab.gen.domain.technology.IntermittentResourceProfile;
 import emlab.gen.domain.technology.PowerGeneratingTechnology;
 import emlab.gen.domain.technology.PowerGridNode;
 import emlab.gen.engine.AbstractRole;
 import emlab.gen.engine.Role;
 import emlab.gen.engine.Schedule;
-import emlab.gen.repository.Reps;
 import emlab.gen.util.Utils;
 
 /**
@@ -49,7 +47,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
 
         long clearingTick = getCurrentTick();
 
-        logger.warning("0. Determining the residual load duration curve");
+        logger.info("0. Determining the residual load duration curve");
 
         // 1. Create big matrix which contains columns for the information later
         // used.
@@ -61,15 +59,6 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         // SegmentsAccordingtoB
         // When creating views, and changes are made to the views, the
         // original matrix is changed as well (see Colt package).
-        List<Zone> zoneList = Utils.asList(getReps().zones);
-        List<PowerGeneratingTechnology> technologyList = Utils.asList(getReps()
-                .findAllIntermittentPowerGeneratingTechnologies());
-        Map<Zone, List<PowerGridNode>> zoneToNodeList = new HashMap<Zone, List<PowerGridNode>>();
-        for (Zone zone : zoneList) {
-            List<PowerGridNode> nodeList = Utils.asList(getReps().findAllPowerGridNodesByZone(zone));
-            zoneToNodeList.put(zone, nodeList);
-        }
-
         int columnIterator = 0;
 
         // Naming of columns, since dynamically created cannot be done as an
@@ -79,19 +68,19 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         int SEGMENT = columnIterator;
         columnIterator++;
         Map<Zone, Integer> LOADINZONE = new HashMap<Zone, Integer>();
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
             LOADINZONE.put(zone, columnIterator);
             columnIterator++;
         }
 
         Map<Zone, Integer> IPROD = new HashMap<Zone, Integer>();
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
             IPROD.put(zone, columnIterator);
             columnIterator++;
         }
 
         Map<Zone, Integer> RLOADINZONE = new HashMap<Zone, Integer>();
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
             RLOADINZONE.put(zone, columnIterator);
             columnIterator++;
         }
@@ -102,17 +91,21 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         columnIterator++;
 
         Map<Zone, Integer> SEGMENTFORZONE = new HashMap<Zone, Integer>();
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
             SEGMENTFORZONE.put(zone, columnIterator);
             columnIterator++;
         }
 
         Map<Zone, Map<PowerGridNode, Map<PowerGeneratingTechnology, Integer>>> TECHNOLOGYLOADFACTORSFORZONEANDNODE = new HashMap<Zone, Map<PowerGridNode, Map<PowerGeneratingTechnology, Integer>>>();
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
+            logger.warning("Found a zone " + zone);
             Map<PowerGridNode, Map<PowerGeneratingTechnology, Integer>> NODETOTECHNOLOGY = new HashMap<PowerGridNode, Map<PowerGeneratingTechnology, Integer>>();
-            for (PowerGridNode node : zoneToNodeList.get(zone)) {
+            for (PowerGridNode node : getReps().findAllPowerGridNodesByZone(zone)) {
+                logger.warning("Found a node " + node + " for zone " + zone);
                 Map<PowerGeneratingTechnology, Integer> technologyToColumn = new HashMap<PowerGeneratingTechnology, Integer>();
-                for (PowerGeneratingTechnology technology : technologyList) {
+                for (PowerGeneratingTechnology technology : getReps().findAllIntermittentPowerGeneratingTechnologies()) {
+                                    logger.warning("Found an intermittent pgt " + technology);
+
                     technologyToColumn.put(technology, columnIterator);
                     columnIterator++;
                 }
@@ -139,15 +132,15 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         // applied.
         m.viewColumn(INTERCONNECTOR).assign(-interConnectorCapacity);
 
-        logger.info("First 10 values of matrix: \n " + m.viewPart(0, 0, 10, m.columns()).toString());
+        logger.warning("First 10 values of matrix: \n " + m.viewPart(0, 0, 10, m.columns()).toString());
 
         // 2. Build national load curves, by adding up grid node load curves in
         // each zone.
         // also fill the residual load columns with the initial load curves.
         // for now simply multiplied with the market wide growth factor
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
 
-            for (PowerGridNode node : zoneToNodeList.get(zone)) {
+            for (PowerGridNode node : getReps().findAllPowerGridNodesByZone(zone)) {
                 DoubleMatrix1D hourlyArray = new DenseDoubleMatrix1D(node.getHourlyDemand().getHourlyArray(getCurrentTick()));
                 double growthRate = getReps().findElectricitySpotMarketForZone(zone).getDemandGrowthTrend()
                         .getValue(clearingTick);
@@ -158,8 +151,8 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
                 m.viewColumn(RLOADINZONE.get(zone)).assign(hourlyArray, Functions.plus);
 
             }
-
         }
+
 
         // 3. For each power grid node multiply the time series of each
         // intermittent technology type with
@@ -170,11 +163,11 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         // no interconnector constraints). Reduce the load factors by obvious
         // spill, that is RES production greater than demand + interconnector
         // capacity.
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
 
-            for (PowerGridNode node : zoneToNodeList.get(zone)) {
+            for (PowerGridNode node : getReps().findAllPowerGridNodesByZone(zone)) {
 
-                for (PowerGeneratingTechnology technology : technologyList) {
+                for (PowerGeneratingTechnology technology : getReps().findAllIntermittentPowerGeneratingTechnologies()) {
 
                     double intermittentCapacityOfTechnologyInNode = getReps()
                             .calculateCapacityOfOperationalIntermittentPowerPlantsByPowerGridNodeAndTechnology(node, technology,
@@ -219,9 +212,9 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
             spillVector.assign(oneVector, Functions.min);
             m.viewColumn(IPROD.get(zone)).assign(loadPlusInterconnector, Functions.min);
 
-            for (PowerGridNode node : zoneToNodeList.get(zone)) {
+            for (PowerGridNode node : getReps().findAllPowerGridNodesByZone(zone)) {
 
-                for (PowerGeneratingTechnology technology : technologyList) {
+                for (PowerGeneratingTechnology technology : getReps().findAllIntermittentPowerGeneratingTechnologies()) {
                     m.viewColumn(TECHNOLOGYLOADFACTORSFORZONEANDNODE.get(zone).get(node).get(technology)).assign(spillVector,
                             Functions.mult);
                 }
@@ -237,10 +230,10 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         // intermittent production if over supply.
         // In the end calculate the total residual load curve over all
         // countries.
-        // logger.warn("First 10 values of matrix: \n " + m.viewPart(0, 0, 10,
-        // m.columns()).toString());
-        Zone zoneA = zoneList.get(0);
-        Zone zoneB = zoneList.get(1);
+         logger.warning("First 10 values of matrix: \n " + m.viewPart(0, 0, 10,
+         m.columns()).toString());
+        Zone zoneA = getReps().zones.get(0);
+        Zone zoneB = getReps().zones.get(1);
 
         Zone zoneSmallerResidual;
         Zone zoneBiggerResidual;
@@ -251,7 +244,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
 
         Map<Zone, DoubleMatrix1D> spillFactorMap = new HashMap<Zone, DoubleMatrix1D>();
         // Get old values of IPROD to calculate spill factors later on.
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
             spillFactorMap.put(zone, m.viewColumn(IPROD.get(zone)).copy());
         }
 
@@ -327,7 +320,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
 
         // First divide it by new value. Spilled values are than greater
         // than 1, the other equal to 1.
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
             DoubleMatrix1D minValuesVector = spillFactorMap.get(zone).like();
             minValuesVector.assign(Double.MIN_NORMAL);
             spillFactorMap.get(zone).assign(minValuesVector, Functions.plus);
@@ -341,12 +334,12 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         DoubleMatrix1D differenceVector = m.viewColumn(12).copy();
         differenceVector.assign(m.viewColumn(13), Functions.minus);
         double result = differenceVector.aggregate(Functions.plus, Functions.identity);
-        // logger.warn("Result: " + result);
+        logger.warning("Result: " + result);
         // Divide all the technology load factors in the zone by the spill
         // factors above
-        for (Zone zone : zoneList) {
-            for (PowerGridNode node : zoneToNodeList.get(zone)) {
-                for (PowerGeneratingTechnology technology : technologyList) {
+        for (Zone zone : getReps().zones) {
+            for (PowerGridNode node : getReps().findAllPowerGridNodesByZone(zone)) {
+                for (PowerGeneratingTechnology technology : getReps().findAllIntermittentPowerGeneratingTechnologies()) {
                     m.viewColumn(TECHNOLOGYLOADFACTORSFORZONEANDNODE.get(zone).get(node).get(technology)).assign(
                             spillFactorMap.get(zone), Functions.div);
                 }
@@ -356,10 +349,10 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         // Make the interconnector capacity postive
         m.viewColumn(INTERCONNECTOR).assign(Functions.mult(-1));
 
-        // logger.warn("Number of hours where both countries of negative residual load: "
-        // + numberOfHoursWereBothCountriesHaveNegativeResidualLoad);
-        // logger.warn("Number of hours where one country exports to the other: "
-        // + numberOfHoursWhereOneCountryExportsREStoTheOther);
+         logger.warning("Number of hours where both countries of negative residual load: "
+         + numberOfHoursWereBothCountriesHaveNegativeResidualLoad);
+         logger.warning("Number of hours where one country exports to the other: "
+         + numberOfHoursWhereOneCountryExportsREStoTheOther);
         // 5. Order the hours in the global residual load curve. Peak load
         // first, base load last.
         // Sorts matrix by the load curve in descending order
@@ -414,7 +407,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         Map<Zone, DynamicBin1D[]> segmentRloadBinsByZone = new HashMap<Zone, DynamicBin1D[]>();
         Map<Zone, DynamicBin1D[]> segmentLoadBinsByZone = new HashMap<Zone, DynamicBin1D[]>();
 
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
             DynamicBin1D[] segmentRloadBinInZone = new DynamicBin1D[noSegments];
             DynamicBin1D[] segmentLoadBinInZone = new DynamicBin1D[noSegments];
             for (int i = 0; i < noSegments; i++) {
@@ -426,11 +419,11 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         }
 
         Map<Zone, Map<PowerGridNode, Map<PowerGeneratingTechnology, DynamicBin1D[]>>> loadFactorBinMap = new HashMap<Zone, Map<PowerGridNode, Map<PowerGeneratingTechnology, DynamicBin1D[]>>>();
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
             Map<PowerGridNode, Map<PowerGeneratingTechnology, DynamicBin1D[]>> NODETOTECHNOLOGY = new HashMap<PowerGridNode, Map<PowerGeneratingTechnology, DynamicBin1D[]>>();
-            for (PowerGridNode node : zoneToNodeList.get(zone)) {
+            for (PowerGridNode node : getReps().findAllPowerGridNodesByZone(zone)) {
                 Map<PowerGeneratingTechnology, DynamicBin1D[]> technologyToBins = new HashMap<PowerGeneratingTechnology, DynamicBin1D[]>();
-                for (PowerGeneratingTechnology technology : technologyList) {
+                for (PowerGeneratingTechnology technology : getReps().findAllIntermittentPowerGeneratingTechnologies()) {
                     DynamicBin1D[] technologyLoadFactorInNode = new DynamicBin1D[noSegments];
                     for (int i = 0; i < noSegments; i++) {
                         technologyLoadFactorInNode[i] = new DynamicBin1D();
@@ -442,10 +435,10 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
             loadFactorBinMap.put(zone, NODETOTECHNOLOGY);
         }
 
-        // logger.warn("Max: " + max + "\n" + "Min: " + min);
-        // for (double value : upperBoundSplit) {
-        // logger.warn("Split-Value:" + value);
-        // }
+         logger.warning("Max: " + max + "\n" + "Min: " + min);
+         for (double value : upperBoundSplit) {
+         logger.warning("Split-Value:" + value);
+         }
         // Assign hours and load to bins and segments
         int currentSegmentID = 1;
         int hoursAssignedToCurrentSegment = 0;
@@ -459,7 +452,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
             }
             m.set(row, SEGMENT, currentSegmentID);
             segmentRloadBins[currentSegmentID - 1].add(m.get(row, RLOADTOTAL));
-            for (Zone zone : zoneList) {
+            for (Zone zone : getReps().zones) {
                 segmentRloadBinsByZone.get(zone)[currentSegmentID - 1].add(m.get(row, RLOADINZONE.get(zone)));
                 segmentLoadBinsByZone.get(zone)[currentSegmentID - 1].add(m.get(row, LOADINZONE.get(zone)));
             }
@@ -467,8 +460,8 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
             hoursAssignedToCurrentSegment++;
         }
 
-        for (Zone zone : zoneList) {
-            for (PowerGridNode node : zoneToNodeList.get(zone)) {
+        for (Zone zone : getReps().zones) {
+            for (PowerGridNode node : getReps().findAllPowerGridNodesByZone(zone)) {
                 for (PowerGeneratingTechnology technology : getReps().findAllIntermittentPowerGeneratingTechnologies()) {
                     DynamicBin1D[] currentBinArray = loadFactorBinMap.get(zone).get(node).get(technology);
                     int columnNumber = TECHNOLOGYLOADFACTORSFORZONEANDNODE.get(zone).get(node).get(technology);
@@ -492,7 +485,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
 
         // Assign hours to segments according to residual load in this country.
         // Only for error estimation purposes
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
             currentSegmentID = 1;
             double minInZone = m.viewColumn(RLOADINZONE.get(zone)).aggregate(Functions.min, Functions.identity);
             double maxInZone = m.viewColumn(RLOADINZONE.get(zone)).aggregate(Functions.max, Functions.identity);
@@ -541,39 +534,39 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         // Printing of segments
         int it = 1;
         for (DynamicBin1D bin : segmentRloadBins) {
-            // logger.warn("Segment " + it + "\n      Size: " + bin.size() +
-            // "\n      Mean RLOAD~: " + Math.round(bin.mean())
-            // + "\n      Max RLOAD~: " + Math.round(bin.max()) +
-            // "\n      Min RLOAD~: " + Math.round(bin.min())
-            // + "\n      Std RLOAD~: " + Math.round(bin.standardDeviation()));
+             logger.warning("Segment " + it + "\n      Size: " + bin.size() +
+             "\n      Mean RLOAD~: " + Math.round(bin.mean())
+             + "\n      Max RLOAD~: " + Math.round(bin.max()) +
+             "\n      Min RLOAD~: " + Math.round(bin.min())
+             + "\n      Std RLOAD~: " + Math.round(bin.standardDeviation()));
             it++;
         }
 
         it = 1;
         for (DynamicBin1D bin : segmentInterConnectorBins) {
-            // logger.warn("Segment " + it + "\n      Size: " + bin.size() +
-            // "\n      Mean IntCapacity~: "
-            // + Math.round(bin.mean()) + "\n      Max IntCapacity~: " +
-            // Math.round(bin.max())
-            // + "\n      Min IntCapacity~: " + Math.round(bin.min()) +
-            // "\n      STD IntCapacity~: "
-            // + Math.round(bin.standardDeviation()));
+             logger.warning("Segment " + it + "\n      Size: " + bin.size() +
+             "\n      Mean IntCapacity~: "
+             + Math.round(bin.mean()) + "\n      Max IntCapacity~: " +
+             Math.round(bin.max())
+             + "\n      Min IntCapacity~: " + Math.round(bin.min()) +
+             "\n      STD IntCapacity~: "
+             + Math.round(bin.standardDeviation()));
             it++;
         }
 
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
             // logger.warn("Bins for " + zone);
             it = 1;
             String meanRLoad = new String("Residual load in " + zone.getName() + ":");
             String meanLoad = new String("Load in " + zone.getName() + ":");
             String segmentLength = new String("Segment length " + zone.getName() + ":");
             for (DynamicBin1D bin : segmentRloadBinsByZone.get(zone)) {
-                // logger.warn("Segment " + it + "\n      Size: " + bin.size() +
-                // "\n      Mean RLOAD~: " + Math.round(bin.mean())
-                // + "\n      Max RLOAD~: " + Math.round(bin.max()) +
-                // "\n      Min RLOAD~: " + Math.round(bin.min())
-                // + "\n      Std RLOAD~: " +
-                // Math.round(bin.standardDeviation()));
+                 logger.warning("Segment " + it + "\n      Size: " + bin.size() +
+                 "\n      Mean RLOAD~: " + Math.round(bin.mean())
+                 + "\n      Max RLOAD~: " + Math.round(bin.max()) +
+                 "\n      Min RLOAD~: " + Math.round(bin.min())
+                 + "\n      Std RLOAD~: " +
+                 Math.round(bin.standardDeviation()));
                 it++;
                 double mean = bin.mean() * 1000;
                 mean = Math.round(mean);
@@ -583,13 +576,13 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
             }
             it = 1;
             for (DynamicBin1D bin : segmentLoadBinsByZone.get(zone)) {
-                // logger.warn("Segment " + it + "\n      Size: " + bin.size() +
-                // "\n      Mean LOAD~: "
-                // + Math.round(bin.mean()) + "\n      Max LOAD~: " +
-                // Math.round(bin.max())
-                // + "\n      Min LOAD~: " + Math.round(bin.min()) +
-                // "\n      Std LOAD~: "
-                // + Math.round(bin.standardDeviation()));
+                 logger.warning("Segment " + it + "\n      Size: " + bin.size() +
+                 "\n      Mean LOAD~: "
+                 + Math.round(bin.mean()) + "\n      Max LOAD~: " +
+                 Math.round(bin.max())
+                 + "\n      Min LOAD~: " + Math.round(bin.min()) +
+                 "\n      Std LOAD~: "
+                 + Math.round(bin.standardDeviation()));
                 it++;
                 double mean = bin.mean() * 1000;
                 mean = Math.round(mean);
@@ -604,10 +597,10 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
 
         // 9. Store the load factors in the IntermittentTechnologyLoadFactors
         String loadFactors;
-        for (Zone zone : zoneList) {
-            for (PowerGridNode node : zoneToNodeList.get(zone)) {
+        for (Zone zone : getReps().zones) {
+            for (PowerGridNode node : getReps().findAllPowerGridNodesByZone(zone)) {
 
-                for (PowerGeneratingTechnology technology : technologyList) {
+                for (PowerGeneratingTechnology technology : getReps().findAllIntermittentPowerGeneratingTechnologies()) {
                     String loadFactorString = new String(technology.getName() + " LF in " + node.getName() + ":");
                     // logger.warn("Bins for " + zone + ", " + node + "and " +
                     // technology);
@@ -621,11 +614,11 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
                     ;
                     it = 1;
                     for (DynamicBin1D bin : loadFactorBinMap.get(zone).get(node).get(technology)) {
-                        // logger.warn("Segment " + it + "\n      Size: " +
-                        // bin.size() + "\n      Mean RLOAD~: "
-                        // + bin.mean() + "\n      Max RLOAD~: " + bin.max() +
-                        // "\n      Min RLOAD~: " + bin.min()
-                        // + "\n      Std RLOAD~: " + bin.standardDeviation());
+                        logger.warning("Segment " + it + "\n      Size: " +
+                         bin.size() + "\n      Mean RLOAD~: "
+                         + bin.mean() + "\n      Max RLOAD~: " + bin.max() +
+                         "\n      Min RLOAD~: " + bin.min()
+                         + "\n      Std RLOAD~: " + bin.standardDeviation());
                         intTechnologyNodeLoadFactor.setLoadFactorForSegmentId(it, bin.mean());
                         double mean = bin.mean() * 1000000;
                         mean = Math.round(mean);
@@ -658,13 +651,13 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
             segment.setLengthInHours(segmentRloadBins[segment.getSegmentID() - 1].size());
         }
 
-        for (Zone zone : zoneList) {
+        for (Zone zone : getReps().zones) {
             double intermittentCapacityOfTechnologyInZone = 0;
 
-            for (PowerGeneratingTechnology technology : technologyList) {
+            for (PowerGeneratingTechnology technology : getReps().findAllIntermittentPowerGeneratingTechnologies()) {
                 double productionOfTechInZone = 0;
 
-                for (PowerGridNode node : zoneToNodeList.get(zone)) {
+                for (PowerGridNode node : getReps().findAllPowerGridNodesByZone(zone)) {
 
                     intermittentCapacityOfTechnologyInZone += getReps().calculateCapacityOfOperationalIntermittentPowerPlantsByPowerGridNodeAndTechnology(node, technology,
                             getCurrentTick());

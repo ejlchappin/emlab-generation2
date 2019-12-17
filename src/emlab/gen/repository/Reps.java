@@ -737,8 +737,7 @@ public class Reps {
     }
 
     public Iterable<PowerGeneratingTechnology> findAllIntermittentPowerGeneratingTechnologies() {
-        Logger.getGlobal().log(Level.SEVERE, "Not yet implemented...");
-        return null;
+        return powerGeneratingTechnologies.stream().filter(p -> p.isIntermittent()).collect(Collectors.toList());
     }
 
     public Set<PowerGeneratingTechnologyTarget> findAllPowerGeneratingTechnologyTargetsByMarket(ElectricitySpotMarket market) {
@@ -751,8 +750,7 @@ public class Reps {
     }
 
     public Iterable<PowerGridNode> findAllPowerGridNodesByZone(Zone zone) {
-        Logger.getGlobal().log(Level.SEVERE, "Not yet implemented...");
-        return null;
+        return powerGridNodes.stream().filter(p -> p.getZone().equals(zone)).collect(Collectors.toList());     
     }
 
     public PowerGridNode findFirstPowerGridNodeByElectricitySpotMarket(ElectricitySpotMarket esm) {
