@@ -18,6 +18,7 @@ public abstract class AbstractReporter {
     public boolean headersWritten = false;
     public final Lock lockMainCSV;
     public final Lock lockPowerPlantCSV;
+    private String reporterDirectoryName;
     
     public AbstractReporter() {
         this.lockMainCSV = new ReentrantLock();
@@ -26,4 +27,12 @@ public abstract class AbstractReporter {
 
     public void report(Schedule schedule){
     }
+
+	public String getReporterDirectoryName() {
+		return reporterDirectoryName;
+	}
+
+	public void setReporterDirectoryName(String reporterDirectoryName) {
+		this.reporterDirectoryName = reporterDirectoryName;
+	}
 }

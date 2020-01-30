@@ -27,10 +27,24 @@ public class Startup {
 
     public static void main(String[] args) {
         long runID = System.currentTimeMillis();
+        
+        /* Default parameters */
+        long numberOfIterations = 10;
+        long numberOfParallelJobs = 4;
+        
+        String scenarioName = "DefaultScenario";
+
+        String modelRole = "EMlabModelRole";
+        String reporterClassName = "DefaultReporter";
+        
+        String reporterDirectoryName = "results/";
+        
+        boolean haveGUI = false;
+
 
         Logger.getGlobal().setLevel(Level.WARNING);
         try {
-            FileHandler handler = new FileHandler(runID + "-log.txt");
+            FileHandler handler = new FileHandler(reporterDirectoryName + runID + "-log.txt");
             handler.setFormatter(new SimpleFormatter());
             Logger.getGlobal().addHandler(handler);//.java.util.logging.FileHandler.pattern   = 
         } catch (IOException ex) {
@@ -40,21 +54,6 @@ public class Startup {
         }
         Logger.getGlobal().warning("Starting EMLab-Generation 2");
         Logger.getGlobal().warning("Run id is " + runID);
-
-        /* Default parameters */
-        long numberOfIterations = 1;
-        long numberOfParallelJobs = 4;
-
-        
-        String scenarioName = "DefaultScenario";
-        //String scenarioName = "Scenario_NL";
-        //String scenarioName = "Scenario_NL_intermittent";
-        //String scenarioName = "Scenario_NL_DE";
-        //String scenarioName = "Scenario_NL_hourly";
-
-        String modelRole = "EMlabModelRole";
-        String reporterClassName = "DefaultReporter";
-        boolean haveGUI = false;
 
         for (int i = 0; i < args.length; i++) {
             if (args[i].contains("=")) {
@@ -92,6 +91,8 @@ public class Startup {
             reporterClass = Class.forName("emlab.gen.reporters." + reporterClassName);
             //assuming one constructor with Schedule schedule as argument.
             reporter = (AbstractReporter) reporterClass.getConstructors()[0].newInstance(null);
+            reporter.setReporterDirectoryName(reporterDirectoryName);
+            
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(Schedule.class.getName()).log(Level.SEVERE, null, ex);
         }
