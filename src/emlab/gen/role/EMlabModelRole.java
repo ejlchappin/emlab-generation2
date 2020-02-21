@@ -27,6 +27,7 @@ import emlab.gen.role.capacitymechanisms.ProcessAcceptedPowerPlantDispatchRolein
 import emlab.gen.role.capacitymechanisms.StrategicReserveOperatorRole;
 import emlab.gen.role.co2policy.MarketStabilityReserveRole;
 import emlab.gen.role.co2policy.RenewableAdaptiveCO2CapRole;
+import emlab.gen.role.investment.DismantlePowerPlantOperationalLossRole;
 import emlab.gen.role.investment.DismantlePowerPlantPastTechnicalLifetimeRole;
 import emlab.gen.role.investment.GenericInvestmentRole;
 import emlab.gen.role.market.ClearCommodityMarketRole;
@@ -66,7 +67,8 @@ public class EMlabModelRole extends AbstractRole<EMLabModel> implements Role<EML
     private final SubmitOffersToCommodityMarketRole submitOffersToCommodityMarketRole = new SubmitOffersToCommodityMarketRole(schedule);
     private final SubmitLongTermElectricityContractsRole submitLongTermElectricityContractsRole = new SubmitLongTermElectricityContractsRole(schedule);
     private final SelectLongTermElectricityContractsRole selectLongTermElectricityContractsRole = new SelectLongTermElectricityContractsRole(schedule);
-    private final DismantlePowerPlantPastTechnicalLifetimeRole dismantlePowerPlantRole = new DismantlePowerPlantPastTechnicalLifetimeRole(schedule);
+    //private final DismantlePowerPlantPastTechnicalLifetimeRole dismantlePowerPlantRole = new DismantlePowerPlantPastTechnicalLifetimeRole(schedule);
+    private final DismantlePowerPlantOperationalLossRole dismantlePowerPlantRole = new DismantlePowerPlantOperationalLossRole(schedule);
     private final ReassignPowerPlantsToLongTermElectricityContractsRole reassignPowerPlantsToLongTermElectricityContractsRole = new ReassignPowerPlantsToLongTermElectricityContractsRole(schedule);
     private final ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole clearIterativeCO2AndElectricitySpotMarketTwoCountryRole = new ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole(schedule);
     private final DetermineFuelMixRole determineFuelMixRole = new DetermineFuelMixRole(schedule);
@@ -116,7 +118,7 @@ public class EMlabModelRole extends AbstractRole<EMLabModel> implements Role<EML
             getReps().removePowerPlantsDismantledUpToTime(getCurrentTick() - 1);
             getReps().removeAllPowerPlantDispatchPlansUpToTime(getCurrentTick() - 1);
             getReps().removeAllPowerPlantDispatchPlansWithForecast(true);
-            getReps().removeFinancialPowerPlantReportsUpToTime(getCurrentTick() - 1);
+            getReps().removeFinancialPowerPlantReportsUpToTime(getCurrentTick() - 6);
             //logger.warning("Plans: " + getReps().powerPlantDispatchPlans.size());
         }
           

@@ -630,6 +630,15 @@ public class Reps {
         return financialPowerPlantReports.stream().filter(p -> p.getTime() == time).collect(Collectors.toList());
     }
 
+    public FinancialPowerPlantReport findFinancialPowerPlantReportsForPlantForTime(PowerPlant plant, long time) {
+        Optional<FinancialPowerPlantReport> optional = financialPowerPlantReports.stream().filter(p -> p.getPowerPlant() == plant).filter(p -> p.getTime() == time).findFirst();
+        if (optional.isPresent()) {
+            return optional.get();
+        } else {
+            return null;
+        }
+    }
+
     public void removeFinancialPowerPlantReportsUpToTime(long time) {
         financialPowerPlantReports.removeIf(p -> (p.getTime() <= time));
     }
@@ -783,7 +792,8 @@ public class Reps {
             boolean forecast) {
 
         Optional<PowerPlantDispatchPlan> plan = powerPlantDispatchPlans.stream().filter(p -> p.getTime() == time).filter(p -> p.getPowerPlant().equals(plant)).filter(p -> p.getSegment().equals(segment)).filter(p -> p.isForecast() == forecast).findFirst();
-        return plan.orElse(null);
+        return plan.get();
+       // return plan.orElse(null);
 //        if (plan.isPresent()) {
 //            return plan.get();
 //        } else {
@@ -796,12 +806,13 @@ public class Reps {
             long time,
             boolean forecast) {
 
-        return powerPlantDispatchPlans.stream().filter(p -> p.getTime() == time).filter(p -> p.isForecast() == forecast).collect(Collectors.toList());
+        return powerPlantDispatchPlans.stream().filter(p -> p.getTime() == time).filter(p -> p.isForecast() == forecast).filter(p -> p.getPowerPlant().equals(plant)).collect(Collectors.toList());
     }
 
     public List<PowerPlantDispatchPlan> findSortedPowerPlantDispatchPlansForSegmentForTime(Segment segment,
             long time, boolean forecast) {
         List<PowerPlantDispatchPlan> list = powerPlantDispatchPlans.stream().filter(p -> p.getTime() == time).filter(p -> p.getSegment() == segment).filter(p -> p.isForecast() == forecast).collect(Collectors.toList());
+        Logger.getGlobal().info("NUmber of plans: " + list.size());
         list.sort(Comparator.comparing(o -> o.getPrice()));
         return list;
     }
@@ -1367,6 +1378,8 @@ public class Reps {
         }
         powerPlantsForAgent.get(plant.getOwner()).add(plant);
         electricitySpotMarketForPowerPlant.put(plant, findElectricitySpotMarketForZone(plant.getLocation().getZone()));
+        //logger.warning(plant.toString() + plant.getOwner() + findElectricitySpotMarketByPowerPlant(plant));
+                
         return plant;
     }
 
@@ -1402,6 +1415,13 @@ public class Reps {
     public PowerPlantDispatchPlan createPowerPlantDispatchPlan(PowerPlant plant, EnergyProducer producer, ElectricitySpotMarket market, Segment segment, long time,
             double price, double bidWithoutCO2, double spotMarketCapacity,
             double longTermContractCapacity, int status, boolean forecast) {
+        
+        //TODO Update if already exists!
+         long count = findPowerPlantDispatchPlansForPowerPlantForTime(plant, time, forecast).stream().filter(p -> (p.getSegment().equals(segment))).count();
+         if (count > 0) {
+             logger.warning("I found a plan already! ERROR should not create a new one");
+         }
+
         PowerPlantDispatchPlan plan = new PowerPlantDispatchPlan();
         plan.setPowerPlant(plant);
         plan.setSegment(segment);
@@ -1415,7 +1435,7 @@ public class Reps {
         plan.setStatus(status);
         plan.setForecast(forecast);
         powerPlantDispatchPlans.add(plan);
-//        logger.warning("Plans:" + powerPlantDispatchPlans.size());
+        logger.info("Plans:" + powerPlantDispatchPlans.size());
         return plan;
     }
 

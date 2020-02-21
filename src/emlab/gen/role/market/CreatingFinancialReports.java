@@ -104,6 +104,8 @@ public class CreatingFinancialReports extends AbstractClearElectricitySpotMarket
 
             //Determine fixed costs
             financialPowerPlantReport.setFixedCosts(calculateFixedCostsOfPowerPlant(cashFlows));
+            financialPowerPlantReport.setFixedOMCosts(calculateFixedOMCostsOfPowerPlant(cashFlows));
+
 
             //Calculate overall revenue
             financialPowerPlantReport.setSpotMarketRevenue(calculateSpotMarketRevenueOfPowerPlant(cashFlows));
@@ -172,5 +174,9 @@ public class CreatingFinancialReports extends AbstractClearElectricitySpotMarket
 
     public double calculateFixedCostsOfPowerPlant(List<CashFlow> list) {
         return list.stream().filter(p -> (p.getType() == CashFlow.FIXEDOMCOST) || (p.getType() == CashFlow.LOAN) || (p.getType() == CashFlow.DOWNPAYMENT)).mapToDouble(p -> p.getMoney()).sum();
+    }
+    
+     public double calculateFixedOMCostsOfPowerPlant(List<CashFlow> list) {
+        return list.stream().filter(p -> (p.getType() == CashFlow.FIXEDOMCOST)).mapToDouble(p -> p.getMoney()).sum();
     }
 }

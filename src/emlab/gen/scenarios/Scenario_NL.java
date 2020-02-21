@@ -76,7 +76,6 @@ public class Scenario_NL implements Scenario {
         //Demand
         TriangularTrend demandGrowthTrendNL = new TriangularTrend();
         demandGrowthTrendNL.setTop(1.02);
-        demandGrowthTrendNL.setMax(1.03);
         demandGrowthTrendNL.setMin(0.98);
         demandGrowthTrendNL.setStart(1.00);
 
@@ -116,7 +115,7 @@ public class Scenario_NL implements Scenario {
         reps.zones.add(de);
         
         PowerGridNode nlNode = new PowerGridNode();
-            nlNode.setName("nlNode");
+        nlNode.setName("nlNode");
         nlNode.setCapacityMultiplicationFactor(1.0);
         nlNode.setZone(nl);
         reps.powerGridNodes.add(nlNode);
@@ -652,7 +651,7 @@ public class Scenario_NL implements Scenario {
         investor.setName("TargetInvestorNL");
         investor.setPowerGenerationTechnologyTargets(targets);
         investor.setInvestmentRole(new TargetInvestmentRole(schedule));
-        investor.setInvestorMarket(netherlandsElectricitySpotMarket);//DEZE IS DUS VOOR NL!
+        investor.setInvestorMarket(netherlandsElectricitySpotMarket);
         reps.targetInvestors.add(investor);
         
         PowerPlantCSVFactory powerPlantCSVFactory = new PowerPlantCSVFactory(reps);

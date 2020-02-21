@@ -1,0 +1,6 @@
+Name,Technology,Location,Age,Owner,Capacity,Efficiency
+Eemshaven,Coal PSC,nlNode,3,Energy Producer NL A,1560,0.46
+Eemshaven2,Coal PSC,nlNode,3,Energy Producer NL A,1560,0.46
+Eemshaven3,Coal PSC,nlNode,3,Energy Producer NL A,1560,0.46
+BigCCGTDE1,CCGT,deNode,6,Energy Producer DE A,500,0.55
+Borssele,Nuclear PGT,nlNode,37,Energy Producer NL A,485,0.33

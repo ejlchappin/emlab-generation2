@@ -274,10 +274,20 @@ public abstract class AbstractClearElectricitySpotMarketRole<T extends EMLabMode
 
         double marginalPlantMarginalCost = Double.MAX_VALUE;
 
+        int i = getReps().powerPlantDispatchPlans.size();
+        logger.info("Number of plans: " + i);
         for (PowerPlantDispatchPlan plan : getReps().findSortedPowerPlantDispatchPlansForSegmentForTime(
                 segment, clearingTick, forecast)) {
-            //logger.warning("Next plant: " + plan);
-            ElectricitySpotMarket myMarket = (ElectricitySpotMarket) plan.getBiddingMarket();
+            logger.info("Next plant: " + plan); //TODO Plan is broken.
+            
+            //TODO EMILE HERE ALREADY BROKEN
+            ElectricitySpotMarket myMarket = getReps().findElectricitySpotMarketByPowerPlant(plan.getPowerPlant());
+                                       
+            ElectricitySpotMarket myMarketFromPlan = (ElectricitySpotMarket) plan.getBiddingMarket();
+            if(myMarket != myMarketFromPlan) {
+                logger.warning("Error 1 in markets!!");
+                plan.setBiddingMarket(myMarket);
+            }
 
             // Make it produce as long as there is load.
             double plantSupply = determineProductionOnSpotMarket(plan, globalOutcome.globalSupply, globalOutcome.globalLoad);
@@ -288,8 +298,7 @@ public abstract class AbstractClearElectricitySpotMarketRole<T extends EMLabMode
                 marginalPlantMarginalCost = plan.getPrice();
                 globalOutcome.supplies.put(myMarket, globalOutcome.supplies.get(myMarket) + plantSupply);
                 globalOutcome.globalSupply = +globalOutcome.globalSupply + plantSupply;
-                // logger.warn("Storing price: {} for plant {} in market " +
-                // myMarket, plantCost.getValue(), plant);
+                logger.info("Storing price: " + plan.getPrice() + " for plant " + plan.getPowerPlant() + " in market " + myMarket);
 
             }
         }
