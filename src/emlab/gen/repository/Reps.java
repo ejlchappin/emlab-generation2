@@ -644,8 +644,9 @@ public class Reps {
     }
 
     public IntermittentResourceProfile findIntermittentResourceProfileByTechnologyAndNode(PowerGeneratingTechnology technology, PowerGridNode node) {
-        Logger.getGlobal().log(Level.SEVERE, "Not yet implemented...");
-        return null;
+        return intermittentResourceProfiles.stream()
+                .filter(p -> p.getIntermittentTechnology().equals(technology))
+                .filter(p -> p.getIntermittentProductionNode().equals(node)).findFirst().get();
     }
 
     public IntermittentTechnologyNodeLoadFactor findIntermittentTechnologyNodeLoadFactorForPowerPlant(PowerPlant plant) {
@@ -654,8 +655,19 @@ public class Reps {
     }
 
     public IntermittentTechnologyNodeLoadFactor findIntermittentTechnologyNodeLoadFactorForNodeAndTechnology(PowerGridNode node, PowerGeneratingTechnology tech) {
-        Logger.getGlobal().log(Level.SEVERE, "Not yet implemented...");
-        return null;
+        Optional<IntermittentTechnologyNodeLoadFactor> optional = intermittentTechnologyNodeLoadFactors.stream()
+                .filter(p -> p.getTechnology().equals(tech))
+                .filter(p -> p.getNode().equals(node))
+                .findFirst();
+        if (optional.isPresent()){
+            return optional.get();
+        } else {
+            IntermittentTechnologyNodeLoadFactor intTechnologyNodeLoadFactor = new IntermittentTechnologyNodeLoadFactor();
+            intTechnologyNodeLoadFactor.setLoadFactors(new double[segments.size()]);
+            intTechnologyNodeLoadFactor.setNode(node);
+            intTechnologyNodeLoadFactor.setTechnology(tech);
+            return intTechnologyNodeLoadFactor;
+        }  
     }
 
     public NationalGovernment findNationalGovernmentByPowerPlant(PowerPlant plant) {
@@ -1174,14 +1186,22 @@ public class Reps {
     public Iterable<PowerPlant> findOperationalIntermittentPowerPlantsByPowerGridNodeAndTechnology(
             PowerGridNode node,
             PowerGeneratingTechnology powerGeneratingTechnology, long tick) {
-        Logger.getGlobal().log(Level.SEVERE, "Not yet implemented...");
-        throw new UnsupportedOperationException();
+            return powerPlants.stream()
+                .filter(p -> p.isOperational(tick))
+                .filter(p -> p.getTechnology().equals(powerGeneratingTechnology))
+                .filter(p -> p.getLocation().equals(node))
+                .collect(Collectors.toList());
     }
-
+    
     public double calculateCapacityOfOperationalIntermittentPowerPlantsByPowerGridNodeAndTechnology(
             PowerGridNode node,
             PowerGeneratingTechnology powerGeneratingTechnology, long tick) {
-        throw new UnsupportedOperationException();
+         return powerPlants.stream()
+                .filter(p -> p.isOperational(tick))
+                .filter(p -> p.getTechnology().equals(powerGeneratingTechnology))
+                .filter(p -> p.getLocation().equals(node))
+                .mapToDouble(p -> p.getAvailableCapacity(tick)).sum();
+        
     }
 
     public List<CashFlow> getCashFlowsForPowerPlant(PowerPlant plant, long tick) {

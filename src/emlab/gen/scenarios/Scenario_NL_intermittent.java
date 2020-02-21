@@ -21,6 +21,7 @@ import emlab.gen.domain.market.electricity.ElectricitySpotMarket;
 import emlab.gen.domain.market.electricity.SegmentLoad;
 import emlab.gen.domain.policy.PowerGeneratingTechnologyTarget;
 import emlab.gen.domain.technology.Interconnector;
+import emlab.gen.domain.technology.IntermittentResourceProfile;
 import emlab.gen.domain.technology.PowerGeneratingTechnology;
 import emlab.gen.domain.technology.PowerGridNode;
 import emlab.gen.domain.technology.PowerPlant;
@@ -30,11 +31,14 @@ import emlab.gen.repository.Reps;
 import emlab.gen.role.investment.InvestInPowerGenerationTechnologiesRole;
 import emlab.gen.role.investment.TargetInvestmentRole;
 import emlab.gen.trend.GeometricTrend;
+import emlab.gen.trend.HourlyCSVTimeSeries;
 import emlab.gen.trend.StepTrend;
 import emlab.gen.trend.TimeSeriesCSVReader;
 import emlab.gen.trend.TriangularTrend;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  *
@@ -111,9 +115,9 @@ public class Scenario_NL_intermittent implements Scenario {
         nl.setName("nl");
         reps.zones.add(nl);
 //      
-//        Zone de = new Zone();
-//        de.setName("de");
-//        reps.zones.add(de);
+        Zone de = new Zone();
+        de.setName("de");
+        reps.zones.add(de);
 //        
         PowerGridNode nlNode = new PowerGridNode();
             nlNode.setName("nlNode");
@@ -123,21 +127,37 @@ public class Scenario_NL_intermittent implements Scenario {
         
         
         //TODO set intermittent profiles from Old scenario!!
-//      nlNode.setHourlyDemand(); //from ldcNLDE-hourly
-        
-        
-///        		<!--  Intermittent Production Profiles -->
-//	<bean id="windSpeedNodeNL" class="emlab.domain.technology.IntermittentResourceProfile" p:filename="/data/wind-node1.csv">
-//		<property name="intermittentTechnology" ref="windPGT"></property>
-//		<property name="intermittentProductionNode" ref="beneluxNode"></property>
-//	</bean>
-//	<bean id="windSpeedNodeDE" class="emlab.domain.technology.IntermittentResourceProfile" p:filename="/data/wind-node2.csv">
-//		<property name="intermittentTechnology" ref="windPGT"></property>
-//		<property name="intermittentProductionNode" ref="germanNode"></property>
-//	</bean>
-//	<bean id="demandDE" class="emlab.trend.HourlyCSVTimeSeries" p:filename="/data/GermanyEntsoe2009_LC.csv"/>
-//	<bean id="demandNL" class="emlab.trend.HourlyCSVTimeSeries" p:filename="/data/NetherlandsEntsoe2009_LC.csv"/>
+        TimeSeriesCSVReader lcReaderNL = new TimeSeriesCSVReader();
+        lcReaderNL.setFilename("/data/ldcNLDE-hourly.csv");
+        lcReaderNL.setDelimiter(",");
+        lcReaderNL.readCSVVariable("NL");
+        nlNode.setHourlyDemand(lcReaderNL);
 
+        //  Intermittent Production Profiles
+        IntermittentResourceProfile windProfileOffShoreNL = new IntermittentResourceProfile();
+        windProfileOffShoreNL.setFilename("/data/wind.csv");
+        windProfileOffShoreNL.setDelimiter(",");
+//        windProfileOffShoreNL.readCSVVariable("NL");
+        windProfileOffShoreNL.setTimeSeries(new Random().doubles(8760).toArray()); //TODO random nrs for now
+        windProfileOffShoreNL.setIntermittentProductionNode(nlNode);
+        reps.intermittentResourceProfiles.add(windProfileOffShoreNL);
+
+        IntermittentResourceProfile windProfileOnShoreNL = new IntermittentResourceProfile();
+        windProfileOnShoreNL.setFilename("/data/wind.csv");
+        windProfileOnShoreNL.setDelimiter(",");
+        //windProfileOnShoreNL.readCSVVariable("NL");
+        windProfileOnShoreNL.setTimeSeries(new Random().doubles(8760).toArray()); //TODO random nrs for now
+        windProfileOnShoreNL.setIntermittentProductionNode(nlNode);
+        reps.intermittentResourceProfiles.add(windProfileOnShoreNL);
+        
+        IntermittentResourceProfile solarProfileNL = new IntermittentResourceProfile();
+        solarProfileNL.setFilename("/data/solar.csv");
+        solarProfileNL.setDelimiter(",");
+        //windProfileOnShoreNL.readCSVVariable("NL");
+        solarProfileNL.setTimeSeries(new Random().doubles(8760).toArray()); //TODO random nrs for now
+        solarProfileNL.setIntermittentProductionNode(nlNode);
+        reps.intermittentResourceProfiles.add(solarProfileNL);
+        
         
         Interconnector interconnectorNetherlandsGermany = new Interconnector();
         interconnectorNetherlandsGermany.setCapacity(0);
@@ -157,6 +177,7 @@ public class Scenario_NL_intermittent implements Scenario {
         
         ldcReader.readCSVVariable("load");
         Set<SegmentLoad> loadDurationCurveNL = ldcFactory.createLDC(ldcReader.getTimeSeries());
+        
         
         ElectricitySpotMarket netherlandsElectricitySpotMarket = reps.createElectricitySpotMarket("DutchMarket", 2000, 40, false, electricity, demandGrowthTrendNL, loadDurationCurveNL, nl);
         
@@ -673,10 +694,17 @@ public class Scenario_NL_intermittent implements Scenario {
         investor.setInvestorMarket(netherlandsElectricitySpotMarket);//DEZE IS DUS VOOR NL!
         reps.targetInvestors.add(investor);
         
+        
+        
+        windProfileOnShoreNL.setIntermittentTechnology(windOnshore);
+        windProfileOffShoreNL.setIntermittentTechnology(windOffshore);
+        solarProfileNL.setIntermittentTechnology(pv);
+                
         PowerPlantCSVFactory powerPlantCSVFactory = new PowerPlantCSVFactory(reps);
         powerPlantCSVFactory.setCsvFile("/data/dutchPlants2015.csv");
         for (PowerPlant plant : powerPlantCSVFactory.read()) {
             reps.createPowerPlantFromPlant(plant);
         }
+
     }
 }

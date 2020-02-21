@@ -28,10 +28,9 @@ public class HourlyCSVTimeSeries implements HourlyTimeSeries {
     Logger logger = Logger.getGlobal();
 
     private String filename;
-
+    
     private double[] hourlyArray;
 
-//    @Transactional
     private void readData() {
 
         logger.warning("Trying to read CSV file: " + filename);

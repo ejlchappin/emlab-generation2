@@ -17,7 +17,7 @@ package emlab.gen.domain.technology;
 
 
 import emlab.gen.domain.gis.Zone;
-import emlab.gen.trend.HourlyCSVTimeSeries;
+import emlab.gen.trend.TimeSeriesImpl;
 
 public class PowerGridNode {
 
@@ -27,7 +27,7 @@ public class PowerGridNode {
     private Zone zone;
 
 //    @RelatedTo(type = "HOURLYDEMAND", elementClass = HourlyCSVTimeSeries.class, direction = Direction.OUTGOING)
-    private HourlyCSVTimeSeries hourlyDemand;
+    private TimeSeriesImpl hourlyDemand;
 
     private double capacityMultiplicationFactor;
 
@@ -39,11 +39,11 @@ public class PowerGridNode {
         this.name = name;
     }
 
-    public HourlyCSVTimeSeries getHourlyDemand() {
+    public TimeSeriesImpl getHourlyDemand() {
         return hourlyDemand;
     }
 
-    public void setHourlyDemand(HourlyCSVTimeSeries hourlydemand) {
+    public void setHourlyDemand(TimeSeriesImpl hourlydemand) {
         this.hourlyDemand = hourlydemand;
     }
 

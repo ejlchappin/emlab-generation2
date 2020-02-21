@@ -39,7 +39,7 @@ public class LDCFactory extends AbstractFactory {
 
         Segment segment = new Segment();
         segment.setLengthInHours(lengthInHours);
-        segment.setSegmentID(getReps().segments.size());
+        segment.setSegmentID(getReps().segments.size()+1);
         getReps().segments.add(segment);
         Logger.getGlobal().info("Created segment " + segment + " with id " + segment.getSegmentID() + " and length " + lengthInHours);
 

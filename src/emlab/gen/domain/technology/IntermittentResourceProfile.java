@@ -1,14 +1,12 @@
 package emlab.gen.domain.technology;
 
-import emlab.gen.trend.HourlyCSVTimeSeries;
+import emlab.gen.trend.TimeSeriesCSVReader;
 
 
-public class IntermittentResourceProfile extends HourlyCSVTimeSeries {
+public class IntermittentResourceProfile extends TimeSeriesCSVReader {
 
-//    @RelatedTo(type = "INTERMITTENT_TECHNOLOGY", elementClass = PowerGeneratingTechnology.class, direction = Direction.OUTGOING)
     PowerGeneratingTechnology intermittentTechnology;
     
-//	@RelatedTo(type = "INTERMITTENT_PRODUCTION_NODE", elementClass = PowerGridNode.class, direction = Direction.INCOMING)
 	PowerGridNode intermittentProductionNode;
 
 	public PowerGridNode getIntermittentProductionNode() {
