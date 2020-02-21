@@ -44,7 +44,8 @@ public class DefaultReporter extends AbstractReporter {
 
         // Main csv
         String outputFileName = schedule.runID + "-" + "main.csv";
-        File outputfile = new File(outputFileName);
+        String outputDirectoryName = this.getReporterDirectoryName();
+        File outputfile = new File(outputDirectoryName + outputFileName);
 
         //Write header if needed
         if (!outputfile.exists()) {
@@ -92,7 +93,7 @@ public class DefaultReporter extends AbstractReporter {
 
         //Power plant file               
         String powerplantFileName = schedule.runID + "-" + "Powerplants.csv";
-        File powerplantfile = new File(powerplantFileName);
+        File powerplantfile = new File(outputDirectoryName + powerplantFileName);
 
         //Write header if needed
         if (!powerplantfile.exists()) {
