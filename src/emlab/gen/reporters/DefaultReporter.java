@@ -84,7 +84,7 @@ public class DefaultReporter extends AbstractReporter {
 
             fileWriter.flush();
             fileWriter.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             //release writing lock for file

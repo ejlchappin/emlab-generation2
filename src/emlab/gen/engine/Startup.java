@@ -33,6 +33,11 @@ public class Startup {
         long numberOfParallelJobs = 4;
         
         String scenarioName = "DefaultScenario";
+        //String scenarioName = "Scenario_NL";
+        //String scenarioName = "Scenario_NL_intermittent";
+        //String scenarioName = "Scenario_NL_DE";
+        //String scenarioName = "Scenario_NL_hourly";
+        //String scenarioName = "Scenario_NL_DE_toy";
 
         String modelRole = "EMlabModelRole";
         String reporterClassName = "DefaultReporter";

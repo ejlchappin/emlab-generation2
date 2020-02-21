@@ -58,7 +58,7 @@ public class SubmitOffersToElectricitySpotMarketRole extends AbstractEnergyProdu
 
     public void createOffersForElectricitySpotMarket(EnergyProducer producer, long tick,
             boolean forecast, Map<Substance, Double> forecastedFuelPrices) {
-        List<PowerPlantDispatchPlan> ppdpList = new ArrayList<PowerPlantDispatchPlan>();
+//        List<PowerPlantDispatchPlan> ppdpList = new ArrayList<PowerPlantDispatchPlan>();
 
         if (forecastedFuelPrices == null && !forecast) {
             EMLabModel model = getReps().emlabModel;
@@ -73,6 +73,7 @@ public class SubmitOffersToElectricitySpotMarketRole extends AbstractEnergyProdu
         if (producer != null) {
             market = producer.getInvestorMarket();
         }
+        
 
         Iterable<PowerPlant> powerPlants;
         if (producer != null) {
@@ -92,7 +93,9 @@ public class SubmitOffersToElectricitySpotMarketRole extends AbstractEnergyProdu
                 market = getReps().findElectricitySpotMarketForZone(plant.getLocation().getZone());
                 producer = plant.getOwner();
             }
-
+            
+            //TODO Emile set to the location of the market.
+            market = getReps().findElectricitySpotMarketForZone(plant.getLocation().getZone());
             double mc;
             double price;
             if (!forecast) {
@@ -103,9 +106,9 @@ public class SubmitOffersToElectricitySpotMarketRole extends AbstractEnergyProdu
                 price = mc * producer.getPriceMarkUp();
             }
 
-            logger.info("Submitting offers for " + plant.getName() + " with technology " + plant.getTechnology().getName());
+            logger.info("Submitting offers for " + plant.getName() + " with technology " + plant.getTechnology().getName() + " in market " + market);
 
-            List<PowerPlantDispatchPlan> plans = getReps().findPowerPlantDispatchPlansForPowerPlantForTime(plant, tick, forecast);
+//            List<PowerPlantDispatchPlan> plans = getReps().findPowerPlantDispatchPlansForPowerPlantForTime(plant, tick, forecast);
 
             for (SegmentLoad segmentload : market.getLoadDurationCurve()) {
                 Segment segment = segmentload.getSegment();
@@ -116,12 +119,15 @@ public class SubmitOffersToElectricitySpotMarketRole extends AbstractEnergyProdu
                     capacity = plant.getExpectedAvailableCapacity(tick, segment, numberOfSegments);
                 }
 
-                logger.info("I bid capacity: " + capacity + " and price: " + mc);
+                logger.info("I bid capacity: " + capacity + " and price: " + mc + " in market " + market);
 
-                PowerPlantDispatchPlan plan = plans.stream().filter(p -> (p.getSegment().equals(segment))).findFirst().orElse(getReps().createPowerPlantDispatchPlan(plant, producer, market, segment, tick, price, price, capacity, 0,
-                        Bid.SUBMITTED, forecast));
+                //TODO THIS BREAKS!
+//                getReps().findPowerPlantDispatchPlansForPowerPlantForTime(plant, tick, forecast).
+//               PowerPlantDispatchPlan plan = plans.stream().filter(p -> (p.getSegment().equals(segment))).findFirst().orElse(getReps().createPowerPlantDispatchPlan(plant, producer, market, segment, tick, price, price, capacity, 0,
+//                        Bid.SUBMITTED, forecast));
 
                 // plan = plans.iterator().next();
+                PowerPlantDispatchPlan plan = getReps().createPowerPlantDispatchPlan(plant, producer, market, segment, tick, mc, mc, capacity, capacity, Bid.SUBMITTED, forecast);
                 plan.setBidder(producer);
                 plan.setBiddingMarket(market);
                 plan.setPrice(mc);
@@ -131,8 +137,10 @@ public class SubmitOffersToElectricitySpotMarketRole extends AbstractEnergyProdu
                 plan.setCapacityLongTermContract(0d);
                 plan.setStatus(Bid.SUBMITTED);
                 plan.setForecast(forecast);
-
-                ppdpList.add(plan);
+                plan.setSegment(segment);
+                
+                logger.info("I bid capacity: " + capacity + " and price: " + mc + " in market " + market + " in plan " + plan);
+//                ppdpList.add(plan);
 
             }
 

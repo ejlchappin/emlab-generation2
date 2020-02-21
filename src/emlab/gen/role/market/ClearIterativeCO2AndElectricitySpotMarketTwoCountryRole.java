@@ -271,6 +271,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
         double marginalPlantMarginalCost = clearGlobalMarketWithNoCapacityConstraints(segment, globalOutcome, forecast,
                 clearingTick);
 
+        logger.info("Global loads: " + globalOutcome.loads.entrySet().toString());
         // For each plant in the cost-ordered list
         // Determine the flow over the interconnector.
         ElectricitySpotMarket firstMarket = getReps().electricitySpotMarkets.iterator().next();
@@ -289,7 +290,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
             // Set the price to the bid of the marginal plant.
             for (ElectricitySpotMarket market : getReps().electricitySpotMarkets) {
                 double supplyInThisMarket = globalOutcome.supplies.get(market);
-
+                
                 // globalOutcome.globalSupply += supplyInThisMarket;
                 if (globalOutcome.globalLoad <= globalOutcome.globalSupply + epsilon) {
                     globalOutcome.globalPrice = marginalPlantMarginalCost;
@@ -309,7 +310,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
             }
 
         } else {
-
+            
             MarketSegmentClearingOutcome marketOutcomes = new MarketSegmentClearingOutcome();
             for (ElectricitySpotMarket m : getReps().electricitySpotMarkets) {
                 marketOutcomes.supplies.put(m, 0d);
@@ -336,6 +337,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
                 }
 
             }
+            logger.info("Loads: " + marketOutcomes.loads.entrySet().toString());
 
             // For each plant in the cost-ordered list
             clearTwoInterconnectedMarketsGivenAnInterconnectorAdjustedLoad(segment, marketOutcomes, clearingTick,
@@ -383,13 +385,18 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
         }
     }
 
+    //TODO Emile feb 2020: what is breaking here?
     void clearTwoInterconnectedMarketsGivenAnInterconnectorAdjustedLoad(Segment segment,
             MarketSegmentClearingOutcome marketOutcomes, long clearingTick, boolean forecast) {
 
+             
+
+      
         for (PowerPlantDispatchPlan plan : getReps().findSortedPowerPlantDispatchPlansForSegmentForTime(segment, clearingTick, forecast)) {
-
-            ElectricitySpotMarket myMarket = (ElectricitySpotMarket) plan.getBiddingMarket();
-
+            
+            ElectricitySpotMarket myMarket = (ElectricitySpotMarket) plan.getBiddingMarket();//Why on this market?
+            
+            logger.info("Supply for market: " + myMarket + " equals " + marketOutcomes.supplies.get(myMarket));
             // Make it produce as long as there is load.
             double plantSupply = determineProductionOnSpotMarket(plan, marketOutcomes.supplies.get(myMarket),
                     marketOutcomes.loads.get(myMarket));
@@ -398,8 +405,9 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
                 // determine price and so on.
                 marketOutcomes.supplies.put(myMarket, marketOutcomes.supplies.get(myMarket) + plantSupply);
                 marketOutcomes.prices.put(myMarket, plan.getPrice());
-                // logger.warn("Storing price: {} for plant {} in market " +
-                // myMarket, plantCost.getValue(), plant);
+                logger.info("1Storing price: " + plan.getPrice() + " and supply " + plantSupply +  " for plant " + plan.getPowerPlant() + " in market " + myMarket);
+            } else {
+                logger.info("2Storing price: " + plan.getPrice() + " and supply " + plantSupply +  " for plant " + plan.getPowerPlant() + " in market " + myMarket);
             }
         }
 
@@ -581,12 +589,11 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
 
         double targetEnergyProducerBanking = calculateTargetCO2EmissionBankingOfEnergyProducers(clearingTick,
                 clearingTick + model.getCentralForecastingYear(), government, model);
-        logger.warning("Hedging Target: " + targetEnergyProducerBanking + " Relative Hedging: " + targetEnergyProducerBanking / government.getCo2Cap(getCurrentTick()));
+        logger.info("Hedging Target: " + targetEnergyProducerBanking + " Relative Hedging: " + targetEnergyProducerBanking / government.getCo2Cap(getCurrentTick()));
 
         double deltaBankedEmissionCertificateToReachBankingTarget = (targetEnergyProducerBanking - previouslyBankedCertificates)
                 / model.getCentralCO2TargetReversionSpeedFactor();
-        ;
-        double deltaBankedEmissionCertificates;
+       double deltaBankedEmissionCertificates;
 
         co2SecantSearch = new CO2SecantSearch();
         co2SecantSearch.stable = false;

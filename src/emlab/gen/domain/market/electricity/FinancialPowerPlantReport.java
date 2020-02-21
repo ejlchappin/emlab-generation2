@@ -58,6 +58,8 @@ public class FinancialPowerPlantReport {
     double variableCosts;
 
     double fixedCosts;
+    
+    double fixedOMCosts;
 
     double fullLoadHours;
 
@@ -156,6 +158,14 @@ public class FinancialPowerPlantReport {
 
     public void setFixedCosts(double fixedCosts) {
         this.fixedCosts = fixedCosts;
+    }
+    
+       public double getFixedOMCosts() {
+        return fixedOMCosts;
+    }
+
+    public void setFixedOMCosts(double fixedOMCosts) {
+        this.fixedOMCosts = fixedOMCosts;
     }
 
     public double getFullLoadHours() {

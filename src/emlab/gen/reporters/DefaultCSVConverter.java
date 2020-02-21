@@ -61,8 +61,13 @@ public class DefaultCSVConverter extends AbstractCSVConverter {
             row.add(String.valueOf(point.getVolume()));
         }
         ClearingPoint point = reps.findClearingPointForMarketAndTime(reps.co2Auction, schedule.getCurrentTick(), false);
-        row.add(String.valueOf(point.getPrice()));
+        if (point != null) { 
+        row.add(String.valueOf(point.getPrice())); 
         row.add(String.valueOf(point.getVolume()));
+        } else {
+        row.add("0"); 
+        row.add("0");    
+        }
 
         row.add(String.valueOf(reps.calculateTotalEmissionsBasedOnPowerPlantDispatchPlans(false, schedule.getCurrentTick())));
 

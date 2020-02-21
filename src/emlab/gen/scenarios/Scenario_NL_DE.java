@@ -202,7 +202,27 @@ public class Scenario_NL_DE implements Scenario {
         energyProducerNLB.setLongTermContractMargin(0.1);
         energyProducerNLB.setCash(3e9);
         energyProducerNLB.setInvestmentRole(defaultInvestmentRole);
-
+        
+        EnergyProducer energyProducerINTC = reps.createEnergyProducer();
+        energyProducerINTC.setName("Energy Producer NL C");
+        energyProducerINTC.setInvestorMarket(netherlandsElectricitySpotMarket);
+       // energyProducerINTC.setInvestorMarket(germanyElectricitySpotMarket);
+        energyProducerINTC.setNumberOfYearsBacklookingForForecasting(5);
+        energyProducerINTC.setPriceMarkUp(1.0);
+        energyProducerINTC.setWillingToInvest(true);
+        energyProducerINTC.setDownpaymentFractionOfCash(.5);
+        energyProducerINTC.setDismantlingRequiredOperatingProfit(0);
+        energyProducerINTC.setDismantlingProlongingYearsAfterTechnicalLifetime(0);
+        energyProducerINTC.setDebtRatioOfInvestments(0.7);
+        energyProducerINTC.setLoanInterestRate(0.1);
+        energyProducerINTC.setEquityInterestRate(0.1);
+        energyProducerINTC.setPastTimeHorizon(5);
+        energyProducerINTC.setInvestmentFutureTimeHorizon(7);
+        energyProducerINTC.setLongTermContractPastTimeHorizon(3);
+        energyProducerINTC.setLongTermContractMargin(0.1);
+        energyProducerINTC.setCash(3e9);
+        energyProducerINTC.setInvestmentRole(defaultInvestmentRole);
+        
         EnergyProducer energyProducerDEA = reps.createEnergyProducer();
         energyProducerDEA.setName("Energy Producer DE A");
         energyProducerDEA.setInvestorMarket(germanyElectricitySpotMarket);
@@ -261,8 +281,8 @@ public class Scenario_NL_DE implements Scenario {
         energyProducerDEC.setInvestmentRole(defaultInvestmentRole);
         
         EnergyProducer energyProducerINTA = reps.createEnergyProducer();
-        energyProducerINTA.setName("Energy Producer International A");
-        energyProducerINTA.setInvestorMarket(netherlandsElectricitySpotMarket);
+        energyProducerINTA.setName("Energy Producer DE D");
+        //energyProducerINTA.setInvestorMarket(netherlandsElectricitySpotMarket);
         energyProducerINTA.setInvestorMarket(germanyElectricitySpotMarket);
         energyProducerINTA.setNumberOfYearsBacklookingForForecasting(5);
         energyProducerINTA.setPriceMarkUp(1.0);
@@ -281,8 +301,8 @@ public class Scenario_NL_DE implements Scenario {
         energyProducerINTA.setInvestmentRole(defaultInvestmentRole);
 
         EnergyProducer energyProducerINTB = reps.createEnergyProducer();
-        energyProducerINTB.setName("Energy Producer International B");
-        energyProducerINTB.setInvestorMarket(netherlandsElectricitySpotMarket);
+        energyProducerINTB.setName("Energy Producer DE E");
+       // energyProducerINTB.setInvestorMarket(netherlandsElectricitySpotMarket);
         energyProducerINTB.setInvestorMarket(germanyElectricitySpotMarket);
         energyProducerINTB.setNumberOfYearsBacklookingForForecasting(5);
         energyProducerINTB.setPriceMarkUp(1.0);
@@ -300,51 +320,33 @@ public class Scenario_NL_DE implements Scenario {
         energyProducerINTB.setCash(3e9);
         energyProducerINTB.setInvestmentRole(defaultInvestmentRole);
         
-        EnergyProducer energyProducerINTC = reps.createEnergyProducer();
-        energyProducerINTC.setName("Energy Producer International C");
-        energyProducerINTC.setInvestorMarket(netherlandsElectricitySpotMarket);
-        energyProducerINTC.setInvestorMarket(germanyElectricitySpotMarket);
-        energyProducerINTC.setNumberOfYearsBacklookingForForecasting(5);
-        energyProducerINTC.setPriceMarkUp(1.0);
-        energyProducerINTC.setWillingToInvest(true);
-        energyProducerINTC.setDownpaymentFractionOfCash(.5);
-        energyProducerINTC.setDismantlingRequiredOperatingProfit(0);
-        energyProducerINTC.setDismantlingProlongingYearsAfterTechnicalLifetime(0);
-        energyProducerINTC.setDebtRatioOfInvestments(0.7);
-        energyProducerINTC.setLoanInterestRate(0.1);
-        energyProducerINTC.setEquityInterestRate(0.1);
-        energyProducerINTC.setPastTimeHorizon(5);
-        energyProducerINTC.setInvestmentFutureTimeHorizon(7);
-        energyProducerINTC.setLongTermContractPastTimeHorizon(3);
-        energyProducerINTC.setLongTermContractMargin(0.1);
-        energyProducerINTC.setCash(3e9);
-        energyProducerINTC.setInvestmentRole(defaultInvestmentRole);
+
         
         reps.bigBank = new BigBank();
 
         StepTrend co2TaxTrend = new StepTrend();
         co2TaxTrend.setDuration(1);
-        co2TaxTrend.setStart(5);
-        co2TaxTrend.setMinValue(5);
+        co2TaxTrend.setStart(0);
+        co2TaxTrend.setMinValue(0);
         co2TaxTrend.setIncrement(0);
 
         StepTrend co2CapTrend = new StepTrend();
         co2CapTrend.setDuration(1);
-        co2CapTrend.setStart(1.5e8);
+        co2CapTrend.setStart(3e9);//This is a very high cap, so it will not be binding.
         co2CapTrend.setMinValue(0);
-        co2CapTrend.setIncrement(-2e7);
+        co2CapTrend.setIncrement(0);
         
         StepTrend minCo2PriceTrend = new StepTrend();
         minCo2PriceTrend.setDuration(1);
-        minCo2PriceTrend.setStart(7);
+        minCo2PriceTrend.setStart(0);
         minCo2PriceTrend.setMinValue(0);
-        minCo2PriceTrend.setIncrement(1);
+        minCo2PriceTrend.setIncrement(0);
         
         StepTrend minCo2PriceTrendNL = new StepTrend();
         minCo2PriceTrendNL.setDuration(1);
-        minCo2PriceTrendNL.setStart(7);
+        minCo2PriceTrendNL.setStart(0);
         minCo2PriceTrendNL.setMinValue(0);
-        minCo2PriceTrendNL.setIncrement(1.5);
+        minCo2PriceTrendNL.setIncrement(0);
 
         StepTrend minCo2PriceTrendDE = new StepTrend();
         minCo2PriceTrendDE.setDuration(1);
