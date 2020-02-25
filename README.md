@@ -48,7 +48,17 @@ A package for R is contributed that makes a number of graphs on the basis of the
 *	Open R Studio and open “Example-code-with instructions.R”, which is located under the folder analysis.
 *	Follow instructions and execute code line by line by selecting and executing (CNTRL+Enter). The code first installes packages required for the emlab package. Now you have to manually install the emlab package (Tools / Install package). The package is located in the file "emlab_0.1.0.tar.gz", which is in the analysis folder. Note that the packages only have to be installed once. Afterwards they are simply loaded by the “library(emlab)” command.
 *	You may need to restart R studio if the package doesn’t work.
-*	The rest of the example code demonstrates how to use emlab functions to generate plots. 
+*	The rest of the example code demonstrates how to use emlab functions to generate plots.
+
+## Datasources
+
+We use the following datasources in EMLab-Generation2
+
+* Hourly capacity factors for PV, onshore wind and offshore wind from www.renewables.ninja by Staffell and Pfenninger (2016)
+
+
+Sources:
+I. Staffell and S. Pfenninger, 2016. Using Bias-Corrected Reanalysis to Simulate Current and Future Wind Power Output. Energy, 114, 1224–1239. http://dx.doi.org/10.1016/j.energy.2016.08.068
 
 ## Further reading
 An earlier version of the model is published open source can be used under the licence as described with the source code. In this course, a new version is embedded, which is not yet published online. Please do not distribute.
