@@ -3,7 +3,6 @@ package emlab.gen.role.market;
 import hep.aida.bin.DynamicBin1D;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import cern.colt.matrix.DoubleMatrix1D;
@@ -22,7 +21,6 @@ import emlab.gen.domain.technology.PowerGridNode;
 import emlab.gen.engine.AbstractRole;
 import emlab.gen.engine.Role;
 import emlab.gen.engine.Schedule;
-import emlab.gen.util.Utils;
 
 /**
  * *
@@ -620,6 +618,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
                         loadFactorString = loadFactorString.concat(" " + mean);
                         it++;
                     }
+                    getReps().intermittentTechnologyNodeLoadFactors.add(intTechnologyNodeLoadFactor);
                     logger.info(loadFactorString);
                 }
 
