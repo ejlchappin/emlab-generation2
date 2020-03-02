@@ -325,7 +325,11 @@ public abstract class AbstractEnergyProducerRole<T extends EnergyProducer> exten
 
         int numberOfFuels = substancePriceMap.size();
         if (numberOfFuels == 0) {
-            logger.warning("No fuels, so no operation mode is set. Empty fuel mix is returned");
+        	if(plant.getTechnology().isIntermittent()) {
+                logger.log(Level.FINE, "Technology is intermittent, so empty fuel mix is returned");
+        	} else {
+        		logger.log(Level.WARNING, "No fuels, so no operation mode is set. Empty fuel mix is returned");
+        	}        		
             return new HashSet<SubstanceShareInFuelMix>();
         } else if (numberOfFuels == 1) {
             SubstanceShareInFuelMix ssifm = null;
