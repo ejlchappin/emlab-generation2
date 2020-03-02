@@ -72,7 +72,7 @@ public class Scenario_NL_intermittent implements Scenario {
         reps.emlabModel.setCapDeviationCriterion(0.03);
         reps.emlabModel.setIterationSpeedCriterion(0.005);
         reps.emlabModel.setIterationSpeedFactor(3);
-        reps.emlabModel.setRealRenewableDataImplemented(true);//TODO EC added
+        reps.emlabModel.setRealRenewableDataImplemented(true);
         reps.emlabModel.setCo2TradingImplemented(true);
        
         reps.emlabModel.setName("EMLab Model");
@@ -114,13 +114,13 @@ public class Scenario_NL_intermittent implements Scenario {
         Zone nl = new Zone();
         nl.setName("nl");
         reps.zones.add(nl);
-//      
+  
         Zone de = new Zone();
         de.setName("de");
         reps.zones.add(de);
-//        
+
         PowerGridNode nlNode = new PowerGridNode();
-            nlNode.setName("nlNode");
+        nlNode.setName("nlNode");
         nlNode.setCapacityMultiplicationFactor(1.0);
         nlNode.setZone(nl);
         reps.powerGridNodes.add(nlNode);
@@ -553,7 +553,7 @@ public class Scenario_NL_intermittent implements Scenario {
         PowerGeneratingTechnology pv = reps.createPowerGeneratingTechnology();
         pv.setName("Photovoltaic PGT");
         pv.setCapacity(500);
-        pv.setIntermittent(true);//TODO EC added
+        pv.setIntermittent(true);
         pv.setApplicableForLongTermContract(true);
         pv.setPeakSegmentDependentAvailability(0.08);
         pv.setBaseSegmentDependentAvailability(0.16);
@@ -614,7 +614,7 @@ public class Scenario_NL_intermittent implements Scenario {
         PowerGeneratingTechnology windOnshore = reps.createPowerGeneratingTechnology();
         windOnshore.setName("Onshore wind PGT");
         windOnshore.setCapacity(600);
-        windOnshore.setIntermittent(true);//TODO EC added
+        windOnshore.setIntermittent(true);
         windOnshore.setApplicableForLongTermContract(true);
         windOnshore.setPeakSegmentDependentAvailability(0.05);
         windOnshore.setBaseSegmentDependentAvailability(0.40);
@@ -645,7 +645,7 @@ public class Scenario_NL_intermittent implements Scenario {
         PowerGeneratingTechnology windOffshore = reps.createPowerGeneratingTechnology();
         windOffshore.setName("Offshore wind PGT");
         windOffshore.setCapacity(600);
-        windOffshore.setIntermittent(true);//TODO EC added
+        windOffshore.setIntermittent(true);
         windOffshore.setApplicableForLongTermContract(true);
         windOffshore.setPeakSegmentDependentAvailability(0.08);
         windOffshore.setBaseSegmentDependentAvailability(0.65);
@@ -690,7 +690,7 @@ public class Scenario_NL_intermittent implements Scenario {
         investor.setName("TargetInvestorNL");
         investor.setPowerGenerationTechnologyTargets(targets);
         investor.setInvestmentRole(new TargetInvestmentRole(schedule));
-        investor.setInvestorMarket(netherlandsElectricitySpotMarket);//DEZE IS DUS VOOR NL!
+        investor.setInvestorMarket(netherlandsElectricitySpotMarket);
         reps.targetInvestors.add(investor);
         
         

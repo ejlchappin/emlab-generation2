@@ -95,7 +95,8 @@ public class Startup {
         try {
             reporterClass = Class.forName("emlab.gen.reporters." + reporterClassName);
             //assuming one constructor with Schedule schedule as argument.
-            reporter = (AbstractReporter) reporterClass.getConstructors()[0].newInstance(null);
+            Object[] novars = new Object[0];
+            reporter = (AbstractReporter) reporterClass.getConstructors()[0].newInstance(novars);
             reporter.setReporterDirectoryName(reporterDirectoryName);
             
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
@@ -104,7 +105,6 @@ public class Startup {
 
         logger.warning("Reporter enabled: " + reporter.getClass());
 
-        
         
         
         List<ScheduleWorker> activeWorkers = new ArrayList<ScheduleWorker>();
