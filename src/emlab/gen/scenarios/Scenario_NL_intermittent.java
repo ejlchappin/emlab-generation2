@@ -125,6 +125,7 @@ public class Scenario_NL_intermittent implements Scenario {
         nlNode.setZone(nl);
         reps.powerGridNodes.add(nlNode);
         
+        
         TimeSeriesCSVReader lcReaderNL = new TimeSeriesCSVReader();
         lcReaderNL.setFilename("/data/ldcNLDE-hourly.csv");
         lcReaderNL.setDelimiter(",");
@@ -133,26 +134,26 @@ public class Scenario_NL_intermittent implements Scenario {
 
         //  Intermittent Production Profiles
         IntermittentResourceProfile windProfileOffShoreNL = new IntermittentResourceProfile();
-        windProfileOffShoreNL.setFilename("/data/wind.csv");
+        windProfileOffShoreNL.setFilename("/data/renewablesNinja2015Profiles.csv");
         windProfileOffShoreNL.setDelimiter(",");
-//        windProfileOffShoreNL.readCSVVariable("NL");
-        windProfileOffShoreNL.setTimeSeries(new Random().doubles(8760).toArray()); //TODO random nrs for now
+        windProfileOffShoreNL.readCSVVariable("OFF_NL");
+        //windProfileOffShoreNL.setTimeSeries(new Random().doubles(8760).toArray()); //TODO random nrs for now
         windProfileOffShoreNL.setIntermittentProductionNode(nlNode);
         reps.intermittentResourceProfiles.add(windProfileOffShoreNL);
 
         IntermittentResourceProfile windProfileOnShoreNL = new IntermittentResourceProfile();
-        windProfileOnShoreNL.setFilename("/data/wind.csv");
+        windProfileOnShoreNL.setFilename("/data/renewablesNinja2015Profiles.csv");
         windProfileOnShoreNL.setDelimiter(",");
-        //windProfileOnShoreNL.readCSVVariable("NL");
-        windProfileOnShoreNL.setTimeSeries(new Random().doubles(8760).toArray()); //TODO random nrs for now
+        windProfileOnShoreNL.readCSVVariable("ON_NL");
+        //windProfileOnShoreNL.setTimeSeries(new Random().doubles(8760).toArray()); //TODO random nrs for now
         windProfileOnShoreNL.setIntermittentProductionNode(nlNode);
         reps.intermittentResourceProfiles.add(windProfileOnShoreNL);
         
         IntermittentResourceProfile solarProfileNL = new IntermittentResourceProfile();
-        solarProfileNL.setFilename("/data/solar.csv");
+        solarProfileNL.setFilename("/data/renewablesNinja2015Profiles.csv");
         solarProfileNL.setDelimiter(",");
-        //windProfileOnShoreNL.readCSVVariable("NL");
-        solarProfileNL.setTimeSeries(new Random().doubles(8760).toArray()); //TODO random nrs for now
+        solarProfileNL.readCSVVariable("PV_NL");
+        //solarProfileNL.setTimeSeries(new Random().doubles(8760).toArray()); //TODO random nrs for now
         solarProfileNL.setIntermittentProductionNode(nlNode);
         reps.intermittentResourceProfiles.add(solarProfileNL);
         

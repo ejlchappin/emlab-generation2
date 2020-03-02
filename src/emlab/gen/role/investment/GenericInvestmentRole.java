@@ -15,6 +15,8 @@
  ***************************************************************************** */
 package emlab.gen.role.investment;
 
+import java.util.logging.Level;
+
 import emlab.gen.domain.agent.EnergyProducer;
 import emlab.gen.engine.Role;
 import emlab.gen.engine.Schedule;
@@ -25,15 +27,17 @@ import emlab.gen.role.AbstractEnergyProducerRole;
  *
  */
 public class GenericInvestmentRole<T extends EnergyProducer> extends AbstractEnergyProducerRole<T> implements Role<T> {
-
-    public GenericInvestmentRole(Schedule schedule) {
+	
+	public GenericInvestmentRole(Schedule schedule) {
         super(schedule);
     }
 
-    public void act(T agent) {
-        // logger.warn(agent.getName() + " does " +
-        // agent.getInvestmentRole().getClass().toString());
+    @SuppressWarnings("unchecked")
+	public void act(T agent) {
+    	
+        logger.log(Level.INFO, agent.getName() + " does " +
+                agent.getInvestmentRole().getClass().toString());
+            	
         agent.getInvestmentRole().act(agent);
-    }
-
+    }   
 }

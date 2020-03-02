@@ -1,0 +1,1 @@
+Get original data from https://www.renewables.ninja or ask authors
