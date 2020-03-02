@@ -45,11 +45,9 @@ import emlab.gen.domain.technology.Substance;
 import emlab.gen.domain.technology.SubstanceShareInFuelMix;
 import emlab.gen.engine.AbstractRole;
 import emlab.gen.engine.Schedule;
-import emlab.gen.repository.Reps;
 import emlab.gen.trend.GeometricTrend;
 import emlab.gen.util.GeometricTrendRegression;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public abstract class AbstractEnergyProducerRole<T extends EnergyProducer> extends AbstractRole<T> {
 
@@ -288,21 +286,21 @@ public abstract class AbstractEnergyProducerRole<T extends EnergyProducer> exten
 
     public double calculateAveragePastOperatingProfit(PowerPlant pp, long horizon) {
 
-        double averagePastOperatingProfit = 0d;
-        for (long i = -horizon; i <= 0; i++) { 
-            averagePastOperatingProfit += calculatePastOperatingProfitInclFixedOMCost(pp, getCurrentTick() + i) / horizon;
+        double averageFractionInMerit = 0d;
+        for (long i = -horizon; i <= 0; i++) {
+            averageFractionInMerit += calculatePastOperatingProfitInclFixedOMCost(pp, getCurrentTick() + i) / i;
         }
-        logger.info(pp + " has had an average operating profit of " + averagePastOperatingProfit);
-        return averagePastOperatingProfit;
+        return averageFractionInMerit;
     }
 
     public double calculatePastOperatingProfitInclFixedOMCost(PowerPlant plant, long clearingTick) {
-        FinancialPowerPlantReport rep = getReps().findFinancialPowerPlantReportsForPlantForTime(plant, clearingTick);
-        if (rep != null) { 
-            logger.info(plant + " report: tick " + clearingTick + " revenue: " + rep.getOverallRevenue() + " var cost: " + rep.getVariableCosts() + " fixed om cost: " + rep.getFixedOMCosts());
-            return rep.getOverallRevenue() - rep.getVariableCosts() - rep.getFixedOMCosts();}
-        logger.info("No financial report for " + plant + " for tick " + clearingTick + " so returning 0");
-        return Double.MAX_VALUE; //TODO avoid dismantling simply becuase you have no data for the full horizon?
+        double pastOP = 0d;
+        // TODO get all accepted supply bids and calculate income
+        // TODO get all accepted demand bids and calculate costs
+        // TODO get the CO2 cost
+        // TODO get the fixed cost
+        pastOP += calculateFixedOperatingCost(plant, clearingTick);
+        return pastOP;
     }
 
     /**
@@ -528,6 +526,103 @@ public abstract class AbstractEnergyProducerRole<T extends EnergyProducer> exten
         }
         return co2Prices;
     }
+    
+    
+    
+    // From Standard role
+    
+    /**
+     * Calculates expected CO2 price based on a geometric trend estimation, of
+     * the past years. The adjustmentForDetermineFuelMix needs to be set to 1,
+     * if this is used in the determine fuel mix role.
+     *
+     * @param futureTimePoint Year the prediction is made for
+     * @param yearsLookingBackForRegression How many years are used as input for
+     * the regression, incl. the current tick.
+     * @return
+     */
+    public HashMap<ElectricitySpotMarket, Double> determineExpectedCO2PriceInclTaxAndFundamentalForecast(
+            long futureTimePoint, long yearsLookingBackForRegression, int adjustmentForDetermineFuelMix,
+            long clearingTick) {
+        HashMap<ElectricitySpotMarket, Double> co2Prices = new HashMap<ElectricitySpotMarket, Double>();
+        CO2Auction co2Auction = getReps().co2Auction;
+        Iterable<ClearingPoint> cps = getReps().findAllClearingPointsForMarketAndTimeRange(
+                co2Auction, clearingTick - yearsLookingBackForRegression + 1 - adjustmentForDetermineFuelMix,
+                clearingTick - adjustmentForDetermineFuelMix, false);
+        // Create regression object and calculate average
+        SimpleRegression sr = new SimpleRegression();
+        Government government = getReps().government;
+        double lastPrice = 0;
+        double averagePrice = 0;
+        int i = 0;
+        for (ClearingPoint clearingPoint : cps) {
+            sr.addData(clearingPoint.getTime(), clearingPoint.getPrice());
+            lastPrice = clearingPoint.getPrice();
+            averagePrice += lastPrice;
+            i++;
+        }
+        averagePrice = averagePrice / i;
+        double expectedCO2Price;
+        double expectedRegressionCO2Price;
+        if (i > 1) {
+            expectedRegressionCO2Price = sr.predict(futureTimePoint);
+            expectedRegressionCO2Price = Math.max(0, expectedRegressionCO2Price);
+            expectedRegressionCO2Price = Math
+                    .min(expectedRegressionCO2Price, government.getCo2Penalty(futureTimePoint));
+        } else {
+            expectedRegressionCO2Price = lastPrice;
+        }
+        ClearingPoint expectedCO2ClearingPoint = getReps().findClearingPointForMarketAndTime(co2Auction,
+                getCurrentTick()
+                + getReps().emlabModel.getCentralForecastingYear(),
+                true);
+        expectedCO2Price = (expectedCO2ClearingPoint == null) ? 0 : expectedCO2ClearingPoint.getPrice();
+        expectedCO2Price = (expectedCO2Price + expectedRegressionCO2Price) / 2;
+        for (ElectricitySpotMarket esm : getReps().electricitySpotMarkets) {
+            double nationalCo2MinPriceinFutureTick = getReps().findNationalGovernmentByElectricitySpotMarket(esm).getMinNationalCo2PriceTrend()
+                    .getValue(futureTimePoint);
+            double co2PriceInCountry = 0d;
+            if (expectedCO2Price > nationalCo2MinPriceinFutureTick) {
+                co2PriceInCountry = expectedCO2Price;
+            } else {
+                co2PriceInCountry = nationalCo2MinPriceinFutureTick;
+            }
+            co2PriceInCountry += getReps().government.getCO2Tax(futureTimePoint);
+            co2Prices.put(esm, Double.valueOf(co2PriceInCountry));
+        }
+        return co2Prices;
+    }
+    
+    /**
+     * Predicts fuel prices for {@link futureTimePoint} using a geometric trend
+     * regression forecast. Only predicts fuels that are traded on a commodity
+     * market.
+     *
+     * @param agent
+     * @param futureTimePoint
+     * @return Map<Substance, Double> of predicted prices.
+     */
+    public Map<Substance, Double> predictFuelPrices(EnergyProducer agent, long futureTimePoint) {
+        // Fuel Prices
+        Map<Substance, Double> expectedFuelPrices = new HashMap<Substance, Double>();
+        for (Substance substance : getReps().substancesOnCommodityMarkets) {
+            logger.info("Predicting price for " + substance);
+            //Find Clearing Points for the last 5 years (counting current year as one of the last 5 years).
+            Iterable<ClearingPoint> cps = getReps().findAllClearingPointsForSubstanceTradedOnCommodityMarkesAndTimeRange(substance, getCurrentTick()
+                    - (agent.getNumberOfYearsBacklookingForForecasting() - 1), getCurrentTick(), false);
+            //logger.warn("{}, {}", getCurrentTick()-(agent.getNumberOfYearsBacklookingForForecasting()-1), getCurrentTick());
+            //Create regression object
+            GeometricTrendRegression gtr = new GeometricTrendRegression();
+            for (ClearingPoint clearingPoint : cps) {
+                //logger.warn("CP {}: {} , in" + clearingPoint.getTime(), substance.getName(), clearingPoint.getPrice());
+                gtr.addData(clearingPoint.getTime(), clearingPoint.getPrice());
+            }
+            expectedFuelPrices.put(substance, gtr.predict(futureTimePoint));
+            //logger.warn("Forecast {}: {}, in Step " +  futureTimePoint, substance, expectedFuelPrices.get(substance));
+        }
+        return expectedFuelPrices;
+    }
+
 
     /**
      * Predicts fuel prices for {@link futureTimePoint} using a geometric trend
