@@ -870,19 +870,33 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
                         reserveVolume = operator.getReserveVolume();
                     }
                 }
+                
+                
+               MarketInformationReport report = new MarketInformationReport(); 
+               report.setExpectedSegmentLoad(expectedSegmentLoad); 
+               report.setSegmentID(segmentLoad.getSegment().getSegmentID()); 
+               report.setSegmentSupply(segmentSupply); 
+               report.setTime(time); 
+               report.setTotalCapacityAvailable(totalCapacityAvailable); 
 
                 if (segmentSupply >= expectedSegmentLoad
                         && ((totalCapacityAvailable - expectedSegmentLoad) <= (reserveVolume))) {
                     expectedElectricityPricesPerSegment.put(segmentLoad.getSegment(), reservePrice);
                     // logger.warn("Price: "+
                     // expectedElectricityPricesPerSegment);
+                    report.setResult(1); 
+
                 } else if (segmentSupply >= expectedSegmentLoad
                         && ((totalCapacityAvailable - expectedSegmentLoad) > (reserveVolume))) {
                     expectedElectricityPricesPerSegment.put(segmentLoad.getSegment(), segmentPrice);
                     // logger.warn("Price: "+
                     // expectedElectricityPricesPerSegment);
+                    report.setResult(2); 
+
                 } else {
                     expectedElectricityPricesPerSegment.put(segmentLoad.getSegment(), market.getValueOfLostLoad());
+                    report.setResult(3); 
+
                 }
 
             }
