@@ -184,26 +184,30 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
     }
     
     
+
     /**
-     * Creates a new power plant with a fuel mix without adding it to the reps
+     * Creates a new power plant with a fuel mix in Zone of the market. Does not add the plant to the repository.
+     * 
      * @param technology
-     * @return
+     * @return PowerPlant
      */
-    public PowerPlant createPowerPlant(PowerGeneratingTechnology technology) {
-    	
-    	PowerPlant plant = getReps().createAndSpecifyTemporaryPowerPlant(getCurrentTick(), agent, getNodeForZone(market.getZone()), technology);
-        
-    	setFuelMixForPlant(technology, plant);
-    	
-        return plant;
-
-        
-
+    public PowerPlant createPowerPlant(PowerGeneratingTechnology technology) {        
+        return createPowerPlant(technology, getNodeForZone(market.getZone()));
     }
     
+    /**
+     * Creates a new power plant with a fuel mix in node. Does not add the plant to the repository.
+     * 
+     * @param technology
+     * @param zone
+     * @return PowerPlant
+     */
     public PowerPlant createPowerPlant(PowerGeneratingTechnology technology, PowerGridNode node) {
     	
-        return getReps().createAndSpecifyTemporaryPowerPlant(getCurrentTick(), agent, node, technology);
+        PowerPlant plant = getReps().createAndSpecifyTemporaryPowerPlant(getCurrentTick(), agent, node, technology);
+    	setFuelMixForPlant(technology, plant);
+    	return plant;
+
 
     }
     
