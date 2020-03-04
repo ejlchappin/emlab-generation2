@@ -48,6 +48,7 @@ import emlab.gen.domain.technology.PowerPlant;
 import emlab.gen.domain.technology.Substance;
 import emlab.gen.engine.AbstractAgent;
 import emlab.gen.engine.Schedule;
+import emlab.gen.role.investment.MarketInformationReport;
 import emlab.gen.trend.TimeSeriesImpl;
 import emlab.gen.util.Utils;
 import java.util.ArrayList;
@@ -148,6 +149,8 @@ public class Reps {
     public ArrayList<LongTermContractDuration> longTermContractDurations = new ArrayList<>();
 
     public ArrayList<CommodityMarket> commodityMarkets = new ArrayList<>();
+    
+    public ArrayList<MarketInformationReport> marketInformationReports = new ArrayList<>();
 
     public DoubleMatrix2D intermittentMatrix = null;
     
@@ -645,6 +648,13 @@ public class Reps {
     public void removeFinancialPowerPlantReportsUpToTime(long time) {
         financialPowerPlantReports.removeIf(p -> (p.getTime() <= time));
     }
+    
+    
+    public List<MarketInformationReport> findAllMarketInformationReportsForTime(long time) {
+        return marketInformationReports.stream().filter(p -> p.getTime() == time).collect(Collectors.toList());
+    }
+    
+    
 
     public IntermittentResourceProfile findIntermittentResourceProfileByTechnologyAndNode(PowerGeneratingTechnology technology, PowerGridNode node) {
         return intermittentResourceProfiles.stream()

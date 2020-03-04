@@ -282,7 +282,100 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
 	
     
     
-    public EnergyProducer getAgent() {
+    public void setNotWillingToInvest(EnergyProducer agent) {
+	      agent.setWillingToInvest(false);
+	
+	
+	  }
+
+	public double determineExpectedMarginalCost(PowerPlant plant) {
+        double mc = determineExpectedMarginalFuelCost(plant, expectedFuelPrices);
+        double co2Intensity = plant.calculateEmissionIntensity();
+        mc += co2Intensity * expectedCO2Price.get(market);
+        
+        logger.log(Level.FINE, "expected marginal cost of plant" + plant + " is " + mc);
+        return mc;
+
+    }
+
+    
+    
+
+    // Create a powerplant investment and operation cash-flow in the form of a
+	  // map. If only investment, or operation costs should be considered set
+	  // totalInvestment or operatingProfit to 0
+	  public TreeMap<Integer, Double> calculateSimplePowerPlantInvestmentCashFlow(int depriacationTime, int buildingTime,
+	          double totalInvestment, double operatingProfit) {
+	      TreeMap<Integer, Double> investmentCashFlow = new TreeMap<Integer, Double>();
+	      double equalTotalDownPaymentInstallement = totalInvestment / buildingTime;
+	      for (int i = 0; i < buildingTime; i++) {
+	          investmentCashFlow.put(new Integer(i), -equalTotalDownPaymentInstallement);
+	      }
+	      for (int i = buildingTime; i < depriacationTime + buildingTime; i++) {
+	          investmentCashFlow.put(new Integer(i), operatingProfit);
+	      }
+	
+	      return investmentCashFlow;
+	  }
+
+
+
+
+	public double npv(TreeMap<Integer, Double> netCashFlow, double wacc) {
+	      double npv = 0;
+	      for (Integer iterator : netCashFlow.keySet()) {
+	          npv += netCashFlow.get(iterator).doubleValue() / Math.pow(1 + wacc, iterator.intValue());
+	      }
+	      return npv;
+	  }
+
+
+
+
+	public double determineExpectedMarginalFuelCost(PowerPlant powerPlant, Map<Substance, Double> expectedFuelPrices) {
+	      double fc = 0d;
+	      logger.info("Fuel mix of plant: " + powerPlant + " of owner " + powerPlant.getOwner() + " is " + powerPlant.getFuelMix());
+	      for (SubstanceShareInFuelMix mix : powerPlant.getFuelMix()) {
+	          double amount = mix.getShare();
+	          logger.info("amount of fuel: " + amount);
+	          logger.info("fuel prices: " + expectedFuelPrices.size());
+	          double fuelPrice = expectedFuelPrices.get(mix.getSubstance());
+	          fc += amount * fuelPrice;
+	      }
+	      return fc;
+	  }
+
+
+
+
+	public PowerGridNode getNodeForZone(Zone zone) {
+	      for (PowerGridNode node : getReps().powerGridNodes) {
+	          if (node.getZone().equals(zone)) {
+	              return node;
+	          }
+	      }
+	      return null;
+	  }
+
+
+
+
+	// Creates n downpayments of equal size in each of the n building years of a
+	  // power plant
+	  public void createSpreadOutDownPayments(EnergyProducer agent, PowerPlantManufacturer manufacturer, double totalDownPayment,
+	          PowerPlant plant) {
+	      int buildingTime = (int) plant.getActualLeadtime();
+	      getReps().createCashFlow(agent, manufacturer, totalDownPayment / buildingTime,
+	              CashFlow.DOWNPAYMENT, getCurrentTick(), plant);
+	      Loan downpayment = getReps().createLoan(agent, manufacturer, totalDownPayment / buildingTime,
+	              buildingTime - 1, getCurrentTick(), plant);
+	      plant.createOrUpdateDownPayment(downpayment);
+	  }
+
+
+	  // Setters and Getters
+	
+	 public EnergyProducer getAgent() {
 		return agent;
 	}
 
@@ -317,7 +410,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
 	public void setMarket(ElectricitySpotMarket market) {
 		this.market = market;
 	}
-	
+
 	public MarketInformation getMarketInformation() {
 		return marketInformation;
 	}
@@ -327,20 +420,9 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
 	}
 
 
-    public double determineExpectedMarginalCost(PowerPlant plant) {
-        double mc = determineExpectedMarginalFuelCost(plant, expectedFuelPrices);
-        double co2Intensity = plant.calculateEmissionIntensity();
-        mc += co2Intensity * expectedCO2Price.get(market);
-        
-        logger.log(Level.FINE, "expected marginal cost of plant" + plant + " is " + mc);
-        return mc;
 
-    }
 
-    
-    
-
-    /**
+	/**
      * Checks if any "hard limits" inhibits the investor from investing.
      * @return
      */
@@ -872,106 +954,46 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
                 }
                 
                 
-               MarketInformationReport report = new MarketInformationReport(); 
+               MarketInformationReport report = new MarketInformationReport();
+               getReps().marketInformationReports.add(report);
+               report.schedule = schedule; 
+
+               
                report.setExpectedSegmentLoad(expectedSegmentLoad); 
-               report.setSegmentID(segmentLoad.getSegment().getSegmentID()); 
+               report.setSegment(segmentLoad.getSegment());
                report.setSegmentSupply(segmentSupply); 
                report.setTime(time); 
-               report.setTotalCapacityAvailable(totalCapacityAvailable); 
+               report.setTotalCapacityAvailable(totalCapacityAvailable);
+               report.setAgent(agent);
+               
+               double expectedElectricityPrice;
+
 
                 if (segmentSupply >= expectedSegmentLoad
                         && ((totalCapacityAvailable - expectedSegmentLoad) <= (reserveVolume))) {
-                    expectedElectricityPricesPerSegment.put(segmentLoad.getSegment(), reservePrice);
-                    // logger.warn("Price: "+
-                    // expectedElectricityPricesPerSegment);
+                
+                	expectedElectricityPrice = reservePrice;
                     report.setResult(1); 
 
                 } else if (segmentSupply >= expectedSegmentLoad
                         && ((totalCapacityAvailable - expectedSegmentLoad) > (reserveVolume))) {
-                    expectedElectricityPricesPerSegment.put(segmentLoad.getSegment(), segmentPrice);
-                    // logger.warn("Price: "+
-                    // expectedElectricityPricesPerSegment);
+                	
+                	expectedElectricityPrice = segmentPrice;
                     report.setResult(2); 
 
                 } else {
-                    expectedElectricityPricesPerSegment.put(segmentLoad.getSegment(), market.getValueOfLostLoad());
+                	expectedElectricityPrice = market.getValueOfLostLoad();
                     report.setResult(3); 
-
                 }
+                
+                expectedElectricityPricesPerSegment.put(segmentLoad.getSegment(), expectedElectricityPrice);
+
+                report.setExpectedElectricityPrice(expectedElectricityPrice);
+
 
             }
         }
     }
-    
-    
-      
-      
-      
-      
-      // Create a powerplant investment and operation cash-flow in the form of a
-      // map. If only investment, or operation costs should be considered set
-      // totalInvestment or operatingProfit to 0
-      public TreeMap<Integer, Double> calculateSimplePowerPlantInvestmentCashFlow(int depriacationTime, int buildingTime,
-              double totalInvestment, double operatingProfit) {
-          TreeMap<Integer, Double> investmentCashFlow = new TreeMap<Integer, Double>();
-          double equalTotalDownPaymentInstallement = totalInvestment / buildingTime;
-          for (int i = 0; i < buildingTime; i++) {
-              investmentCashFlow.put(new Integer(i), -equalTotalDownPaymentInstallement);
-          }
-          for (int i = buildingTime; i < depriacationTime + buildingTime; i++) {
-              investmentCashFlow.put(new Integer(i), operatingProfit);
-          }
-
-          return investmentCashFlow;
-      }
-      
-      public double npv(TreeMap<Integer, Double> netCashFlow, double wacc) {
-          double npv = 0;
-          for (Integer iterator : netCashFlow.keySet()) {
-              npv += netCashFlow.get(iterator).doubleValue() / Math.pow(1 + wacc, iterator.intValue());
-          }
-          return npv;
-      }
-
-      public double determineExpectedMarginalFuelCost(PowerPlant powerPlant, Map<Substance, Double> expectedFuelPrices) {
-          double fc = 0d;
-          logger.info("Fuel mix of plant: " + powerPlant + " of owner " + powerPlant.getOwner() + " is " + powerPlant.getFuelMix());
-          for (SubstanceShareInFuelMix mix : powerPlant.getFuelMix()) {
-              double amount = mix.getShare();
-              logger.info("amount of fuel: " + amount);
-              logger.info("fuel prices: " + expectedFuelPrices.size());
-              double fuelPrice = expectedFuelPrices.get(mix.getSubstance());
-              fc += amount * fuelPrice;
-          }
-          return fc;
-      }
-
-      public PowerGridNode getNodeForZone(Zone zone) {
-          for (PowerGridNode node : getReps().powerGridNodes) {
-              if (node.getZone().equals(zone)) {
-                  return node;
-              }
-          }
-          return null;
-      }      
-      
-      // Creates n downpayments of equal size in each of the n building years of a
-      // power plant
-      public void createSpreadOutDownPayments(EnergyProducer agent, PowerPlantManufacturer manufacturer, double totalDownPayment,
-              PowerPlant plant) {
-          int buildingTime = (int) plant.getActualLeadtime();
-          getReps().createCashFlow(agent, manufacturer, totalDownPayment / buildingTime,
-                  CashFlow.DOWNPAYMENT, getCurrentTick(), plant);
-          Loan downpayment = getReps().createLoan(agent, manufacturer, totalDownPayment / buildingTime,
-                  buildingTime - 1, getCurrentTick(), plant);
-          plant.createOrUpdateDownPayment(downpayment);
-      }
-
-      public void setNotWillingToInvest(EnergyProducer agent) {
-          agent.setWillingToInvest(false);
-      
-      
-      }
 
      
   	

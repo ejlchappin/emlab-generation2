@@ -19,12 +19,15 @@ public abstract class AbstractReporter {
     public final Lock lockMainCSV;
     public final Lock lockPowerPlantCSV;
     public final Lock lockSegmentCSV;
+    public final Lock lockMarketInformationCSV;
+
     private String reporterDirectoryName;
     
     public AbstractReporter() {
         this.lockMainCSV = new ReentrantLock();
         this.lockPowerPlantCSV = new ReentrantLock();
         this.lockSegmentCSV = new ReentrantLock();
+        this.lockMarketInformationCSV = new ReentrantLock();
     }
 
     public void report(Schedule schedule){

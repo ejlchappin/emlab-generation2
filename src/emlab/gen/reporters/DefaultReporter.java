@@ -13,6 +13,8 @@ import emlab.gen.domain.market.electricity.FinancialPowerPlantReport;
 import emlab.gen.engine.AbstractReporter;
 import emlab.gen.engine.Schedule;
 import emlab.gen.repository.Reps;
+import emlab.gen.role.investment.MarketInformationReport;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -40,6 +42,8 @@ public class DefaultReporter extends AbstractReporter {
         //Default file of reporters over time
         logger.warning("Writing log for tick " + schedule.getCurrentTick());
 
+        
+        
         // Main csv
         String outputFileName = schedule.runID + "-" + "main.csv";
         String outputDirectoryName = this.getReporterDirectoryName();
@@ -88,6 +92,9 @@ public class DefaultReporter extends AbstractReporter {
             //release writing lock for file
             schedule.reporter.lockMainCSV.unlock();
         }
+        
+        
+        
 
         //Power plant file               
         String powerplantFileName = schedule.runID + "-" + "Powerplants.csv";
@@ -130,6 +137,51 @@ public class DefaultReporter extends AbstractReporter {
         } finally {
             //release writing lock for file
             schedule.reporter.lockPowerPlantCSV.unlock();
+        }
+        
+        
+        // MarketInformation file               
+        String marketinfoFileName = schedule.runID + "-" + "MarketInformation.csv";
+        File marketinfofile = new File(outputDirectoryName + marketinfoFileName);
+
+        //Write header if needed
+        if (!marketinfofile.exists()) {
+            try {
+                schedule.reporter.lockMarketInformationCSV.lock();
+                FileWriter marketinfoFileWriter = new FileWriter(marketinfofile, false);
+                CSVWriter<MarketInformationReport> marketinfoCSVWriter = new CSVWriterBuilder<MarketInformationReport>(marketinfoFileWriter)
+                        .entryConverter(new MarketInformationReportCSVConverterHeaders())
+                        .strategy(CSVStrategy.DEFAULT)
+                        .build();
+                marketinfoCSVWriter.write(null);
+                marketinfoFileWriter.flush();
+                marketinfoFileWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                //release writing lock for file
+                schedule.reporter.lockMarketInformationCSV.unlock();
+            }
+        }
+
+        try {
+            schedule.reporter.lockMarketInformationCSV.lock();
+            FileWriter marketinfoFileWriter = new FileWriter(marketinfofile, true);
+            CSVWriter<MarketInformationReport> marketinfoCSVWriter = new CSVWriterBuilder<MarketInformationReport>(marketinfoFileWriter)
+                    .entryConverter(new MarketInformationReportCSVConverter())
+                    .strategy(CSVStrategy.DEFAULT)
+                    .build();
+
+            //write report per power plant
+            marketinfoCSVWriter.writeAll(schedule.reps.findAllMarketInformationReportsForTime(schedule.getCurrentTick()));
+            marketinfoFileWriter.flush();
+            marketinfoFileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            //release writing lock for file
+            schedule.reporter.lockMarketInformationCSV.unlock();
+        	
         }
 
 
@@ -180,5 +232,6 @@ public class DefaultReporter extends AbstractReporter {
         
 
     }
+        
 
 }
