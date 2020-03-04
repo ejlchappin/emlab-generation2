@@ -954,17 +954,11 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
                 }
                 
                 
-               MarketInformationReport report = new MarketInformationReport();
-               getReps().marketInformationReports.add(report);
+               MarketInformationReport report = getReps().findMarketInformationReport(segmentLoad.getSegment(), agent, time);
                report.schedule = schedule; 
-
-               
                report.setExpectedSegmentLoad(expectedSegmentLoad); 
-               report.setSegment(segmentLoad.getSegment());
                report.setSegmentSupply(segmentSupply); 
-               report.setTime(time); 
                report.setTotalCapacityAvailable(totalCapacityAvailable);
-               report.setAgent(agent);
                
                double expectedElectricityPrice;
 

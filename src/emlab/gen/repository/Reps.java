@@ -1501,6 +1501,29 @@ public class Reps {
         return substances.stream().filter(p -> p.getName().equals(name)).findFirst().get();
     }
 
+    public MarketInformationReport findMarketInformationReport(Segment segment, EnergyProducer agent, long time) {
+     
+        Optional<MarketInformationReport> optional = marketInformationReports.stream()
+                .filter(p -> p.getSegment().equals(segment))
+                .filter(p -> p.getAgent().equals(agent))
+                .filter(p -> p.getTime() == time).findFirst();
+        if(optional.isPresent()){
+            return optional.get();
+        } else {
+            MarketInformationReport report = new MarketInformationReport();
+            report.setAgent(agent);
+            report.setSegment(segment);
+            report.setTime(time); 
+            marketInformationReports.add(report);
+            return report;
+        }
+                               
+                
+        
+        
+    }
+        
+
     public class PowerPlantDispatchPlanPriceComparator implements Comparator<PowerPlantDispatchPlan> {
 
         @Override
@@ -1518,5 +1541,7 @@ public class Reps {
             return d.intValue();
         }
     }
+    
+   
 
 }
