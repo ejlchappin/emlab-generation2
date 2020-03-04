@@ -1472,6 +1472,10 @@ public class Reps {
         return co2Auction;
     }
 
+    public Substance findSubstanceByName(String name) {
+        return substances.stream().filter(p -> p.getName().equals(name)).findFirst().get();
+    }
+
     public class PowerPlantDispatchPlanPriceComparator implements Comparator<PowerPlantDispatchPlan> {
 
         @Override

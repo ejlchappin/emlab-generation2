@@ -83,6 +83,7 @@ public class EMlabModelRole extends AbstractRole<EMLabModel> implements Role<EML
     private final MarketStabilityReserveRole marketStabilityReserveRole = new MarketStabilityReserveRole(schedule);
     private final DetermineResidualLoadCurvesForTwoCountriesRole determineResidualLoadCurve = new DetermineResidualLoadCurvesForTwoCountriesRole(schedule);
     private final CreatingFinancialReports creatingFinancialReports = new CreatingFinancialReports(schedule);
+    private final EmptyRoleBeginning emptyRoleBeginning = new EmptyRoleBeginning(schedule);
 
     public EMlabModelRole(Schedule schedule) {
         super(schedule);
@@ -122,6 +123,9 @@ public class EMlabModelRole extends AbstractRole<EMLabModel> implements Role<EML
             //logger.warning("Plans: " + getReps().powerPlantDispatchPlans.size());
         }
           
+        logger.log(Level.INFO, "  0. Empty Role at the Beginning");
+        emptyRoleBeginning.act(model);
+        
         /*
          * Load duration curve (if renewable data is implemented)
          */
