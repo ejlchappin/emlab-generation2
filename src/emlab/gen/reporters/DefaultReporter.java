@@ -173,7 +173,7 @@ public class DefaultReporter extends AbstractReporter {
                     .build();
 
             //write report per power plant
-            marketinfoCSVWriter.writeAll(schedule.reps.findAllMarketInformationReportsForTime(schedule.getCurrentTick()));
+            marketinfoCSVWriter.writeAll(schedule.reps.marketInformationReports);
             marketinfoFileWriter.flush();
             marketinfoFileWriter.close();
         } catch (IOException e) {

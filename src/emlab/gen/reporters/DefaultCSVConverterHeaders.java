@@ -44,6 +44,7 @@ public class DefaultCSVConverterHeaders extends AbstractCSVConverter {
         for (ElectricitySpotMarket market : schedule.reps.electricitySpotMarkets) {
             for (PowerGeneratingTechnology tech : schedule.reps.powerGeneratingTechnologies) {
                 row.add("operational.capacity." + market + "." + tech);
+                row.add("production." + market + "." + tech);
             }
         }
         for (ElectricitySpotMarket market : schedule.reps.electricitySpotMarkets) {

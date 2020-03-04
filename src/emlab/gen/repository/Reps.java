@@ -1013,6 +1013,21 @@ public class Reps {
         return calculateCapacityOfPowerPlantList(findOperationalPowerPlantsByTechnologyInMarket(technology, market, tick), tick);
     }
 
+    
+    public double calculateProductionOfOperationalPowerPlantsByTechnologyInMarket(PowerGeneratingTechnology technology, ElectricitySpotMarket market,
+            long tick) {
+        
+        
+        return powerPlantDispatchPlans.stream()
+                .filter(p -> p.getPowerPlant().getTechnology().equals(technology))
+                .filter(p -> findElectricitySpotMarketByPowerPlant(p.getPowerPlant()).equals(market))
+                .filter(p -> p.getTime() == tick)
+                .collect(Collectors.summarizingDouble(PowerPlantDispatchPlan::getElectricityOutput)).getSum();
+        
+    }
+    
+    
+    
     public PowerPlant findOneOperationalHistoricalCvarDummyPowerPlantsByOwnerAndTechnology(
             PowerGeneratingTechnology technology,
             long tick, EnergyProducer owner) {

@@ -7,7 +7,6 @@ package emlab.gen.reporters;
 
 import emlab.gen.domain.agent.EnergyProducer;
 import emlab.gen.domain.contract.CashFlow;
-import emlab.gen.domain.market.CO2MarketClearingPoint;
 import emlab.gen.domain.market.ClearingPoint;
 import emlab.gen.domain.market.electricity.ElectricitySpotMarket;
 import emlab.gen.domain.market.electricity.PowerPlantDispatchPlan;
@@ -44,6 +43,7 @@ public class DefaultCSVConverter extends AbstractCSVConverter {
         for (ElectricitySpotMarket market : schedule.reps.electricitySpotMarkets) {
             for (PowerGeneratingTechnology tech : schedule.reps.powerGeneratingTechnologies) {
                 row.add(String.valueOf(reps.calculateCapacityOfOperationalPowerPlantsByTechnologyInMarket(tech, market, schedule.getCurrentTick())));
+                row.add(String.valueOf(reps.calculateProductionOfOperationalPowerPlantsByTechnologyInMarket(tech, market, schedule.getCurrentTick())));
             }
         }
         for (ElectricitySpotMarket market : reps.electricitySpotMarkets) {

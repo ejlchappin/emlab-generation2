@@ -48,6 +48,7 @@ import emlab.gen.role.operating.PayCO2AuctionRole;
 import emlab.gen.role.operating.PayCO2TaxRole;
 import emlab.gen.role.operating.PayForLoansRole;
 import emlab.gen.role.operating.PayOperatingAndMaintainanceCostsRole;
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 /**
@@ -120,6 +121,7 @@ public class EMlabModelRole extends AbstractRole<EMLabModel> implements Role<EML
             getReps().removeAllPowerPlantDispatchPlansUpToTime(getCurrentTick() - 1);
             getReps().removeAllPowerPlantDispatchPlansWithForecast(true);
             getReps().removeFinancialPowerPlantReportsUpToTime(getCurrentTick() - 6);
+            getReps().marketInformationReports = new ArrayList<>();
             //logger.warning("Plans: " + getReps().powerPlantDispatchPlans.size());
         }
           
