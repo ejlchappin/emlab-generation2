@@ -4,6 +4,7 @@
 
 library(tidyverse)
 
+
 ## config
 id = "1583326255162"
 #scenario = "Scenario_NL"
@@ -12,10 +13,23 @@ scenario = "Scenario_NL_intermittent"
 directory = "/Users/marcmel/Development/java-projects/emlab-generation2/results/"
 # Define your directory location (where data files are located and plots will be stored). Make sure you use '/', not '\'
 # 
-# filename = paste(id, scenario, "EMlabModelRole-DefaultReporter-main.csv", sep = "-")
+filename = paste(id, scenario, "EMlabModelRole-DefaultReporter-main.csv", sep = "-") 
+
+data = ReadMainData(filename, directory) %>% as_tibble()
+data
+data$
+data %>% 
+  select(iteration, tick, starts_with("generation.DutchMarket.")) %>% 
+  gather(starts_with("generation.DutchMarket."), key = "variable", value = "KWH") %>% 
+  separate(col = "variable", into = c("variable", "market", "technology")) %>% 
+  ggplot(mapping = aes(x = tick, y = KWH)) +
+   geom_line() + 
+    facet_grid(~ technology)
+
+
+
 # 
 # # Read your main.csv data into a cleaned dataframe using
-# data = ReadMainData(filename, directory)
 # 
 # plot(data$cash.Energy.Producer.NL.A)
 # plot(data$cash.Energy.Producer.NL.B)
