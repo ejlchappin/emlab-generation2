@@ -663,6 +663,10 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
 
             }
         }
+      
+                
+       //Store the matrix into the repository.
+       getReps().intermittentMatrix = m;
     }
 
 }

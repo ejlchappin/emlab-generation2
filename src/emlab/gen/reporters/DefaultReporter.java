@@ -26,8 +26,6 @@ import java.nio.channels.FileLock;
  */
 public class DefaultReporter extends AbstractReporter {
 
-    //TODO implement locks here
-    //https://examples.javacodegeeks.com/core-java/util/concurrent/locks-concurrent/reentrantlock/java-reentrantlock-example/
     public DefaultReporter() {
         super();
     }
@@ -117,7 +115,6 @@ public class DefaultReporter extends AbstractReporter {
 
         try {
             schedule.reporter.lockPowerPlantCSV.lock();
-            //TODO change the Command Line parameter to the CSV converer... not the defaultreporter
             FileWriter powerplantfileWriter = new FileWriter(powerplantfile, true);
             CSVWriter<FinancialPowerPlantReport> powerplantCSVWriter = new CSVWriterBuilder<FinancialPowerPlantReport>(powerplantfileWriter)
                     .entryConverter(new FinancialPowerPlantReportCSVConverter())
@@ -134,6 +131,53 @@ public class DefaultReporter extends AbstractReporter {
             //release writing lock for file
             schedule.reporter.lockPowerPlantCSV.unlock();
         }
+
+
+
+        //Segment file               
+        String segmentFileName = schedule.runID + "-" + "Segments.csv";
+        File segmentfile = new File(outputDirectoryName + segmentFileName);
+
+        //Write header if needed
+        if (!segmentfile.exists()) {
+            try {
+                schedule.reporter.lockSegmentCSV.lock();
+                FileWriter segmentfileWriter = new FileWriter(segmentfile, false);
+                CSVWriter<Schedule> segmentCSVWriter = new CSVWriterBuilder<Schedule>(segmentfileWriter)
+                        .entryConverter(new SegmentCSVConverterHeaders())
+                        .strategy(CSVStrategy.DEFAULT)
+                        .build();
+                segmentCSVWriter.write(schedule);
+                segmentfileWriter.flush();
+                segmentfileWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                //release writing lock for file
+                schedule.reporter.lockSegmentCSV.unlock();
+            }
+        }
+
+        try {
+            schedule.reporter.lockSegmentCSV.lock();
+            FileWriter segmentfileWriter = new FileWriter(segmentfile, true);
+            CSVWriter<Schedule> segmentCSVWriter = new CSVWriterBuilder<Schedule>(segmentfileWriter)
+                    .entryConverter(new SegmentCSVConverter())
+                    .strategy(CSVStrategy.DEFAULT)
+                    .build();
+
+            //write report
+            segmentCSVWriter.write(schedule);
+            segmentfileWriter.flush();
+            segmentfileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            //release writing lock for file
+            schedule.reporter.lockSegmentCSV.unlock();
+        }
+        
+        
 
     }
 

@@ -3,6 +3,7 @@
  */
 package emlab.gen.repository;
 
+import cern.colt.matrix.DoubleMatrix2D;
 import emlab.gen.domain.agent.BigBank;
 import emlab.gen.domain.agent.CommoditySupplier;
 import emlab.gen.domain.agent.EMLabAgent;
@@ -148,6 +149,8 @@ public class Reps {
 
     public ArrayList<CommodityMarket> commodityMarkets = new ArrayList<>();
 
+    public DoubleMatrix2D intermittentMatrix = null;
+    
     //private maps 
     public HashMap<Substance, DecarbonizationMarket> marketForSubstance = new HashMap<>();
     private HashMap<NationalGovernment, ElectricitySpotMarket> electricitySpotMarketForNationalGovernment = new HashMap<>();

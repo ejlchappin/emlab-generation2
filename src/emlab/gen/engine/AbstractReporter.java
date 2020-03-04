@@ -6,9 +6,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
 /**
- * Abstract role provides utility methods for role implementation
+ * Abstract reporter
  *
- * @author alfredas
+ * @author Emile Chappin
  *
  * @param <T>
  */
@@ -18,11 +18,13 @@ public abstract class AbstractReporter {
     public boolean headersWritten = false;
     public final Lock lockMainCSV;
     public final Lock lockPowerPlantCSV;
+    public final Lock lockSegmentCSV;
     private String reporterDirectoryName;
     
     public AbstractReporter() {
         this.lockMainCSV = new ReentrantLock();
         this.lockPowerPlantCSV = new ReentrantLock();
+        this.lockSegmentCSV = new ReentrantLock();
     }
 
     public void report(Schedule schedule){
