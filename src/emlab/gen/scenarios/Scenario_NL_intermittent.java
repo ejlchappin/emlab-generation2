@@ -282,22 +282,22 @@ public class Scenario_NL_intermittent implements Scenario {
 
         StepTrend co2TaxTrend = new StepTrend();
         co2TaxTrend.setDuration(1);
-        co2TaxTrend.setStart(5);
-        co2TaxTrend.setMinValue(5);
+        co2TaxTrend.setStart(0);
+        co2TaxTrend.setMinValue(0);
         co2TaxTrend.setIncrement(0);
 
         StepTrend co2CapTrend = new StepTrend();
         co2CapTrend.setDuration(1);
-        co2CapTrend.setStart(10e9);
+        co2CapTrend.setStart(55e6);
         co2CapTrend.setMinValue(0);
-        co2CapTrend.setIncrement(0);
+        co2CapTrend.setIncrement(-1e6);
         
         
         StepTrend minCo2PriceTrend = new StepTrend();
         minCo2PriceTrend.setDuration(1);
-        minCo2PriceTrend.setStart(7);
+        minCo2PriceTrend.setStart(0);
         minCo2PriceTrend.setMinValue(0);
-        minCo2PriceTrend.setIncrement(1.5);
+        minCo2PriceTrend.setIncrement(0);
 
         
         reps.government = new Government();
@@ -660,19 +660,19 @@ public class Scenario_NL_intermittent implements Scenario {
         PowerGeneratingTechnologyTarget windTarget = new PowerGeneratingTechnologyTarget();
         windTarget.setPowerGeneratingTechnology(windOffshore);
         StepTrend windTargetTrend = new StepTrend();
-        windTargetTrend.setStart(700);
-        windTargetTrend.setIncrement(700);
+        windTargetTrend.setStart(0);
+        windTargetTrend.setIncrement(0);
         windTargetTrend.setDuration(1);
-        windTargetTrend.setMinValue(700);
+        windTargetTrend.setMinValue(0);
         windTarget.setTrend(windTargetTrend);
  
         PowerGeneratingTechnologyTarget pvTarget = new PowerGeneratingTechnologyTarget();
         pvTarget.setPowerGeneratingTechnology(pv);
         StepTrend pvTargetTrend = new StepTrend();
-        pvTargetTrend.setStart(10000);
+        pvTargetTrend.setStart(0);
         pvTargetTrend.setIncrement(0);
         pvTargetTrend.setDuration(1);
-        pvTargetTrend.setMinValue(10000);
+        pvTargetTrend.setMinValue(0);
         pvTarget.setTrend(pvTargetTrend);
                        
         Set<PowerGeneratingTechnologyTarget> targets = new HashSet<>();
