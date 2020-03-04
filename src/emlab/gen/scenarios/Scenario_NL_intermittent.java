@@ -156,8 +156,7 @@ public class Scenario_NL_intermittent implements Scenario {
         //solarProfileNL.setTimeSeries(new Random().doubles(8760).toArray()); //TODO random nrs for now
         solarProfileNL.setIntermittentProductionNode(nlNode);
         reps.intermittentResourceProfiles.add(solarProfileNL);
-        
-        
+               
         Interconnector interconnectorNetherlandsGermany = new Interconnector();
         interconnectorNetherlandsGermany.setCapacity(0);
         Set<PowerGridNode> connections = new HashSet<>();
@@ -165,18 +164,11 @@ public class Scenario_NL_intermittent implements Scenario {
         interconnectorNetherlandsGermany.setConnections(connections);
         reps.interconnector = interconnectorNetherlandsGermany;
 
-        //Load duration curve
+        //Create empty load duration curve, initiated with random values. The intermittent role will override the values.
+        int numberOfSegmentsYouWant = 100;
         LDCFactory ldcFactory = new LDCFactory(reps);
-        TimeSeriesCSVReader ldcReader = new TimeSeriesCSVReader();
-        ldcReader.setFilename("/data/ldcNL.csv");
-        ldcReader.setDelimiter(",");
-       
-        ldcReader.readCSVVariable("lengthInHours");
-        ldcFactory.createSegments(ldcReader.getTimeSeries());
-        
-        ldcReader.readCSVVariable("load");
-        Set<SegmentLoad> loadDurationCurveNL = ldcFactory.createLDC(ldcReader.getTimeSeries());
-        
+        ldcFactory.createSegments(new Random().doubles(numberOfSegmentsYouWant).toArray());
+        Set<SegmentLoad> loadDurationCurveNL = ldcFactory.createLDC(new Random().doubles(numberOfSegmentsYouWant).toArray());        
         
         ElectricitySpotMarket netherlandsElectricitySpotMarket = reps.createElectricitySpotMarket("DutchMarket", 2000, 40, false, electricity, demandGrowthTrendNL, loadDurationCurveNL, nl);
         
