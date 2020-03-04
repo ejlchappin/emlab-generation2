@@ -286,23 +286,22 @@ public abstract class AbstractEnergyProducerRole<T extends EnergyProducer> exten
 
     public double calculateAveragePastOperatingProfit(PowerPlant pp, long horizon) {
 
-        double averageFractionInMerit = 0d;
-        for (long i = -horizon; i <= 0; i++) {
-            averageFractionInMerit += calculatePastOperatingProfitInclFixedOMCost(pp, getCurrentTick() + i) / i;
+        double averagePastOperatingProfit = 0d;
+        for (long i = -horizon; i <= 0; i++) { 
+            averagePastOperatingProfit += calculatePastOperatingProfitInclFixedOMCost(pp, getCurrentTick() + i) / horizon;
         }
-        return averageFractionInMerit;
+        logger.info(pp + " has had an average operating profit of " + averagePastOperatingProfit);
+        return averagePastOperatingProfit;
     }
 
     public double calculatePastOperatingProfitInclFixedOMCost(PowerPlant plant, long clearingTick) {
-        double pastOP = 0d;
-        // TODO get all accepted supply bids and calculate income
-        // TODO get all accepted demand bids and calculate costs
-        // TODO get the CO2 cost
-        // TODO get the fixed cost
-        pastOP += calculateFixedOperatingCost(plant, clearingTick);
-        return pastOP;
+        FinancialPowerPlantReport rep = getReps().findFinancialPowerPlantReportsForPlantForTime(plant, clearingTick);
+        if (rep != null) { 
+            logger.info(plant + " report: tick " + clearingTick + " revenue: " + rep.getOverallRevenue() + " var cost: " + rep.getVariableCosts() + " fixed om cost: " + rep.getFixedOMCosts());
+            return rep.getOverallRevenue() - rep.getVariableCosts() - rep.getFixedOMCosts();}
+        logger.info("No financial report for " + plant + " for tick " + clearingTick + " so returning 0");
+        return Double.MAX_VALUE; //TODO avoid dismantling simply becuase you have no data for the full horizon?
     }
-
     /**
      * The fuel mix is calculated with a linear optimization model of the
      * possible fuels and the requirements.
