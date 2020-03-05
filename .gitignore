@@ -36,3 +36,7 @@ nbproject/private/
 /bin1/
 .Rhistory
 .Rproj.user
+
+analysis/plot_analysis/server.R
+
+analysis/plot_analysis/ui.R
