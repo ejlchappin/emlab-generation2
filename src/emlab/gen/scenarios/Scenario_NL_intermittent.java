@@ -165,7 +165,7 @@ public class Scenario_NL_intermittent implements Scenario {
         reps.interconnector = interconnectorNetherlandsGermany;
 
         //Create empty load duration curve, initiated with random values. The intermittent role will override the values.
-        int numberOfSegmentsYouWant = 100;
+        int numberOfSegmentsYouWant = 20;
         LDCFactory ldcFactory = new LDCFactory(reps);
         ldcFactory.createSegments(new Random().doubles(numberOfSegmentsYouWant).toArray());
         Set<SegmentLoad> loadDurationCurveNL = ldcFactory.createLDC(new Random().doubles(numberOfSegmentsYouWant).toArray());        
@@ -661,7 +661,7 @@ public class Scenario_NL_intermittent implements Scenario {
         windTarget.setPowerGeneratingTechnology(windOffshore);
         StepTrend windTargetTrend = new StepTrend();
         windTargetTrend.setStart(0);
-        windTargetTrend.setIncrement(0);
+        windTargetTrend.setIncrement(500);
         windTargetTrend.setDuration(1);
         windTargetTrend.setMinValue(0);
         windTarget.setTrend(windTargetTrend);
@@ -670,7 +670,7 @@ public class Scenario_NL_intermittent implements Scenario {
         pvTarget.setPowerGeneratingTechnology(pv);
         StepTrend pvTargetTrend = new StepTrend();
         pvTargetTrend.setStart(0);
-        pvTargetTrend.setIncrement(0);
+        pvTargetTrend.setIncrement(200);
         pvTargetTrend.setDuration(1);
         pvTargetTrend.setMinValue(0);
         pvTarget.setTrend(pvTargetTrend);

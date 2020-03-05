@@ -29,8 +29,8 @@ public class Startup {
         long runID = System.currentTimeMillis();
         
         /* Default parameters */
-        long numberOfIterations = 1;
-        long numberOfParallelJobs = 1;
+        long numberOfIterations = 10;
+        long numberOfParallelJobs = 4;
         
         //String scenarioName = "DefaultScenario";
         //String scenarioName = "Scenario_NL";
