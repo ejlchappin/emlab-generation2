@@ -1,22 +1,18 @@
 ---
-title: "Analysis"
-author: "Marc Melliger"
+title: "Analysis of EMlab Generation 2"
+author: "Marc Melliger & Emile Chappin"
 date: "3/5/2020"
 output: html_document
 runtime: shiny
 ---
 
-
 ```{r setup, include=FALSE}
-library(emlab)
-library(tidyverse)
-library(RColorBrewer)
-library(viridis)
 
+knitr::opts_chunk$set(echo = FALSE)
 
+source(file = "scripts/init.R")
 
-knitr::opts_chunk$set(echo = TRUE)
-
+# theme for ggplot
 theme_set(
   theme_bw(base_size = 13) + 
     theme(
@@ -24,173 +20,42 @@ theme_set(
       panel.grid.major = element_blank(), 
       panel.grid.minor = element_blank(),
       legend.spacing.x = unit(0.1, 'cm')
-      )
-  )
-
-
-navbarPage("My Application",
-  tabPanel("Component 1"),
-  tabPanel("Component 2"),
-  tabPanel("Component 3")
+    )
 )
 
+# In the init.R all results are read and common variables are prepared
+source(file = "scripts/main.R")
 ```
 
-## Scenario
+Analysing result files with ID `r id` for scenario `r scenario`.
 
-```{r fileconfig, echo=FALSE}
+## Interactive part
 
-# Read files. Need to follow the following schemne "-": "id", "scenario", "model", "reporter", "datatype"
+```{r setup variables}
 
-directory <- "/Users/marcmel/Development/java-projects/emlab-generation2/results/"
-
-file_list <- list.files(path = directory, pattern = "*.csv")
-
-
-result_files <- tibble(
-  file = file_list,
-  date = file.info(paste0(directory,file_list))$ctime
-) %>% 
-  arrange(date) %>% 
-  separate(col = "file", into = c("id", "scenario", "model", "reporter", "datatype"), sep = "-", remove = FALSE)
-
-
-lastest_results_id <- result_files %>% 
-  select(id, date) %>% 
-  filter(date == max(date)) %>% 
-  slice(1) %>% 
-  pull(id)
-
-
-latest_files <- result_files %>%
-  filter(id == lastest_results_id)
-
-# TODO selection, maybe by Shiny app
-
-#id = "1583329851748"
-#scenario = "Scenario_NL"
-#scenario = "Scenario_NL_intermittent"
-
-
-## Setting up path
-
-id <- lastest_results_id
-
-scenario <- latest_files %>% 
-  slice(1) %>% 
-  pull(scenario)
-
-prefix = paste(id, scenario, sep = "-") 
-
-```
-
-
-Analysing latest results with ID `r id` for scenario `r scenario`.
-
-
-```{r, echo=FALSE,  include=FALSE}
-geom_area_shaded <- function(){
-  geom_area(colour = "black", size = 0.2, alpha = 0.6)
-}
-scale_fill_technologies <- function(){
-  scale_fill_brewer(type = "qual", palette = "Set3")
-}
-  
-# util
-
-get_data_by_prefix <- function(data, col_prefix, value){
-  
-  col_prefix <- paste0(col_prefix, ".")
-  raw_main_results %>% 
-    select(one_of(meta_cols), starts_with(col_prefix)) %>% 
-    gather(starts_with(col_prefix), key = "key", value = !!value)
-}
-
-```
-
-```{r raw results, echo=FALSE, include=FALSE}
-
-
-prefix = paste(id, scenario, sep = "-") 
-filename_main_results = paste(prefix, "EMlabModelRole-DefaultReporter-main.csv", sep = "-") 
-
-meta_cols <- c("iteration", "tick")
-
-
-raw_main_results = paste0(directory, filename_main_results) %>% 
-  read_csv2(col_types = cols(.default = "n")) %>% 
-  arrange(iteration, tick)
-
-iteration_min <- min(raw_main_results$iteration)
-iteration_max <- max(raw_main_results$iteration)
-
-# TODO technologies
-  
-
-```
-
-
-
-## Operational capacity
-
-
-```{r main results, echo = FALSE}
-
-# capacity in MWh
-# Plot operational capacity
-
-operational_capacities <- raw_main_results %>% 
-  get_data_by_prefix("operational.capacity", value = "capacity")
-
-total_operational_capacities <- operational_capacities %>% 
-  filter(key == "operational.capacity.powerplants")
-
-operational_capacities_by_tech <- operational_capacities %>% 
-  filter(key != "operational.capacity.powerplants") %>% 
-  separate(col = "key", into = c("var1", "var2", "market", "technology"), sep = "\\.") %>% 
-  select(-var1, -var2) %>% 
-  mutate(
-    technology = as.factor(technology)
-  )
-
-technologies <- operational_capacities_by_tech %>% 
+# variables for selection
+technologies <- data$operational_capacities_by_tech %>% 
   select(technology) %>% 
   distinct() %>% 
   pull(technology)
 
-  
-plot_operational_capacities_average <- function(technologies){
-    
-  operational_capacities_by_tech %>%
-      group_by(tick, market, technology) %>% 
-      summarise(avg_capacity = mean(capacity)) %>% 
-      filter(
-        technology %in% technologies) %>% 
-      ggplot(mapping = aes(x = tick, y = avg_capacity, fill = technology)) +
-       geom_area_shaded() +
-       scale_fill_technologies() +
-       facet_grid(~ market)
-}
-
-plot_operational_capacities_by_iterations <- function(technologies, iterations){
-      
-  operational_capacities_by_tech %>%
-    filter(
-      technology %in% technologies,
-      iteration %in% iterations) %>%
-    ggplot(mapping = aes(x = tick, y = capacity, fill = technology)) +
-       geom_area_shaded() +
-       scale_fill_technologies() +
-       facet_wrap(iteration ~  market)
-}
-
-## TODO iteration
-## Interactive: select technologies: factor and filter, selectboxed
-## Interactive: all iterations or just one: if and filter
+all_producers <- data$cash_by_agents %>% 
+  select(producer) %>% 
+  distinct() %>% 
+  pull()
 
 
 ## Shiny App
 
+iteration_input <- function(input){
+  seq(from = input$iterations[1], to = input$iterations[2], by = 1)
+}
+
+```
+
+
+```{r Shiny App}
+#library(shiny)
 sidebarLayout(
   
   sidebarPanel(
@@ -202,121 +67,132 @@ sidebarLayout(
     hr(),
     
     sliderInput("iterations", label = h3("Iteration Range"), min = iteration_min, max = iteration_max, 
-    value = c(iteration_min, iteration_max))
+    value = c(iteration_min, iteration_max)),
+
+    checkboxGroupInput("selected_producers", label = h3("Investors"), 
+      choices = all_producers,
+      selected = all_producers)
+ 
   
   ),
 
   mainPanel(
 
-
     tabsetPanel(type = "tabs",
+      
       tabPanel("Average", 
-               renderPlot({
-                 plot_operational_capacities_average(input$technologies_checked)
-                 })),
+        renderPlot({plot_operational_capacities_average(input$technologies_checked, iteration_input(input))}),
+        renderPlot({plot_cash_by_agents_average(input$selected_producers, iteration_input(input))})
+        ),
+      
       tabPanel("Iterations",
-               renderPlot({
-               plot_operational_capacities_by_iterations(
-                 input$technologies_checked, 
-                 seq(from = input$iterations[1], to = input$iterations[2], by = 1) )
-               }))
-     )
+       renderPlot({plot_operational_capacities_by_iterations(input$technologies_checked, iteration_input(input))}),
+       renderPlot({plot_cash_by_agents_by_iterations(input$selected_producers, iteration_input(input))})
+       
       )
+    )
+  )
 )
-    
+
 
 ```
+
 
 ## Generation
 
+Still static
+
 ```{r, echo=FALSE}
 
-
-raw_main_results %>% 
-  get_data_by_prefix(col_prefix = "production", value = "generation") %>% 
-  separate(col = "key", into = c("var", "market", "technology"), sep = "\\.") %>% 
-  ggplot(mapping = aes(x = tick, y = generation, fill = technology)) +
-   geom_area_shaded() +
-   scale_fill_technologies() +
-   facet_wrap(iteration ~ market)
+plot_generation()
 
 ```
 
 
-
-## TODO:
+## TODOs
 
 - Read in different scenarios, automically parse files
-
 - Wholesale prices
-- THings implemented previously
+- Things implemented previously
+- For different agents.
+- Distribution of cost of different costs
+- Label stuff
 
--
 
 ```{r, echo=FALSE}
 # 
-# 
+#library(emlab)
+
 # PlotCapacity(data_orig, detail = TRUE)
 # 
+
 # PlotCO2Emissions(data)
 # PlotCO2Price(data)
 # PlotCosts(data)
 # PlotDuration(data)
+# 
 # PlotElectricityPrice(data,TRUE) 
+# 
 # PlotElectricityVolume(data)
 # PlotNrPowerPlants(data)
 # PlotPipelineCapacity(data)
+
+
+
 # 
 # PlotSubstancePrice(data)
 # PlotSubstanceVolume(data)
 
+# Missing load duration curve
+# 
+
 ```
 
-## Marketforecast
+- Marketforecast
 
 ```{r}
-# Marketinfo --------------------------------------------------------------
-
-prefix = paste(id, scenario, sep ="-")
-
-filename = paste(prefix, "EMlabModelRole-DefaultReporter-MarketInformation.csv", sep = "-")
-marketForecast <- read_delim(paste0(directory, filename), delim = ";") %>% 
-  arrange(iteration, tick, segment)
-
-
-market_forecast_filtered <- marketForecast %>% 
-  mutate(
-    expectedSegmentLoadCausingVOLL = ifelse(result == 3, expectedSegmentLoad, NA)
-  ) %>% 
-  gather(
-    expectedSegmentLoad, segmentSupply, totalCapacityAvailable, 
-    key = "variable", value = "capacity") %>% 
-  filter(
-    # Just focus on one agent
-    agent == "Energy Producer NL B",
-    variable != "totalCapacityAvailable")
-
-marketForecastPlot1 <-  market_forecast_filtered %>% 
-  ggplot(mapping = aes(x = segment, y = capacity, color = variable, linetype = agent)) +
-    geom_line() +
-    geom_point(mapping = aes(y = expectedSegmentLoadCausingVOLL), pch = 1, col = "blue") +
-    scale_y_log10() + 
-    facet_wrap(~ tick) + 
-    labs(
-      title = "Expected Market Information")
-marketForecastPlot1
-  
-marketForecastPlot2 <- market_forecast_filtered %>% 
-  ggplot(mapping = aes(x = segment, y = expectedElectricityPrice, linetype = agent)) +
-  geom_line() +
-  scale_y_log10() + 
-  facet_wrap(~ tick) + 
-  labs(
-    title = "Expected Electrictiy Prices")
-marketForecastPlot2
-
-ggsave(filename = paste0("output/", prefix, "-marketForecastPlot1.pdf"), plot = marketForecastPlot1, width = 10, height = 6)
-ggsave(filename = paste0("output/", prefix, "-marketForecastPlot2.pdf"), plot = marketForecastPlot2, width = 10, height = 6)
+# # Marketinfo --------------------------------------------------------------
+# 
+# prefix = paste(id, scenario, sep ="-")
+# 
+# filename = paste(prefix, "EMlabModelRole-DefaultReporter-MarketInformation.csv", sep = "-")
+# marketForecast <- read_delim(paste0(directory, filename), delim = ";") %>% 
+#   arrange(iteration, tick, segment)
+# 
+# 
+# market_forecast_filtered <- marketForecast %>% 
+#   mutate(
+#     expectedSegmentLoadCausingVOLL = ifelse(result == 3, expectedSegmentLoad, NA)
+#   ) %>% 
+#   gather(
+#     expectedSegmentLoad, segmentSupply, totalCapacityAvailable, 
+#     key = "variable", value = "capacity") %>% 
+#   filter(
+#     # Just focus on one agent
+#     agent == "Energy Producer NL B",
+#     variable != "totalCapacityAvailable")
+# 
+# marketForecastPlot1 <-  market_forecast_filtered %>% 
+#   ggplot(mapping = aes(x = segment, y = capacity, color = variable, linetype = agent)) +
+#     geom_line() +
+#     geom_point(mapping = aes(y = expectedSegmentLoadCausingVOLL), pch = 1, col = "blue") +
+#     scale_y_log10() + 
+#     facet_wrap(~ tick) + 
+#     labs(
+#       title = "Expected Market Information")
+# marketForecastPlot1
+#   
+# marketForecastPlot2 <- market_forecast_filtered %>% 
+#   ggplot(mapping = aes(x = segment, y = expectedElectricityPrice, linetype = agent)) +
+#   geom_line() +
+#   scale_y_log10() + 
+#   facet_wrap(~ tick) + 
+#   labs(
+#     title = "Expected Electrictiy Prices")
+# marketForecastPlot2
+# 
+# ggsave(filename = paste0("output/", prefix, "-marketForecastPlot1.pdf"), plot = marketForecastPlot1, width = 10, height = 6)
+# ggsave(filename = paste0("output/", prefix, "-marketForecastPlot2.pdf"), plot = marketForecastPlot2, width = 10, height = 6)
 
 ```
 
