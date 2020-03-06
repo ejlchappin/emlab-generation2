@@ -40,3 +40,5 @@ nbproject/private/
 analysis/plot_analysis/server.R
 
 analysis/plot_analysis/ui.R
+
+analysis/config.R
