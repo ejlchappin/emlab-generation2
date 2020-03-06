@@ -67,6 +67,8 @@ public class DefaultCSVConverterHeaders extends AbstractCSVConverter {
         for (ElectricitySpotMarket market : schedule.reps.electricitySpotMarkets) {
             for (Segment segment : schedule.reps.segments) {
                 row.add("price." + market + "." + segment);
+                row.add("hours." + market + "." + segment);
+                row.add("load." + market + "." + segment);
                 row.add("volume." + market + "." + segment);
             }
             row.add("average price." + market);

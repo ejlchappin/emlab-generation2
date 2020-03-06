@@ -83,12 +83,13 @@ public class DefaultCSVConverter extends AbstractCSVConverter {
                 totalAveragePrice += price * hours;
                 totalHours += hours;
                 row.add(String.valueOf(price));
+                row.add(String.valueOf(segment.getLengthInHours()));
+                row.add(String.valueOf(amount));
                 row.add(String.valueOf(segment.getLengthInHours() * amount));
                 totalVolume += segment.getLengthInHours() * amount;
             }
             row.add(String.valueOf(totalAveragePrice/totalHours));
             row.add(String.valueOf(totalVolume));
-
         }
         row.add(String.valueOf(reps.cashFlows.stream().filter(p -> p.getType() == CashFlow.ELECTRICITY_SPOT).collect(Collectors.summarizingDouble(CashFlow::getMoney)).getSum()));
         row.add(String.valueOf(reps.cashFlows.stream().filter(p -> p.getType() == CashFlow.COMMODITY).collect(Collectors.summarizingDouble(CashFlow::getMoney)).getSum()));
