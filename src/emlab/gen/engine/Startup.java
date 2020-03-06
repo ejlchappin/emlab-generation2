@@ -6,8 +6,6 @@
 package emlab.gen.engine;
 
 import static emlab.gen.engine.Schedule.logger;
-import emlab.gen.gui.GUIServer;
-import emlab.gen.gui.SimpleGUI2;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -110,21 +108,12 @@ public class Startup {
         List<ScheduleWorker> activeWorkers = new ArrayList<ScheduleWorker>();
         List<ScheduleWorker> doneWorkers = new ArrayList<ScheduleWorker>();
 
-        SimpleGUI2 gui = new SimpleGUI2(activeWorkers, doneWorkers);
-
-        if (haveGUI) {
-            GUIServer server = new GUIServer(gui);
-            server.execute();
-        }
-
         long iteration = 0;
 
-        while (!gui.exit && !gui.stop && (iteration < numberOfIterations || activeWorkers.size() > 0)) {
+        while (iteration < numberOfIterations || activeWorkers.size() > 0) {
 
-            gui.body = "<p>Run: " + String.valueOf(runID) + " iteration " + String.valueOf(iteration) + " out of " + String.valueOf(numberOfIterations) + "</p>";
-
-            //Check whether we need workers for new iterations and whether we have space for a new worker
-            if (!gui.stop && (activeWorkers.size() < numberOfParallelJobs && iteration < numberOfIterations)) {
+                     //Check whether we need workers for new iterations and whether we have space for a new worker
+            if ((activeWorkers.size() < numberOfParallelJobs && iteration < numberOfIterations)) {
                 iteration++;
                 Logger.getGlobal().warning("Starting worker for iteration " + iteration);
                 ScheduleWorker worker = new ScheduleWorker(runID, iteration, scenarioName, modelRole, reporter);
@@ -152,20 +141,5 @@ public class Startup {
 
         //Out of the loop, all iterations have been performed and all workers are done
         Logger.getGlobal().warning("All is done.");
-        if (haveGUI) {
-            while (!gui.exit) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Startup.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            try {
-                gui.getServer().stop();
-            } catch (Exception ex) {
-                Logger.getLogger(Startup.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            gui.destroy();
-        }
     }
 }
