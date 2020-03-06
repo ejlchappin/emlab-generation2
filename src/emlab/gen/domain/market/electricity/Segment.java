@@ -53,7 +53,8 @@ public class Segment {
 
     @Override
     public String toString() {
-    	return "length in hours: " + getLengthInHours();
+        return "segment"+segmentID;
+    	//return "length in hours: " + getLengthInHours();
     }
 
 }
