@@ -1,10 +1,11 @@
 
 library(tidyverse)
+library(glue)
 library(RColorBrewer)
 
 
-
 # Config ------------------------------------------------------------------
+
 
 config_file <- "config.R"
 if(!file.exists(config_file)){
@@ -14,7 +15,7 @@ if(!file.exists(config_file)){
   
 }
 
-source(file = "scripts/util_functions.R")
+source(file = "app_scripts/util_functions.R")
 
 # Loading and preparing files ---------------------------------------------
 

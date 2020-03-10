@@ -33,17 +33,11 @@ Analysing result files with ID `r id` for scenario `r scenario`.
 
 ```{r setup variables}
 
-# variables for selection
-technologies <- data$operational_capacities_by_tech %>% 
-  select(technology) %>% 
-  distinct() %>% 
-  pull(technology)
+# variables for selection based on results
+all_technologies <- get_sinlge_variable(data$operational_capacities_by_tech, technology)
+technology_colors <- set_technology_colors(all_technologies)
 
-all_producers <- data$cash_by_agents %>% 
-  select(producer) %>% 
-  distinct() %>% 
-  pull()
-
+all_producers <- get_sinlge_variable(data$cash_by_agents, producer)
 
 ## Shiny App
 
@@ -61,8 +55,8 @@ sidebarLayout(
   sidebarPanel(
 
     checkboxGroupInput("technologies_checked", label = h3("Technologies"), 
-      choices = technologies,
-      selected = technologies),
+      choices = all_technologies,
+      selected = all_technologies),
     
     hr(),
     
@@ -78,16 +72,33 @@ sidebarLayout(
 
   mainPanel(
 
-    tabsetPanel(type = "tabs",
+    tabsetPanel(
+      type = "tabs",
       
-      tabPanel("Average", 
-        renderPlot({plot_operational_capacities_average(input$technologies_checked, iteration_input(input))}),
-        renderPlot({plot_cash_by_agents_average(input$selected_producers, iteration_input(input))})
+      tabPanel(
+        "Average", 
+        
+        renderPlot({plot_operational_capacities_average(input$technologies_checked, iteration_input(input))})
+        
+        # renderPlot({plot_generation_average(input$technologies_checked, iteration_input(input))}),
+        # 
+        # renderPlot({plot_cash_by_agents_average(input$selected_producers, iteration_input(input))})
+        # 
+
+
+        
         ),
       
-      tabPanel("Iterations",
-       renderPlot({plot_operational_capacities_by_iterations(input$technologies_checked, iteration_input(input))}),
-       renderPlot({plot_cash_by_agents_by_iterations(input$selected_producers, iteration_input(input))})
+    tabPanel(
+      "Iterations",
+       
+      renderPlot({plot_operational_capacities_by_iterations(input$technologies_checked, iteration_input(input))})
+
+      #  
+      # renderPlot({plot_cash_by_agents_by_iterations(input$selected_producers, iteration_input(input))})
+      
+
+
        
       )
     )
@@ -97,14 +108,29 @@ sidebarLayout(
 
 ```
 
+```{r static example}
 
-## Generation
+plot_operational_capacities_average(all_technologies, c(iteration_min, iteration_max))
 
-Still static
+  
+# nice_colors = brewer.pal(n = 11, name = "Set3")
+# technology_colors <- c(
+#  "Coal PSC" = nice_colors[1],
+#  "Lignite PSC" = nice_colors[2],
+#  "Biomass CHP" = nice_colors[2],
+#  "CCGT" = nice_colors[4],
+#  "OCGT" = nice_colors[5],
+#  "Fuel oil PGT" = nice_colors[6],
+#  "Nuclear PGT" = nice_colors[7],
+#  "Photovoltaic PGT" = nice_colors[8],
+#  "Hydroelectric" = nice_colors[9],
+#  "Onshore wind PGT" = nice_colors[10],
+#  "Offshore wind PGT" = nice_colors[11]
+# )
 
-```{r, echo=FALSE}
 
-plot_generation()
+  
+
 
 ```
 

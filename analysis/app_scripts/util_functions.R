@@ -64,11 +64,51 @@ get_filepath <- function(datafile){
 
 # Plots -------------------------------------------------------------------
 
+#' Sets colors for plots
+#'
+#' @param technologies Vector containing technology vectors
+#'
+#' @return
+#' @export
+#'
+#' @examples
+set_technology_colors <- function(technologies){
+  
+  if(exists("technology_color_palette")){
+    technology_colors <- brewer.pal(
+      n = length(technologies), 
+      name = technology_color_palette
+    )
+    names(technology_colors) <- technologies
+    
+  }
+  if(exists("technology_colors")){
+    return(technology_colors)  
+  } else {
+    stop("Technology Colors or palette not set in config.R")
+  }
+  
+}
+
+#' colors for fill. Takes either technology_colors or leaves standard
+#'
+#' @return
+#' @export
+#'
+#' @examples
+scale_fill_technologies <- function(){
+  
+  if(exists("technology_colors")){
+    scale <- scale_fill_manual(values = technology_colors)
+  } else {
+    scale <- scale_fill_brewer(type = "qual", palette = "Set3")
+  }
+  
+  return(scale)
+}
+
 geom_area_shaded <- function(){
   geom_area(colour = "black", size = 0.2, alpha = 0.6)
-}
-scale_fill_technologies <- function(){
-  scale_fill_brewer(type = "qual", palette = "Set3")
 }
 
 
@@ -81,4 +121,16 @@ get_data_by_prefix <- function(data, col_prefix, value){
     select(one_of(meta_cols), starts_with(col_prefix)) %>% 
     gather(starts_with(col_prefix), key = "key", value = !!value)
 }
+
+get_sinlge_variable <- function(data, variable){
+  
+  variable <- enquo(variable)
+  
+  data %>% 
+    select(!!variable) %>% 
+    distinct() %>% 
+    pull()
+  
+}
+
 
