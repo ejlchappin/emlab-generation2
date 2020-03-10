@@ -153,6 +153,7 @@ public class DefaultReporter extends AbstractReporter {
                         .entryConverter(new MarketInformationReportCSVConverterHeaders())
                         .strategy(CSVStrategy.DEFAULT)
                         .build();
+//                marketinfoCSVWriter.write(schedule.reps.marketInformationReports.get(1));
                 marketinfoCSVWriter.write(null);
                 marketinfoFileWriter.flush();
                 marketinfoFileWriter.close();

@@ -1,7 +1,11 @@
 package emlab.gen.role.investment;
 
+import java.util.Map;
+
 import emlab.gen.domain.agent.EnergyProducer;
+import emlab.gen.domain.market.electricity.ElectricitySpotMarket;
 import emlab.gen.domain.market.electricity.Segment;
+import emlab.gen.domain.technology.Substance;
 import emlab.gen.engine.Schedule;
 
 public class MarketInformationReport {
@@ -26,6 +30,15 @@ public class MarketInformationReport {
 	private int result;
 	
 	private double expectedElectricityPrice;
+	
+	
+	Map<ElectricitySpotMarket, Double> expectedDemand; 
+	
+	Map<Substance, Double> fuelPrices;
+	
+	double co2price;
+	
+	
 	
     public EnergyProducer getAgent() {
 		return agent;
@@ -82,6 +95,30 @@ public class MarketInformationReport {
 
 	public void setExpectedElectricityPrice(double expectedElectricityPrice) {
 		this.expectedElectricityPrice = expectedElectricityPrice;
+	}
+
+	public Map<ElectricitySpotMarket, Double> getExpectedDemand() {
+		return expectedDemand;
+	}
+
+	public void setExpectedDemand(Map<ElectricitySpotMarket, Double> expectedDemand) {
+		this.expectedDemand = expectedDemand;
+	}
+
+	public Map<Substance, Double> getFuelPrices() {
+		return fuelPrices;
+	}
+
+	public void setFuelPrices(Map<Substance, Double> fuelPrices) {
+		this.fuelPrices = fuelPrices;
+	}
+
+	public double getCO2price() {
+		return co2price;
+	}
+
+	public void setCO2price(double co2price) {
+		this.co2price = co2price;
 	} 
 
 }

@@ -960,6 +960,10 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
                report.setSegmentSupply(segmentSupply); 
                report.setTotalCapacityAvailable(totalCapacityAvailable);
                
+               report.setCO2price(co2price);
+               report.setFuelPrices(fuelPrices);
+               
+               
                double expectedElectricityPrice;
 
 
