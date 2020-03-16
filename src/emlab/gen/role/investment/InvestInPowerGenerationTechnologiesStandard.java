@@ -65,6 +65,7 @@ public class InvestInPowerGenerationTechnologiesStandard<T extends EnergyProduce
                 	FutureFinancialExpectation financialExpectation = new FutureFinancialExpectation(plant);                    
                     
                     if (financialExpectation.plantHasRequiredRunningHours()) {
+                    	financialExpectation.calculateDiscountedValues();
                     	
                     	double projectValue = financialExpectation.calculateProjectValue();
 
