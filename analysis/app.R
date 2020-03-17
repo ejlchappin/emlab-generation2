@@ -6,7 +6,13 @@
 # This version need to be executed by selecting all and run:
 # CMD+A and CMD+Enter
 
+#install.packages("shinyjs")
+
+remove(list = ls())
+
 library(shiny)
+library(shinyjs)
+
 
 # Init --------------------------------------------------------------------
 
@@ -18,91 +24,73 @@ theme_set(
   theme_bw(base_size = 13) + 
     theme(
       legend.title=element_blank(),
-      panel.grid.major = element_blank(), 
-      panel.grid.minor = element_blank(),
       legend.spacing.x = unit(0.1, 'cm')
     )
 )
 
 
-# Define functions --------------------------------------------------------
+# Load dynamic plots and pages  --------------------------------------------------------
+
 
 # All plots are defined in this script
 source(file = "app_scripts/main.R")
 
-# variables for inputs based on results
-all_technologies <- get_sinlge_variable(data$operational_capacities_by_tech, technology)
-all_producers <- get_sinlge_variable(data$cash_by_agents, producer)
-
-# Other
-technology_colors <- set_technology_colors(all_technologies)
-
 # App UI ------------------------------------------------------------------
 
-# TODO How to draw same element?
+ui <- do.call(navbarPage, c(
+  title = if_else(exists("app_title"), app_title, "EMLab2"), 
+  app_menu,
+  # add shared options that are hidden by default
+  header = list(
+      list(
+        useShinyjs(), 
+        hidden(
+          wellPanel(id = "shared_filter_panel",
+            fluidRow(
+              column(
+                6,
+                sliderInput(
+                  "iterations",
+                  label = h3("Iteration Range"),
+                  min = iteration_min, max = iteration_max,
+                  value = c(iteration_min, iteration_max))
+                ),
 
-iteration_input <- function(input){
-  seq(from = input$iterations[1], to = input$iterations[2], by = 1)
-}
+              column(
+                6, radioButtons("unit", "Unit:",all_my_units))
+            )
 
-ui <- navbarPage("EMLab2",
-  # defined Menupages here.
-  
-  navbarMenu(
-    "Energy",
-    tabPanel("Capacity", source("app_pages/tab_capacity.R")),
-    tabPanel("Pipeline capacity", source("app_pages/tab_pipeline_capacity.R")),
-    tabPanel("Generation", source("app_pages/tab_generation.R"))
-  ),
-  header = (
-    # Slider for iterations in sidebar
-    sliderInput(
-      "iterations", 
-      label = h3("Iteration Range"), 
-      min = iteration_min, max = iteration_max, 
-      value = c(iteration_min, iteration_max))
-    
+          )
+        )
+      )
+    )
   )
-
 )
 
 # App Server ---------------------------------------------------------------
 
-
-
 server <- function(input, output) {
   
-  # Plot logic is defined here and stored in ouput. 
-  # This is a functio, so no , needed
-  
-  # Define capacity plots
-  output$plot_operational_capacities_average <- renderPlot({
-    plot_operational_capacities_average(input$technologies_checked, iteration_input(input))
-    })
-  
-  output$plot_operational_capacities_by_iterations <- renderPlot({
-    plot_operational_capacities_by_iterations(input$technologies_checked, iteration_input(input))
-    })
-  
-  output$plot_generation_average <- renderPlot({
-    plot_generation_average(input$technologies_checked, iteration_input(input))
-    })
-  
-  output$plot_generation_by_iterations <- renderPlot({
-    plot_generation_by_iterations(input$technologies_checked, iteration_input(input))
-    })
-  
-  output$plot_pipeline_capacity_average <- renderPlot({
-    plot_pipeline_capacity_average(iteration_input(input))
+  observeEvent(input$toggle_shared_options, {
+    toggle("shared_filter_panel")
   })
   
-  output$plot_pipeline_capacity_by_iterations <- renderPlot({
-    plot_pipeline_capacity_by_iterations(iteration_input(input))
+  # for each element in app_plots produce plots of the namescheme plot_(data_name)_(average/by_iterations)
+  map(app_plots, function(app_plot){
+    # get average of all iterations plot
+    output[[paste("plot", app_plot$data_name, "average", sep = "_")]] <- renderPlot({
+      get_plot(app_plot$data_name, app_plot$y_label, input)
+    })
+    
+    # get by iterations plot
+    output[[paste("plot", app_plot$data_name, "by_iterations", sep = "_")]] <- renderPlot({
+      get_plot(app_plot$data_name, app_plot$y_label, input, FALSE)
+    })
   })
 
-  
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
 

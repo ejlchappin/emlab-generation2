@@ -4,6 +4,6 @@ sidebarLayout(
     ui_more_button()
   ),
   
-  default_mainPanel("Pipeline capacity", "pipeline_capacities")
-
+  default_mainPanel("Powerplants", "nr_powerplants")
+  
 )

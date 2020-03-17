@@ -58,6 +58,13 @@ meta_cols <- c("iteration", "tick")
 iteration_min <- min(raw_main_results$iteration)
 iteration_max <- max(raw_main_results$iteration)
 
+# Units
+available_units <- tribble(
+  ~name, ~prefix, ~factor,
+  "Mega", "M", 1,
+  "Giga", "G", 1/1000,
+  "Tera", "T", 1/1000000)
+
 
 # Cleanup -----------------------------------------------------------------
 
