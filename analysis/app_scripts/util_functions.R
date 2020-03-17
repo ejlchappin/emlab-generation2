@@ -64,31 +64,35 @@ get_filepath <- function(datafile){
 
 # Plots -------------------------------------------------------------------
 
-#' Sets colors for plots
+#' Sets fixed colors for items such as technologies, fuels...
+#' If a named color vector with color is set in conig.R this one is used
+#' If not, the colors are assigned using the color palette set
+#' 
 #'
-#' @param technologies Vector containing technology vectors
+#' @param items Vector containing names of items
+#' @param named_colors_vector_name  Name of variable in config.R
+#' @param palette_name  Name of variable in config.R
 #'
-#' @return
-#' @export
-#'
-#' @examples
-set_technology_colors <- function(technologies){
+#' @return named vector with color codes
+set_colors <- function(items, named_colors_vector_name, palette_name){
   
-  if(exists("technology_color_palette")){
-    technology_colors <- brewer.pal(
-      n = length(technologies), 
-      name = technology_color_palette
+  if(exists(named_colors_vector_name)){
+    return(get(named_colors_vector_name))  
+  } 
+  else if(exists(palette_name)){
+    colors <- brewer.pal(
+      n = length(items), 
+      name = get(palette_name)
     )
-    names(technology_colors) <- technologies
-    
-  }
-  if(exists("technology_colors")){
-    return(technology_colors)  
+    names(colors) <- items
+    return(colors)
+  
   } else {
-    stop("Technology Colors or palette not set in config.R")
+    stop(glue("{named_colors_vector_name} and {palette_name} not set in config.R"))
   }
   
 }
+
 
 #' colors for fill. Takes either technology_colors or leaves standard
 #'
@@ -107,6 +111,25 @@ scale_fill_technologies <- function(){
   return(scale)
 }
 
+#' colors for fill. Takes either technology_colors or leaves standard
+#'
+#' @return
+#' @export
+#'
+#' @examples
+scale_color_custom <- function(manual_color_variable){
+  
+  if(exists(manual_color_variable)){
+    scale <- scale_color_manual(values = get(manual_color_variable))
+  } else {
+    scale <- scale_color_brewer(type = "qual", palette = "Set3")
+  }
+  
+  return(scale)
+}
+
+
+
 geom_area_shaded <- function(){
   geom_area(colour = "black", size = 0.2, alpha = 0.6)
 }
@@ -114,6 +137,7 @@ geom_area_shaded <- function(){
 get_plot <- function(data_name, y_label, input, average = TRUE){
   
   #Shared filter
+  # TODO simplify iteration stuff.
   my_shared_filters <- get_shared_filters(input)
   
   # Units

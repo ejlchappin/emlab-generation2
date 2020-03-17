@@ -80,3 +80,18 @@ rm(
 
 
 
+# Setting up all data and plot functions  -------------------------------
+
+# Container for data
+data <- list()
+
+# Containter for plot functions
+plots <- list(
+  average = list(),
+  iterations = list(),
+  meta = list()
+)
+
+
+
+

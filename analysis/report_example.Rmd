@@ -1,0 +1,87 @@
+---
+title: "Example Report"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+This report show that the results can exported in an [R Markdown](http://rmarkdown.rstudio.com) Notebook.
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(
+  echo = FALSE, 
+  message = FALSE, 
+  warning = FALSE,
+  fig.width= 20
+  #out.width= 10
+  )
+
+source(file = "app_scripts/init.R")
+
+# theme for ggplot
+theme_set(
+  theme_bw(base_size = 13) + 
+    theme(
+      legend.title=element_blank(),
+      legend.spacing.x = unit(0.1, 'cm')
+    )
+)
+
+# Load dynamic plots and pages  --------------------------------------------------------
+
+# All plots are defined in this script
+source(file = "app_scripts/main.R")
+rm(app_menu)
+```
+
+```{r vars}
+filters <- list(
+  iterations = c(1,10),
+  unit = "M")
+```
+
+
+## Operational Capacity
+
+In this market the capacity of all technologies develops like that
+
+
+```{r}
+
+filters$technologies_checked <- all_technologies
+
+get_plot(
+  app_plots$`Capacity operational`$data_name, 
+  app_plots$`Capacity operational`$y_label, 
+  filters
+)
+
+```
+
+And only renewables develop like that
+
+```{r}
+
+# TODO Make sure that values are correct
+filters$technologies_checked <- c("Photovoltaic PGT", "Hydroelectric", "Onshore wind PGT", "Offshore wind PGT")
+
+get_plot(
+  app_plots$`Capacity operational`$data_name, 
+  "Renewable capacity ({unit_prefix}W)", 
+  filters
+)
+
+```
+
+Other plots can be added by adjusting the app_plots vector:
+
+```{r}
+#app_plots$`Capacity operational`
+```
+
+
+

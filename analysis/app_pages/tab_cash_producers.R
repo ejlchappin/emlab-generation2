@@ -1,7 +1,6 @@
 sidebarLayout(
   
   sidebarPanel(
-    ui_more_button(),
     # Selection of technologies in sidebar
     checkboxGroupInput("producers_checked", label = h3("Producers"), 
                        choices = all_producers,

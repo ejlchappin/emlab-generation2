@@ -1,7 +1,6 @@
 sidebarLayout(
   
   sidebarPanel(
-    ui_more_button()
   ),
   
   default_mainPanel("Pipeline capacity", "pipeline_capacities")

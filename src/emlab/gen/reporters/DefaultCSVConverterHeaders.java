@@ -57,22 +57,22 @@ public class DefaultCSVConverterHeaders extends AbstractCSVConverter {
             row.add("cash." + agent.getName());
         }
         for (Substance substance : schedule.reps.substancesOnCommodityMarkets) {
-            row.add("price." + substance);
-            row.add("volume." + substance);
+            row.add("substance.price." + substance);
+            row.add("substance.volume." + substance);
         }
         row.add("price.co2");
-        row.add("volume.traded.co2.emissions");
-        row.add("volume.total.co2.emissions");
+        row.add("co2.emissions.traded");
+        row.add("co2.emissions.total");
         row.add("average.start.constructing.operational.plants");
         for (ElectricitySpotMarket market : schedule.reps.electricitySpotMarkets) {
             for (Segment segment : schedule.reps.segments) {
-                row.add("price." + market + "." + segment);
-                row.add("hours." + market + "." + segment);
-                row.add("load." + market + "." + segment);
-                row.add("volume." + market + "." + segment);
+                row.add("segment.price." + market + "." + segment);
+                row.add("segment.hours." + market + "." + segment);
+                row.add("segment.load." + market + "." + segment);
+                row.add("segment.volume." + market + "." + segment);
             }
-            row.add("average price." + market);
-            row.add("volume." + market);
+            row.add("market.average price." + market);
+            row.add("market.volume." + market);
         }
         row.add("cashflow.ELECTRICITYSPOT");
         row.add("cashflow.COMMODITY");
