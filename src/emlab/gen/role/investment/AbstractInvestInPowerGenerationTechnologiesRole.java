@@ -956,6 +956,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
                 
                MarketInformationReport report = getReps().findMarketInformationReport(segmentLoad.getSegment(), agent, time);
                report.schedule = schedule; 
+               report.setMarket(market);
                report.setExpectedSegmentLoad(expectedSegmentLoad); 
                report.setSegmentSupply(segmentSupply); 
                report.setTotalCapacityAvailable(totalCapacityAvailable);

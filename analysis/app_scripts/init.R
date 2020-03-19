@@ -42,12 +42,12 @@ prefix = paste(id, scenario, sep = "-")
 
 raw_main_results <- read_results("main.csv")
 raw_marketinformation_results <- read_results(
-  "MarketInformation.csv", custom_col_types = cols(.default = "n", agent = "c"))
+  "MarketInformation.csv", 
+  custom_col_types = cols(.default = "n", producer = "c", market = "c"))
 
 
 # Common variables --------------------------------------------------------
 
-meta_cols <- c("iteration", "tick")
 iteration_min <- min(raw_main_results$iteration)
 iteration_max <- max(raw_main_results$iteration)
 
@@ -75,6 +75,18 @@ rm(
 )
 
 
+
+# Generate plots and data ----------------------------------------------------------
+
+# Definition of data and plots 
+
+data <- list()
+plots <- list()
+
+
+# Load plots for different types of data
+source(file = "app_scripts/data_main.R")
+source(file = "app_scripts/data_marketinformation.R")
 
 
 

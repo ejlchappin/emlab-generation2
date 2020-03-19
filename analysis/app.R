@@ -18,7 +18,7 @@ library(shinyjs)
 # In the init.R all results are read and common variables are prepared
 source(file = "app_scripts/init.R")
 
-# theme for ggplot
+# theme for all ggplots
 theme_set(
   theme_bw(base_size = 13) + 
     theme(
@@ -26,9 +26,6 @@ theme_set(
       legend.spacing.x = unit(0.1, 'cm')
     )
 )
-
-# Load plots 
-source(file = "app_scripts/main.R")
 
 # App UI ------------------------------------------------------------------
 
@@ -147,8 +144,13 @@ ui <- fluidPage(
            tabPanel("Volume", source("app_pages/tab_segment_volume.R")$value),
            tabPanel("Load", source("app_pages/tab_segment_load.R")$value),
            tabPanel("Segment hours", default_mainPanel("Hours", "segment_hours"))
-           
-    )
+      ),
+      navbarMenu(
+        "Expectations",
+        tabPanel("Expected power",default_mainPanel("Expected power in markets","marketinfo_segment_energy")),
+        tabPanel("Expected prices",default_mainPanel("Expected prices in markets","marketinfo_prices"))
+        
+      )
   )
 )))
   

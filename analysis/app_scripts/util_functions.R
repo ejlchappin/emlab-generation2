@@ -243,9 +243,39 @@ ui_more_button <- function(){
 get_data_by_prefix <- function(data, col_prefix, value, suffix = "."){
   
   col_prefix <- paste0(col_prefix, suffix)
-  raw_main_results %>% 
+  data %>% 
     select(one_of(meta_cols), starts_with(col_prefix)) %>% 
     gather(starts_with(col_prefix), key = "key", value = !!value)
+}
+
+
+#' Transforms column in raw data of wide format into multiple variables
+#' 
+#' This first selects all columns in the tibble `data` that begin with `prefix`
+#' and then gathers the data in the column names to one or multiple variables in `vars`
+#'
+#' @param data data
+#' @param prefix prefix to look for in columns. All columns that start with this prefix will be considered for the gathering into long format
+#' @param vars character vector of the variables to be extraced.
+#' @param value name for the value column
+#'
+#' @return data in long format
+#' @export
+#'
+#' @examples 
+#'  data[["test"]] <- raw_marketinformation_results %>% 
+#'  get_vars_from_multiple_columns(prefix = "segment", vars = "type", value = "energy")
+get_vars_from_multiple_columns <- function(data, prefix, vars, value){
+  
+  prefix_cols <- paste("prefix_",str_split(prefix, "\\.")[[1]])
+  
+  data <- data %>% 
+    get_data_by_prefix(col_prefix = prefix, value = value) %>% 
+    separate(col = "key", into = c(prefix_cols,vars), sep = "\\.") %>% 
+    select(-one_of(prefix_cols))
+  
+  return(data)
+  
 }
 
 get_sinlge_variable <- function(data, variable){

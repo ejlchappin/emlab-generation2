@@ -32,6 +32,7 @@ public class MarketInformationReportCSVConverter implements CSVEntryConverter<Ma
         row.add(String.valueOf(report.schedule.iteration));
         row.add(String.valueOf(report.getTime()));
         row.add(String.valueOf(report.getSegment().getSegmentID()));
+        row.add(String.valueOf(report.getMarket().getName()));
         row.add(String.valueOf(report.getAgent().getName()));
 
         row.add(String.valueOf(report.getExpectedSegmentLoad()));

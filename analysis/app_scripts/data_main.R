@@ -1,8 +1,7 @@
 
-# Definition of data and plots 
+# columns to include in every data obtained by (get_data_by_prefix)
+meta_cols <- c("iteration", "tick")
 
-data <- list()
-plots <- list()
 
 # Operational capacity ----------------------------------------------------
 

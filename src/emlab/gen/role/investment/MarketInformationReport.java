@@ -17,6 +17,8 @@ public class MarketInformationReport {
     
     public Schedule schedule;
     
+    private ElectricitySpotMarket market;
+    
     private EnergyProducer agent;
     
 	private Segment segment; 
@@ -119,6 +121,14 @@ public class MarketInformationReport {
 
 	public void setCO2price(double co2price) {
 		this.co2price = co2price;
+	}
+
+	public ElectricitySpotMarket getMarket() {
+		return market;
+	}
+
+	public void setMarket(ElectricitySpotMarket market) {
+		this.market = market;
 	} 
 
 }

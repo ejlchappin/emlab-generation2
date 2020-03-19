@@ -35,17 +35,19 @@ public class MarketInformationReportCSVConverterHeaders implements CSVEntryConve
         row.add("iteration");
         row.add("tick");
         row.add("segment");
-        row.add("agent");
+        row.add("market");
+        row.add("producer");
         
-        row.add("expectedSegmentLoad");
-        row.add("segmentSupply");
-        row.add("totalCapacityAvailable");
-        row.add("result");
+        row.add("segment.load");
+        row.add("segment.supply");
+        row.add("capacity.available");
+        row.add("case.id");
         
-        row.add("expectedElectricityPrice");
-        row.add("expectedCO2Price");
+        row.add("price.electricity");
+        row.add("price.co2");
         
-        // TOOD: make working 
+        // TOOD: make working
+        // TODO: add different markets
 //	    for ( Map.Entry<Substance, Double> entry  : report.getFuelPrices().entrySet()) {
 //	        row.add(String.valueOf("price." + entry.getKey()));
 //	    }
