@@ -32,22 +32,6 @@ source(file = "app_scripts/main.R")
 
 # App UI ------------------------------------------------------------------
 
-# This is the main menu a adds the plot pages to the app
-
-sidebarLayout(
-  
-  sidebarPanel(
-    # Selection of technologies in sidebar
-    checkboxGroupInput("technologies_checked_gen", label = h3("Technologies"), 
-                       choices = all_technologies,
-                       selected = all_technologies)
-    
-  ), # end sidebarPanel()
-  
-  default_mainPanel("Generation", "generation_total")
-  
-)
-
 # WIP
 # toggle_sidbar_elements <- function(active_element){
 # 
@@ -127,7 +111,7 @@ ui <- fluidPage(
         value = TRUE),
       
       checkboxGroupInput("segments_checked", label = h3("Segments"), 
-                         E:choices = all_segments,
+                         choices = all_segments,
                          selected = all_segments)
       
     ), 

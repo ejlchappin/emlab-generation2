@@ -59,6 +59,14 @@ get_filepath <- function(datafile){
   
 }
 
+read_results <- function(filename, custom_col_types = cols(.default = "n")){
+  read_delim(
+    file = get_filepath(filename),
+    delim = ";",
+    col_types = custom_col_types,
+    locale = locale(decimal_mark = ".", grouping_mark =  "'")) %>% 
+    arrange(iteration, tick)
+}
 
 
 

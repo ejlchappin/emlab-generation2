@@ -40,16 +40,9 @@ prefix = paste(id, scenario, sep = "-")
 
 # Get raw results ---------------------------------------------------------
 
-raw_main_results <- read_delim(
-  file = get_filepath("main.csv"),
-  delim = ";",
-  col_types = cols(.default = "n"),
-  locale = locale(decimal_mark = ".", grouping_mark =  "'")) %>% 
-  arrange(iteration, tick)
-
-## TODO add other result files here
-
-
+raw_main_results <- read_results("main.csv")
+raw_marketinformation_results <- read_results(
+  "MarketInformation.csv", custom_col_types = cols(.default = "n", agent = "c"))
 
 
 # Common variables --------------------------------------------------------
