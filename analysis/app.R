@@ -22,7 +22,7 @@ source(file = "app_scripts/init.R")
 theme_set(
   theme_bw(base_size = 13) + 
     theme(
-      legend.title=element_blank(),
+      #legend.title=element_blank(),
       legend.spacing.x = unit(0.1, 'cm')
     )
 )
@@ -33,65 +33,144 @@ source(file = "app_scripts/main.R")
 # App UI ------------------------------------------------------------------
 
 # This is the main menu a adds the plot pages to the app
-app_menu <- list(
-  navbarMenu(
-    "Energy",
-    tabPanel("Powerplants", source("app_pages/tab_powerplants.R")$value),
-    tabPanel("Capacity", source("app_pages/tab_capacity.R")$value),
-    tabPanel("Pipeline capacity", source("app_pages/tab_pipeline_capacity.R")$value),
-    tabPanel("Generation", source("app_pages/tab_generation.R")$value)
-  ),
-  navbarMenu(
-    "Cash",
-    tabPanel("Cash", source("app_pages/tab_cash_producers.R")$value)
-  ),
-  navbarMenu(
-    "Substances",
-    tabPanel("CO2 Price", source("app_pages/tab_co2_prices.R")$value),
-    tabPanel("CO2 Volumes", source("app_pages/tab_co2_volumes.R")$value),
-    tabPanel("Fuel Price", source("app_pages/tab_fuel_prices.R")$value),
-    tabPanel("Fuel Volume", source("app_pages/tab_fuel_volumes.R")$value)
-  )#,
-  # navbarMenu(
-  #   "Spotmarket",
-  #   tabPanel("Average price", source("app_pages/tab_spot_averge.R")$value),
-  #   tabPanel("Total volume", source("app_pages/tab_spot_total_volume.R")$value),
-  #   tabPanel("Price", source("app_pages/tab_spot_price.R")$value),
-  #   tabPanel("Volume", source("app_pages/tab_spot_volume.R")$value)
-  # )
+
+sidebarLayout(
+  
+  sidebarPanel(
+    # Selection of technologies in sidebar
+    checkboxGroupInput("technologies_checked_gen", label = h3("Technologies"), 
+                       choices = all_technologies,
+                       selected = all_technologies)
+    
+  ), # end sidebarPanel()
+  
+  default_mainPanel("Generation", "generation_total")
+  
 )
 
-# Everything else
-ui <- do.call(navbarPage, c(
-  title = if_else(exists("app_title"), app_title, "EMLab2"), 
-  app_menu,
-  # add shared options that are hidden by default
-  header = list(
-      list(
-        useShinyjs(), 
-        ui_more_button(),
-        hidden(
-          wellPanel(id = "shared_filter_panel",
-            fluidRow(
-              column(
-                6,
-                sliderInput(
-                  "iterations",
-                  label = h3("Iteration Range"),
-                  min = iteration_min, max = iteration_max,
-                  value = c(iteration_min, iteration_max))
-                ),
+# WIP
+# toggle_sidbar_elements <- function(active_element){
+# 
+#   if(active_element == "technologies"){
+#     show("technologies_checked")
+#     hide("producers_checked")
+#     hide("fuels_checked")
+#     hide("all_in_one_plot")
+#     hide("flip_tick_segment")
+#     hide("segments_checked")
+#   } else if (active_element == "producers"){
+#     hide("technologies_checked")
+#     show("producers_checked")
+#     hide("fuels_checked")
+#     hide("all_in_one_plot")
+#     hide("flip_tick_segment")
+#     hide("segments_checked")
+#   }  else if (active_element == "fuels"){
+#     hide("technologies_checked")
+#     hide("producers_checked")
+#     show("fuels_checked")
+#     hide("all_in_one_plot")
+#     hide("flip_tick_segment")
+#     hide("segments_checked")
+#   }  else if (active_element == "segments"){
+#     hide("technologies_checked")
+#     hide("producers_checked")
+#     hide("fuels_checked")
+#     show("all_in_one_plot")
+#     show("flip_tick_segment")
+#     show("segments_checked")
+#   } else {
+#     hide("technologies_checked")
+#     hide("producers_checked")
+#     hide("fuels_checked")
+#     hide("all_in_one_plot")
+#     hide("flip_tick_segment")
+#     hide("segments_checked")
+#   }
+# }
 
-              column(
-                6, radioButtons("unit", "Unit:",all_my_units))
-            )
-
-          )
-        )
-      )
+ui <- fluidPage(
+  
+ 
+  sidebarLayout(
+  
+    sidebarPanel(
+      # Selection of technologies in sidebar
+      sliderInput(
+        "iterations",
+        label = h3("Iteration Range"),
+        min = iteration_min, max = iteration_max,
+        value = c(iteration_min, iteration_max)),
+      radioButtons("unit_prefix", "Unit:",all_unit_prefixes),
+      hr(),
+  
+      checkboxGroupInput("technologies_checked", label = h3("Technologies"), 
+                         choices = all_technologies,
+                         selected = all_technologies),
+      hr(),
+      checkboxGroupInput("producers_checked", label = h3("Producers"), 
+                         choices = all_producers,
+                         selected = all_producers),
+      hr(),
+      checkboxGroupInput("fuels_checked", label = h3("Fuels"), 
+                         choices = all_fuels,
+                         selected = all_fuels),
+      hr(),
+      # Segments
+      checkboxInput(
+        inputId = "all_in_one_plot",
+        label = "Segments in one plot",
+        value = TRUE),
+      checkboxInput(
+        inputId = "flip_tick_segment",
+        label = "Flip tick and segment",
+        value = TRUE),
+      
+      checkboxGroupInput("segments_checked", label = h3("Segments"), 
+                         E:choices = all_segments,
+                         selected = all_segments)
+      
+    ), 
+  mainPanel(
+    navbarPage(
+      title = if_else(exists("app_title"), app_title, "EMLab2"), 
+      navbarMenu(
+        "Energy",
+        tabPanel("Capacity", default_mainPanel("Operational capacity", "operational_capacities_by_tech")),
+        tabPanel("Pipeline capacity", source("app_pages/tab_pipeline_capacity.R")$value),
+        tabPanel("Generation", source("app_pages/tab_generation.R")$value),
+        tabPanel("Powerplants", source("app_pages/tab_powerplants.R")$value)
+      ),
+      navbarMenu(
+        "Cash",
+        tabPanel("Cash", source("app_pages/tab_cash_producers.R")$value),
+        tabPanel("Cashflow", default_mainPanel("Cashflows", "cashflows"))
+        
+      ),
+      navbarMenu(
+        "Substances",
+        tabPanel("CO2 Price", source("app_pages/tab_co2_prices.R")$value),
+        tabPanel("CO2 Volumes", source("app_pages/tab_co2_volumes.R")$value),
+        tabPanel("Fuel Price", source("app_pages/tab_fuel_prices.R")$value),
+        tabPanel("Fuel Volume", source("app_pages/tab_fuel_volumes.R")$value)
+        
+      ),
+        navbarMenu(
+           "Spotmarket",
+           tabPanel("Average prices",default_mainPanel("Average Electricity prices","average_prices")),
+           tabPanel("Market volumes",default_mainPanel("Market volumes","average_volumes")),
+           tabPanel("Segment prices", source("app_pages/tab_spot_prices.R")$value),
+           tabPanel("Volume", source("app_pages/tab_segment_volume.R")$value),
+           tabPanel("Load", source("app_pages/tab_segment_load.R")$value),
+           tabPanel("Segment hours", default_mainPanel("Hours", "segment_hours"))
+           
     )
   )
-)
+)))
+  
+  
+    
+ 
 
 # App Server ---------------------------------------------------------------
 
@@ -101,18 +180,26 @@ server <- function(input, output) {
     toggle("shared_filter_panel")
   })
   
+  unit_factor <- reactive({ 
+    available_units %>%
+      filter(prefix == input$unit_prefix) %>%
+      pull(factor)
+    })
+  assign("unit_factor", unit_factor, envir = .GlobalEnv)
+  
+  all_plots <- names(plots)
+  
   # for each plot in plots[] produce plots of the namescheme plot_(data_name)_(average/by_iterations)
-  map(plots$meta, function(app_plot){
-    
+  map(all_plots, function(plot_name){
     
     # get average of all iterations plot
-    output[[paste("plot", app_plot$data_name, "average", sep = "_")]] <- renderPlot({
-      get_plot(app_plot$data_name, app_plot$y_label, input)
+    output[[paste("plot", plot_name, "average", sep = "_")]] <- renderPlot({
+      get_plot_filtered(plot_name, input)
     })
     
     # get by iterations plot
-    output[[paste("plot", app_plot$data_name, "by_iterations", sep = "_")]] <- renderPlot({
-      get_plot(app_plot$data_name, app_plot$y_label, input, FALSE)
+    output[[paste("plot", plot_name, "by_iterations", sep = "_")]] <- renderPlot({
+      get_plot_filtered(plot_name, input, average = FALSE)
     })
   })
 

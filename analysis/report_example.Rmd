@@ -16,7 +16,8 @@ knitr::opts_chunk$set(
   echo = FALSE, 
   message = FALSE, 
   warning = FALSE,
-  fig.width= 20
+  fig.width= 10,
+  fig.asp=0.5
   #out.width= 10
   )
 
@@ -35,14 +36,17 @@ theme_set(
 
 # All plots are defined in this script
 source(file = "app_scripts/main.R")
-rm(app_menu)
+
+
+
+# global vars
+filters <- list(
+  iterations = c(iteration_min,iteration_max),
+  unit_prefix = "M")
+# needed for report
+assign("global_unit",filters$unit, envir = .GlobalEnv)
 ```
 
-```{r vars}
-filters <- list(
-  iterations = c(1,10),
-  unit = "M")
-```
 
 
 ## Operational Capacity
@@ -54,33 +58,29 @@ In this market the capacity of all technologies develops like that
 
 filters$technologies_checked <- all_technologies
 
-get_plot(
-  app_plots$`Capacity operational`$data_name, 
-  app_plots$`Capacity operational`$y_label, 
-  filters
-)
+get_plot_filtered("operational_capacities_by_tech", filters)
 
 ```
 
-And only renewables develop like that
+And only renewables develop like that on average (top) and in each iteration (bottom)
 
 ```{r}
 
 # TODO Make sure that values are correct
-filters$technologies_checked <- c("Photovoltaic PGT", "Hydroelectric", "Onshore wind PGT", "Offshore wind PGT")
+filters$technologies_checked <- c("Photovoltaic PGT", "Hydroelectric", "Onshore wind PGT", "Offshore wind PGT") 
 
-get_plot(
-  app_plots$`Capacity operational`$data_name, 
-  "Renewable capacity ({unit_prefix}W)", 
-  filters
-)
+get_plot_filtered("operational_capacities_by_tech", filters)
+get_plot_filtered("operational_capacities_by_tech", filters,average = FALSE)
+
 
 ```
 
-Other plots can be added by adjusting the app_plots vector:
+## Other plots
+
+Other plots are in the vector plots[]. Use these names in get_plot_filtered()
 
 ```{r}
-#app_plots$`Capacity operational`
+names(plots)
 ```
 
 

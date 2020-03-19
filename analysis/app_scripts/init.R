@@ -65,6 +65,9 @@ available_units <- tribble(
   "Giga", "G", 1/1000,
   "Tera", "T", 1/1000000)
 
+all_unit_prefixes <- available_units$prefix
+names(all_unit_prefixes) <- available_units$name
+
 
 # Cleanup -----------------------------------------------------------------
 
@@ -78,19 +81,6 @@ rm(
   get_result_files
 )
 
-
-
-# Setting up all data and plot functions  -------------------------------
-
-# Container for data
-data <- list()
-
-# Containter for plot functions
-plots <- list(
-  average = list(),
-  iterations = list(),
-  meta = list()
-)
 
 
 

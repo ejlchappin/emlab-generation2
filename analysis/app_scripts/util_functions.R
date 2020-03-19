@@ -134,45 +134,60 @@ geom_area_shaded <- function(){
   geom_area(colour = "black", size = 0.2, alpha = 0.6)
 }
 
-get_plot <- function(data_name, y_label, input, average = TRUE){
+
+labs_default <- function(
+  x = "Tick (year)", 
+  y = waiver(), 
+  title = waiver(), 
+  subtitle = waiver(), 
+  caption = waiver(),
+  tag = waiver(), 
+  ...){
   
-  #Shared filter
-  # TODO simplify iteration stuff.
-  my_shared_filters <- get_shared_filters(input)
-  
-  # Units
-  unit_prefix <- input$unit
-  unit_factor <- available_units %>% 
-    filter(prefix == unit_prefix) %>% 
-    pull(factor)
-  
-  my_labs <- c(
-    "average" = "Average over all selected iterations",
-    "iterations" = "Selected iterations",
-    "x_label" = "Tick (year)",
-    "y_label" = glue(y_label)
+  labs(
+    x = x,
+    y = y,
+    title = title,
+    subtitle = subtitle,
+    caption = caption,
+    tag = tag,
+    ... = ...
   )
-  
-  if(average){
-    plot <- data[[data_name]] %>%
-      filter_by_shared_filters(my_shared_filters) %>% 
-      plots$average[[data_name]](unit_factor, input) +
-      labs(
-        subtitle = my_labs["average"],
-        x = my_labs["x_label"],
-        y = my_labs["y_label"]
+}
+
+default_subtitle <- function(average){
+  if_else(average, "Average over all selected iterations", "Selected iterations")
+}
+
+#' Gets either an average of by iterations plot defined in plots[] and applies common filters
+#'
+#' @param plot_name name of the plot
+#' @param input input
+#' @param average return a plot where iterations a averaged or single 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get_plot_filtered <- function(plot_name, input, average = TRUE){
+
+  if(plot_name %in% names(data)){
+
+    # TODO adjust for more flexibility
+    shared_filters <- list(
+        my_iterations = seq(from = input$iterations[1], to = input$iterations[2], by = 1)
+        #my_ticks
       )
+    
+    plot <- data[[plot_name]] %>%
+      filter(
+        iteration %in% shared_filters$my_iterations
+        ) %>% 
+      plots[[plot_name]](input, average)
+    
   } else {
-    plot <- data[[data_name]] %>%
-      filter_by_shared_filters(my_shared_filters) %>% 
-      plots$iterations[[data_name]](unit_factor, input) +
-      labs(
-        subtitle = my_labs["iterations"],
-        x = my_labs["x_label"],
-        y = my_labs["y_label"]
-      )
+    stop(glue("{plot_name} does not exist in data[] in main.R. Please choose a plot_name defined in plot AND data."))
   }
-  
   
   
   return(plot)
@@ -182,18 +197,31 @@ get_plot <- function(data_name, y_label, input, average = TRUE){
 
 # UI ----------------------------------------------------------------------
 
-default_mainPanel <- function(title, data_name){
+#' Default tab layout showing average and iterations
+#'
+#' @param title Title of tab
+#' @param data_name Data
+#' @param ... parameters passed to imageOutput 
+#'
+#' @return mainPanel()
+default_mainPanel <- function(title, data_name, ...){
   
-  mainPanel(
-    titlePanel(title),
-    tabsetPanel(
+  #mainPanel(
+  
+  
+  tabsetPanel(
+    
       tabPanel("Average",
-               plotOutput(paste_("plot", data_name, "average"))
+               tags$p(""),
+               tags$h3(title),
+               plotOutput(paste_("plot", data_name, "average"),...)
       ),
       tabPanel("Iterations",
-               plotOutput(paste_("plot", data_name, "by_iterations"))
+               tags$p(""),
+               tags$h3(title),
+               plotOutput(paste_("plot", data_name, "by_iterations"),...)
       )
-    )
+    #)
   )
   
 }
@@ -227,31 +255,19 @@ get_sinlge_variable <- function(data, variable){
 
 # Data Wrangling ----------------------------------------------------------
 
-
-#' Filters the data by the global filters iterations and ticks
-#'
-#' @param data 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-filter_by_shared_filters <- function(data, shared_filters){
-  data %>% 
-    filter(
-      iteration %in% shared_filters$my_iterations
-    )
-}
-
-# TODO, probably no function needed
-get_shared_filters <- function(input){
-  list(
-    my_iterations = seq(from = input$iterations[1], to = input$iterations[2], by = 1)
-    #my_ticks
-  )
-}
-
 paste_ <- function(...){
   paste(..., sep = "_")
 }
+
+
+# Report function ---------------------------------------------------------
+
+## Will be overwritten by reactive function in app.R for apps, so only used by reports
+unit_factor <- function(){ 
+  available_units %>%
+    filter(prefix == global_unit) %>%
+    pull(factor)
+}
+
+
 

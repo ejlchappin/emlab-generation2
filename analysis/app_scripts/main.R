@@ -1,6 +1,9 @@
 
 # Definition of data and plots 
 
+data <- list()
+plots <- list()
+
 # Operational capacity ----------------------------------------------------
 
 
@@ -10,56 +13,38 @@ data[["operational_capacities"]] <- raw_main_results %>%
 data[["operational_capacities_total"]] <- data$operational_capacities %>% 
   filter(key == "operational.capacity.powerplants")
 
+
 data[["operational_capacities_by_tech"]] <- data$operational_capacities %>% 
   filter(key != "operational.capacity.powerplants") %>% 
   separate(col = "key", into = c("var1", "var2", "market", "technology"), sep = "\\.") %>% 
   select(-var1, -var2)
 
+plots[["operational_capacities_by_tech"]] <- function(data, input, average = TRUE){
 
-plots$meta[["operational_capacities_by_tech"]] <- list(
-  data_name = "operational_capacities_by_tech",
-  y_label = "Capacity ({unit_prefix}W)"
-)
-
-#' Generates an area plot of the operational capacities of selected technologies.
-#' The mean is take over all iterations
-#'
-#' @param data data frame with data
-#' @param unit factor to divide unit
-#' @param input a list with the character vector *technologies_checked* listing all technologies to be plotted
-#'
-#' @return ggplot
-plots$average[["operational_capacities_by_tech"]] <- function(data, unit_factor, input){
+  data <- data %>%
+    filter(technology %in% input$technologies_checked) 
   
-  data %>%
-    filter(technology %in% input$technologies_checked) %>% 
-    group_by(tick, market, technology) %>% 
-    summarise(avg_capacity = mean(capacity)) %>% 
-    ggplot(mapping = aes(x = tick, y = avg_capacity * unit_factor, fill = technology)) +
-      geom_area_shaded() +
-      scale_fill_technologies() +
-      facet_grid(~ market)
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, market, technology) %>% 
+      summarise(avg_capacity = mean(capacity)) %>% 
+      ggplot(mapping = aes(x = tick, y = avg_capacity * unit_factor(), fill = technology)) +
+        facet_grid(~ market)
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = capacity * unit_factor(), fill = technology)) +
+        facet_wrap(iteration ~ market)
+  }
+  plot +
+    geom_area_shaded() +
+    scale_fill_technologies() + 
+    labs_default(
+      y = glue("Capacity ({input$unit_prefix}W)"),
+      subtitle = default_subtitle(average),
+      fill = "Technology")
 }
-
-#' Generates an area plot of the operational capacities of selected technologies.
-#' By Iterations
-#'
-#' @param data data frame with data
-#' @param unit factor to divide unit
-#' @param input a list with the character vector *technologies_checked* listing all technologies to be plotted
-#'
-#' @return ggplot
-plots$iterations[["operational_capacities_by_tech"]] <- function(data, unit_factor, input){
-  
-  data %>%
-    filter(technology %in% input$technologies_checked) %>% 
-    ggplot(mapping = aes(x = tick, y = capacity * unit_factor, fill = technology)) +
-      geom_area_shaded() +
-      scale_fill_technologies() +
-      facet_wrap(iteration ~ market)
-}
-
- 
 
 # Generation --------------------------------------------------------------
 
@@ -67,50 +52,33 @@ data[["generation_total"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "production", value = "generation") %>%
   separate(col = "key", into = c("var", "market", "technology"), sep = "\\.")
 
-plots$meta[["generation_total"]] = list(
-  data_name = "generation_total",
-  y_label = "Generation ({unit_prefix}Wh)"
-  )
+plots[["generation_total"]] <- function(data, input, average = TRUE){
   
-#' Generates an area plot of the generation of selected technologies.
-#' The mean is take over all iterations
-#'
-#' @param data data frame with data
-#' @param unit factor to divide unit
-#' @param input a list with the character vector *technologies_checked* listing all technologies to be plotted
-#'
-#' @return ggplot
-plots$average[["generation_total"]] <- function(data, unit_factor, input){
-
-  data %>%
-    filter(technology %in% input$technologies_checked_gen) %>% 
-    group_by(tick, market, technology) %>% 
-    summarise(avg_generation = mean(generation)) %>% 
-    ggplot(mapping = aes(x = tick, y = avg_generation * unit_factor, fill = technology)) +
-      geom_area_shaded() +
-      scale_fill_technologies() +
-      facet_grid(~ market)
-}
-
-#' Generates an area plot of the generation of selected technologies.
-#' By Iterations
-#'
-#' @param data data frame with data
-#' @param unit factor to divide unit
-#' @param input a list with the character vector *technologies_checked* listing all technologies to be plotted
-#'
-#' @return ggplot
-plots$iterations[["generation_total"]] <- function(data, unit_factor, input){
+  data <- data %>%
+    filter(technology %in% input$technologies_checked) 
   
-  data %>%
-    filter(technology %in% input$technologies_checked_gen) %>% 
-    ggplot(mapping = aes(x = tick, y = generation * unit_factor, fill = technology))  +
-      geom_area_shaded() +
-      scale_fill_technologies() +
-      facet_wrap(iteration ~ market)
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, market, technology) %>% 
+      summarise(avg_generation = mean(generation)) %>%
+      ggplot(mapping = aes(x = tick, y = avg_generation * unit_factor(), fill = technology)) +
+        facet_grid(~ market)
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = generation * unit_factor(), fill = technology)) +
+        facet_wrap(iteration ~ market)
+  }
+  
+  plot +
+    geom_area_shaded() +
+    scale_fill_technologies() + 
+    labs_default(
+      y = glue("Generation ({input$unit_prefix}Wh)"),
+      subtitle = default_subtitle(average),
+      fill = "Technology")
 }
-
-
 
 # Pipeline Capacity -------------------------------------------------------
 
@@ -119,98 +87,93 @@ data[["pipeline_capacities"]] <- raw_main_results %>%
   separate(col = "key", into = c("var1", "var2", "market"), sep = "\\.") %>%
   select(-var1, -var2)
 
-plots$meta[["pipeline_capacities"]] <- list(
-  data_name = "pipeline_capacities",
-  y_label = "Pipeline capacity ({unit_prefix}W)"
-)
-
-#' Generates a line plot of the total pipeline capacities.
-#' The mean is take over all iterations
-#'
-#' @param data data frame with data
-#' @param unit factor to divide unit
-#' @param input can be NULL
-#'
-#' @return ggplot
-plots$average[["pipeline_capacities"]] <- function(data, unit_factor, input){
+plots[["pipeline_capacities"]] <- function(data, input, average = TRUE){
   
-  data %>%
-    group_by(tick, market) %>% 
-    summarise(avg_capacity = mean(capacity)) %>% 
-    ggplot(mapping = aes(x = tick, y = avg_capacity * unit_factor)) +
-    geom_line() +
-    scale_fill_technologies() +
-    facet_grid(~ market)
-}
-
-#' Generates a line plot of the total pipeline capacities
-#' By Iterations
-#'
-#' @param data data frame with data
-#' @param unit factor to divide unit
-#' @param input can be NULL
-#'
-#' @return ggplot
-plots$iterations[["pipeline_capacities"]] <- function(data, unit_factor, input){
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, market) %>% 
+      summarise(avg_capacity = mean(capacity)) %>% 
+      ggplot(mapping = aes(x = tick, y = avg_capacity * unit_factor())) +
+      facet_grid(~ market)
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = capacity * unit_factor())) +
+      facet_wrap(iteration ~ market)
+  }
   
-  data %>%
-    ggplot(mapping = aes(x = tick, y = capacity * unit_factor)) +
+  plot +
     geom_line() +
-    scale_fill_technologies() +
-    facet_wrap(iteration ~ market)
+    labs_default(
+      y = glue("Pipeline capacity ({input$unit_prefix}W)"),
+      subtitle = default_subtitle(average),
+      fill = "Technology")
 }
-
 
 
 # Cash --------------------------------------------------------------------
 
-
 data[["cash_by_producers"]] <- raw_main_results %>%
   get_data_by_prefix("cash", value = "cash") %>%
   separate(col = key, into = c("var", "producer"), sep = "\\.")
-  
-plots$meta[["cash_by_producers"]] <- list(
-    data_name = "cash_by_producers",
-    y_label = "Cash (EUR)"
-  )
 
-#' Generates a line plot of the total cash by producers
-#' The mean is take over all iterations
-#'
-#' @param data data frame with data
-#' @param unit factor to divide unit
-#' @param input a list with the character vector *producers_checked* listing all technologies to be plotted
-#'
-#' @return ggplot
-plots$average[["cash_by_producers"]] <- function(data, unit_factor, input){
+plots[["cash_by_producers"]] <- function(data, input, average = TRUE){
   
-  data %>%
-    filter(producer %in% input$producers_checked) %>% 
-    group_by(tick, producer) %>% 
-    summarise(avg_cash = mean(cash)) %>% 
-    ggplot(mapping = aes(x = tick, y = avg_cash * unit_factor, color = producer)) +
-    geom_line() +
-    scale_color_custom("producer_colors")
-}
-
-#' Generates a line plot of the total cash by producers
-#' By Iterations
-#'
-#' @param data data frame with data
-#' @param unit factor to divide unit
-#' @param input a list with the character vector *producers_checked* listing all technologies to be plotted
-#'
-#' @return ggplot
-plots$iterations[["cash_by_producers"]] <- function(data, unit_factor, input){
+  data <- data %>%
+    filter(producer %in% input$producers_checked)
+    
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, producer) %>%
+      summarise(avg_cash = mean(cash)) %>%
+      ggplot(mapping = aes(x = tick, y = avg_cash * unit_factor(), color = producer))
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = cash * unit_factor(), color = producer)) +
+      facet_wrap( ~ iteration)
+  }
   
-  data %>%
-    filter(producer %in% input$producers_checked) %>% 
-    ggplot(mapping = aes(x = tick, y = cash * unit_factor, color = producer)) +
+  plot +
     geom_line() +
     scale_color_custom("producer_colors") +
-    facet_wrap( ~ iteration)
+    labs_default(
+        y = "Cash (EUR)",
+        subtitle = default_subtitle(average),
+        color = "Producer")
 }
 
+# Cashflow --------------------------------------------------------------------
+
+data[["cashflows"]] <- raw_main_results %>%
+  get_data_by_prefix("cashflow", value = "cash") %>%
+  separate(col = key, into = c("var", "type"), sep = "\\.") %>% 
+  select(-var)
+
+plots[["cashflows"]] <- function(data, input, average = TRUE){
+  
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, type) %>%
+      summarise(avg_cash = mean(cash)) %>%
+      ggplot(mapping = aes(x = tick, y = avg_cash * unit_factor(), color = type))
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = cash * unit_factor(), color = type)) +
+      facet_wrap( ~ iteration)
+  }
+  
+  plot +
+    geom_line() +
+    #scale_color_custom("producer_colors") +
+    labs_default(
+      y = "Cashflow (EUR)",
+      subtitle = default_subtitle(average))
+}
 
 
 # Power plants ------------------------------------------------------------
@@ -218,42 +181,27 @@ plots$iterations[["cash_by_producers"]] <- function(data, unit_factor, input){
 data[["nr_powerplants"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "nr.of.powerplants", value = "N", suffix = "") %>%
   select(-key)
-  
-plots$meta[["nr_powerplants"]] <- list(
-    data_name = "nr_powerplants",
-    y_label = "Nr of powerplants")
 
-#' Generates a line plot of the nr of total powerplants
-#' The mean is taken over all iterations
-#'
-#' @param data data frame with data
-#' @param unit (not used)
-#' @param input (not used)
-#'
-#' @return ggplot
-plots$average[["nr_powerplants"]] <- function(data, unit_factor, input){
+plots[["nr_powerplants"]] <- function(data, input, average = TRUE){
+    
+    if(average){
+      # Average over all iterations
+      plot <- data %>% 
+        group_by(tick) %>%
+        summarise(avg = mean(N)) %>%
+        ggplot(mapping = aes(x = tick, y = avg))
+    } else {
+      # By Iterations
+      plot <- data %>%
+        ggplot(mapping = aes(x = tick, y = N)) +
+        facet_wrap( ~ iteration)
+    }
   
-  data %>%
-    group_by(tick) %>% 
-    summarise(avg = mean(N)) %>% 
-    ggplot(mapping = aes(x = tick, y = avg)) +
-      geom_line()
-}
-
-#' Generates a line plot of the nr of total powerplants
-#' By Iterations
-#'
-#' @param data data frame with data
-#' @param unit (not used)
-#' @param input (not used)
-#' 
-#' @return ggplot
-plots$iterations[["nr_powerplants"]] <- function(data, unit_factor, input){
-  
-  data %>%
-    ggplot(mapping = aes(x = tick, y = N)) +
+  plot +
     geom_line() +
-    facet_wrap(~ iteration)
+    labs_default(
+      y = "Nr of powerplants",
+      subtitle = default_subtitle(average))
 }
 
 
@@ -266,48 +214,33 @@ data[["fuel_prices"]] <- raw_main_results %>%
   separate(col = "key", into = c("var1","var2", "fuel"), sep = "\\.") %>%
   select(-var1, -var2)
 
-
-plots$meta[["fuel_prices"]] = list(
-    data_name = "fuel_prices",
-    y_label = "Price (EUR)"
-)
-
-#' Generates a line plot of fuel prices
-#' The mean is take over all iterations
-#'
-#' @param data data frame with data
-#' @param unit (not used)
-#' @param input a list with the character vector *fuels_checked* listing all fuels to be plotted
-#'
-#' @return ggplot
-plots$average[["fuel_prices"]] <- function(data, unit_factor, input){
+plots[["fuel_prices"]] <- function(data, input, average = TRUE){
   
-  data %>%
-    filter(fuel %in% input$fuels_checked) %>% 
-    group_by(tick, fuel) %>% 
-    summarise(avg_price = mean(price)) %>% 
-    ggplot(mapping = aes(x = tick, y = avg_price, color = fuel)) +
-    geom_line() +
-    scale_color_custom("fuel_colors")
-}
-
-#' Generates a line plot of fuel prices
-#' By Iterations
-#'
-#' @param data data frame with data
-#' @param unit (not used)
-#' @param input a list with the character vector *fuels_checked* listing all fuels to be plotted
-#'
-#' @return ggplot
-plots$iterations[["fuel_prices"]] <- function(data, unit_factor, input){
+  data <- data %>%
+    filter(fuel %in% input$fuels_checked)
+    
+    if(average){
+      # Average over all iterations
+      plot <- data %>% 
+        group_by(tick, fuel) %>%
+        summarise(avg_price = mean(price)) %>%
+        ggplot(mapping = aes(x = tick, y = avg_price, color = fuel))
+    } else {
+      # By Iterations
+      plot <- data %>%
+        ggplot(mapping = aes(x = tick, y = price, color = fuel)) +
+        facet_wrap( ~ iteration)
+    }
   
-  data %>%
-    filter(fuel %in% input$fuels_checked) %>% 
-    ggplot(mapping = aes(x = tick, y = price, color = fuel)) +
+  plot +
     geom_line() +
     scale_color_custom("fuel_colors") +
-    facet_wrap( ~ iteration)
+    labs_default(
+      y = "Price (EUR)",
+      subtitle = default_subtitle(average),
+      color = "Fuel")
 }
+
 
 # Fuel Volumes ------------------------------------------------------------
 
@@ -316,96 +249,63 @@ data[["fuel_volumes"]] <- raw_main_results %>%
   separate(col = "key", into = c("var1","var2", "fuel"), sep = "\\.") %>%
   select(-var1, -var2)
 
-
-plots$meta[["fuel_volumes"]] = list(
-  data_name = "fuel_volumes",
-  y_label = "Volume"
-)
-
-#' Generates a line plot of fuel volumes
-#' The mean is take over all iterations
-#'
-#' @param data data frame with data
-#' @param unit (not used)
-#' @param input a list with the character vector *fuels_checked_vol* listing all fuels to be plotted
-#'
-#' @return ggplot
-plots$average[["fuel_volumes"]] <- function(data, unit_factor, input){
+plots[["fuel_volumes"]] <- function(data, input, average = TRUE){
   
-  data %>%
-    filter(fuel %in% input$fuels_checked_vol) %>% 
-    group_by(tick, fuel) %>% 
-    summarise(avg_volume = mean(volume)) %>% 
-    ggplot(mapping = aes(x = tick, y = avg_volume, color = fuel)) +
-    geom_line() +
-    scale_color_custom("fuel_colors")
-}
-
-#' Generates a line plot of fuel prices
-#' By Iterations
-#'
-#' @param data data frame with data
-#' @param unit (not used)
-#' @param input a list with the character vector *fuels_checked_vol* listing all fuels to be plotted
-#'
-#' @return ggplot
-plots$iterations[["fuel_volumes"]] <- function(data, unit_factor, input){
+  data <- data %>%
+    filter(fuel %in% input$fuels_checked)
   
-  data %>%
-    filter(fuel %in% input$fuels_checked_vol) %>% 
-    ggplot(mapping = aes(x = tick, y = volume, color = fuel)) +
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, fuel) %>%
+      summarise(avg_volume = mean(volume)) %>%
+      ggplot(mapping = aes(x = tick, y = avg_volume, color = fuel))
+    
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = volume, color = fuel)) +
+      facet_wrap( ~ iteration)
+  }
+  
+  plot +
     geom_line() +
     scale_color_custom("fuel_colors") +
-    facet_wrap( ~ iteration)
+    labs_default(
+      y = "Volume",
+      subtitle = default_subtitle(average),
+      color = "Fuel")
 }
 
-
-
+ 
 # CO2 Prices -------------------------------------------------------------
 
 data[["CO2_prices"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "price.co2", value = "price", suffix = "") %>%
   select(-key)
 
+plots[["CO2_prices"]] <- function(data, input, average = TRUE){
 
-plots$meta[["CO2_prices"]] = list(
-  data_name = "CO2_prices",
-  #title = "CO2 Prices",
-  y_label = "Price (EUR)"
-)
-
-#' Generates a line plot of fuel prices
-#' The mean is take over all iterations
-#'
-#' @param data data frame with data
-#' @param unit (not used)
-#' @param input (not used)
-#'
-#' @return ggplot
-plots$average[["CO2_prices"]] <- function(data, unit_factor, input){
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick) %>%
+      summarise(avg_price = mean(price)) %>%
+      ggplot(mapping = aes(x = tick, y = avg_price))
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = price)) +
+      facet_wrap( ~ iteration)
+  }
   
-  data %>%
-    group_by(tick) %>% 
-    summarise(avg_price = mean(price)) %>% 
-    ggplot(mapping = aes(x = tick, y = avg_price)) +
-    geom_line()
-}
-
-#' Generates a line plot of fuel prices
-#' By Iterations
-#'
-#' @param data data frame with data
-#' @param unit (not used)
-#' @param input (not used)
-#'
-#' @return ggplot
-plots$iterations[["CO2_prices"]] <- function(data, unit_factor, input){
-  
-  data %>%
-    ggplot(mapping = aes(x = tick, y = price)) +
+  plot +
     geom_line() +
-    facet_wrap( ~ iteration)
+    labs_default(
+      y = "Price (EUR)",
+      subtitle = default_subtitle(average))
 }
+
 
 
 # CO2 Volumes ------------------------------------------------------------
@@ -415,44 +315,332 @@ data[["CO2_volumes"]] <- raw_main_results %>%
   separate(col = "key", into = c("var1","var2", "type"), sep = "\\.") %>%
   select(-var1, -var2)
 
-plots$meta[["CO2_volumes"]] = list(
-  data_name = "CO2_volumes",
-  y_label = "Volume [t]"
-)
-
-#' Generates a line plot of CO2 volumes
-#' The mean is take over all iterations
-#'
-#' @param data data frame with data
-#' @param unit (not used)
-#' @param input (not used)
-#'
-#' @return ggplot
-plots$average[["CO2_volumes"]] <- function(data, unit_factor, input){
+plots[["CO2_volumes"]] <- function(data, input, average = TRUE){
   
-  data %>%
-    group_by(tick, type) %>% 
-    summarise(avg_volume = mean(volume)) %>% 
-    ggplot(mapping = aes(x = tick, y = avg_volume, linetype = type)) +
-    geom_line()
-}
-
-#' Generates a line plot of CO2 volumes
-#' By Iterations
-#'
-#' @param data data frame with data
-#' @param unit (not used)
-#' @param input a list with the character vector *fuels_checked_vol* listing all fuels to be plotted
-#'
-#' @return ggplot
-plots$iterations[["CO2_volumes"]] <- function(data, unit_factor, input){
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, type) %>%
+      summarise(avg_volume = mean(volume)) %>%
+      ggplot(mapping = aes(x = tick, y = avg_volume, linetype = type)) 
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = volume, linetype = type)) +
+      facet_wrap( ~ iteration)
+    
+  }
   
-  data %>%
-    group_by(tick, type) %>% 
-    ggplot(mapping = aes(x = tick, y = volume, linetype = type)) +
+  plot +
     geom_line() +
-    facet_wrap( ~ iteration)
+    labs_default(
+      y = "Volume [t]",
+      subtitle = default_subtitle(average))
 }
+
+
+
+
+
+# Market Average prices -------------------------------------------------------------
+
+
+data[["average_prices"]] <- raw_main_results %>%
+  get_data_by_prefix(col_prefix = "market.average price", value = "price") %>%
+  separate(col = "key", into = c("var1","var2", "market"), sep = "\\.") %>%
+  select(-var1, -var2)
+
+plots[["average_prices"]] <- function(data, input, average = TRUE){
+  
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, market) %>%
+      summarise(avg_price = mean(price)) %>% 
+      ggplot(mapping = aes(x = tick, y = avg_price / unit_factor())) +
+      facet_grid( ~ market)
+
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = price / unit_factor())) +
+      facet_wrap(iteration ~ market)
+    
+  }
+  
+  plot +
+    geom_line() +
+    labs_default(
+      y = glue("Electricity price (EUR/{input$unit_prefix}Wh)"),
+      subtitle = default_subtitle(average))
+}
+
+# Market Average Volumes -------------------------------------------------------------
+
+
+data[["average_volumes"]] <- raw_main_results %>%
+  get_data_by_prefix(col_prefix = "market.volume", value = "volume") %>%
+  separate(col = "key", into = c("var1","var2", "market"), sep = "\\.") %>%
+  select(-var1, -var2)
+
+plots[["average_volumes"]] <- function(data, input, average = TRUE){
+  
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, market) %>%
+      summarise(avg_volume = mean(volume)) %>% 
+      ggplot(mapping = aes(x = tick, y = avg_volume)) +
+      facet_grid( ~ market)
+    
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = volume)) +
+      facet_wrap(iteration ~ market)
+    
+  }
+  
+  plot +
+    geom_line() +
+    labs_default(
+      y = glue("Market Volume"),
+      subtitle = default_subtitle(average))
+}
+
+# Segment prices -------------------------------------------------------------
+
+# ..   segment.price.DutchMarket.segment20 = col_number(),
+# ..   segment.hours.DutchMarket.segment20 = col_number(),
+# ..   segment.load.DutchMarket.segment20 = col_number(),
+# ..   segment.volume.DutchMarket.segment20
+
+# structure for segments is always the same:
+
+get_segment_data <- function(data, segment_value){
+
+  data %>%
+    get_data_by_prefix(col_prefix = paste0("segment.",segment_value), value = segment_value) %>%
+    separate(col = "key", into = c("var1","var2", "market", "segment"), sep = "\\.") %>%
+    mutate(
+      segment = as.numeric(str_remove(segment, "segment")),
+      segment = as.factor(segment)
+    ) %>%
+    select(-var1, -var2)
+
+}
+
+data[["segment_prices"]] <- raw_main_results %>%
+  get_segment_data(segment_value = "price")
+
+plots[["segment_prices"]] <- function(data, input, average = TRUE){
+  
+  data <- data %>%
+    filter(segment %in% input$segments_checked)
+  
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, market, segment) %>%
+      summarise(avg_price = mean(price)) %>% 
+      ggplot(mapping = aes(x = tick, y = avg_price / unit_factor(), color = segment)) +
+
+    if(input$all_in_one_plot){
+      plot <- plot +
+        facet_grid( ~ market)
+      
+    } else {
+      plot <- plot +
+        facet_grid(segment ~ market)
+    }
+    
+    
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = price, color = segment)) +
+      facet_grid(segment + iteration ~ market)
+    
+  }
+  
+  plot +
+    geom_line() +
+    labs_default(
+      y = glue("Electricity price (EUR/{input$unit_prefix}Wh)"),
+      subtitle = default_subtitle(average))
+}
+
+
+# Electricity load -------------------------------------------------------------
+
+data[["segment_load"]] <- raw_main_results %>%
+  get_segment_data(segment_value = "load")
+
+plots[["segment_load"]] <- function(data, input, average = TRUE){
+  
+  data <- data %>%
+    filter(segment %in% input$segments_checked)
+
+  label_color = "Segment"
+  label_x = "Tick (year)"
+    
+  if(average){
+    # Average over all iterations
+    data <- data %>% 
+      group_by(tick, market, segment) %>%
+      summarise(avg_load = mean(load)) %>% 
+      ungroup()
+
+      if(input$all_in_one_plot){
+        
+        if(input$flip_tick_segment){
+          
+          plot <- data %>%
+            mutate(
+              segment = as.numeric(segment),
+              tick = as.factor(tick)
+            ) %>%
+            ggplot(mapping = aes(x = segment, y = avg_load * unit_factor(), color = tick))
+          
+          label_color = "Tick (Year)"
+          label_x = "Segment"
+          
+        } else {
+          plot <- data %>%
+            ggplot(mapping = aes(x = tick, y = avg_load * unit_factor(), color = segment))
+        }
+        
+        plot <- plot +
+          facet_wrap(~ market)
+        
+        
+      } else {
+        
+        if(input$flip_tick_segment){
+          plot <- data %>%
+            mutate(
+              segment = as.numeric(segment),
+              tick = as.factor(tick)
+            ) %>%
+            ggplot(mapping = aes(x = segment, y = avg_load * unit_factor(), color = tick)) +
+            facet_wrap(market ~ tick)
+          
+          label_color = "Tick (Year)"
+          label_x = "Segment"
+          
+        } else {
+          plot <- data %>%
+            ggplot(mapping = aes(x = tick, y = avg_load * unit_factor(), color = segment)) +
+            facet_grid(segment ~ market)
+        }
+      }
+    
+    
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = load * unit_factor(), color = segment)) +
+      geom_line() +
+      facet_wrap(iteration ~ market)
+  }
+  
+  plot +
+    geom_line() +
+    labs_default(
+      y = glue("Load ({input$unit_prefix}Wh)"),
+      x = label_x,
+      color = label_color,
+      subtitle = default_subtitle(average))
+}
+
+
+
+# Segment volume -------------------------------------------------------------
+
+data[["segment_volume"]] <- raw_main_results %>%
+  get_segment_data(segment_value = "volume")
+
+
+plots[["segment_volume"]] <- function(data, input, average = TRUE){
+  
+  data <- data %>%
+    filter(segment %in% input$segments_checked)
+    
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, market, segment) %>%
+      summarise(avg_volume = mean(volume)) %>% 
+      ggplot(mapping = aes(x = tick, y = avg_volume, color = segment))
+      
+      if(input$all_in_one_plot){
+        plot <- plot +
+          facet_grid( ~ market)
+        
+      } else {
+        plot <- plot +
+          facet_grid(segment ~ market)
+      }
+    
+    
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = volume, color = segment)) +
+      facet_grid(market ~ iteration)
+    
+  }
+  
+  plot +
+    geom_line() +
+    labs_default(
+      y = glue("Volume (??)"),
+      subtitle = default_subtitle(average))
+}
+
+# Segment volume -------------------------------------------------------------
+
+data[["segment_hours"]] <- raw_main_results %>%
+  get_segment_data(segment_value = "hours")
+
+
+plots[["segment_hours"]] <- function(data, input, average = TRUE){
+  
+  data <- data %>%
+    filter(segment %in% input$segments_checked)
+  
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, market, segment) %>%
+      summarise(avg_hours = mean(hours)) %>% 
+      ggplot(mapping = aes(x = tick, y = avg_hours, color = segment))
+    
+    if(input$all_in_one_plot){
+      plot <- plot +
+        facet_grid( ~ market)
+      
+    } else {
+      plot <- plot +
+        facet_grid(segment ~ market)
+    }
+    
+    
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = hours, color = segment)) +
+      facet_grid(market ~ iteration)
+    
+  }
+  
+  plot +
+    geom_line() +
+    labs_default(
+      y = glue("Hours (??)"),
+      subtitle = default_subtitle(average))
+}
+
 
 # Variables for app  ------------------------------------------------------------
 
@@ -462,11 +650,13 @@ plots$iterations[["CO2_volumes"]] <- function(data, unit_factor, input){
 all_technologies <- get_sinlge_variable(data$operational_capacities_by_tech, technology)
 all_producers <- get_sinlge_variable(data$cash_by_producers, producer)
 all_fuels <- get_sinlge_variable(data$fuel_prices, fuel)
+all_segments <- get_sinlge_variable(data$segment_prices, segment)
+
 
 technology_colors <- set_colors(all_technologies, "custom_technology_colors", "technology_color_palette")
 producer_colors <- set_colors(all_producers, "custom_producer_colors", "producer_color_palette")
 fuel_colors <- set_colors(all_fuels, "custom_fuel_colors", "fuel_color_palette")
+#segment_colors <- set_colors(all_segments, "custom_segment_colors", "segment_color_palette")
 
-all_my_units <- available_units$prefix
-names(all_my_units) <- available_units$name
+
 
