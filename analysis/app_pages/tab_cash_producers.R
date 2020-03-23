@@ -1,1 +1,0 @@
-default_mainPanel("Cash by producers", "cash_by_producers")

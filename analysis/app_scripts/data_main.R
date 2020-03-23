@@ -21,7 +21,11 @@ data[["operational_capacities_by_tech"]] <- data$operational_capacities %>%
 plots[["operational_capacities_by_tech"]] <- function(data, input, average = TRUE){
 
   data <- data %>%
-    filter(technology %in% input$technologies_checked) 
+    filter(technology %in% input$technologies_checked)
+  
+  if(length(input$technologies_checked)==0) {
+    stop("Please select at least one filter value")
+  }
   
   if(average){
     # Average over all iterations

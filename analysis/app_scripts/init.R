@@ -21,7 +21,14 @@ source(file = "app_scripts/util_functions.R")
 
 result_files <- get_result_files(emlab_results_directory)
 latest_files <- get_latest_result_files(result_files)
-  
+
+prefix_list <- result_files %>% 
+  arrange(desc(date)) %>% 
+  select(id, scenario) %>% 
+  distinct() %>% 
+  mutate(prefix = paste(id, scenario, sep ="-"))
+
+
 # TODO selection, maybe in Shiny app
 #id = "1583329851748"
 #scenario = "Scenario_NL"
@@ -34,8 +41,11 @@ scenario <- latest_files %>%
   slice(1) %>% 
   pull(scenario)
 
-warning("Analysing latest result files")
+file_loaded_text <- glue("Analysing latest result file, id: {id} and scenario {scenario}")
 prefix = paste(id, scenario, sep = "-") 
+
+warning(file_loaded_text)
+
 
 
 # Get raw results ---------------------------------------------------------
@@ -88,5 +98,14 @@ plots <- list()
 source(file = "app_scripts/data_main.R")
 source(file = "app_scripts/data_marketinformation.R")
 
+
+# theme for all ggplots
+theme_set(
+  theme_bw(base_size = 13) + 
+    theme(
+      #legend.title=element_blank(),
+      legend.spacing.x = unit(0.1, 'cm')
+    )
+)
 
 

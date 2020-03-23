@@ -278,6 +278,16 @@ get_vars_from_multiple_columns <- function(data, prefix, vars, value){
   
 }
 
+get_var_from_single_column <- function(data, prefix, value){
+  
+  data <- data %>% 
+    get_data_by_prefix(col_prefix = prefix, value = value, suffix = "") %>% 
+    select(-key)
+  
+  return(data)
+  
+}
+
 get_sinlge_variable <- function(data, variable){
   
   variable <- enquo(variable)

@@ -34,8 +34,8 @@ plots[["marketinfo_segment_energy"]] <- function(data, input, average = TRUE){
       y = glue("Expected power ({input$unit_prefix}Wh)"),
       x = "Segment",
       subtitle = default_subtitle(average),
-      color = "Type",
-      linetype = "Energy proudcer")
+      linetype = "Type",
+      color = "Energy proudcer")
 }
 
 # prices  ----------------------------------------------------
@@ -43,10 +43,12 @@ plots[["marketinfo_segment_energy"]] <- function(data, input, average = TRUE){
 data[["marketinfo_prices"]] <- raw_marketinformation_results %>% 
   get_vars_from_multiple_columns(prefix = "price", vars = "type", value = "price")
 
-plots[["marketinfo_prices"]] <- function(data, input, average = TRUE){
+
+get_marketinfo_prices <- function(data, input, average = TRUE){
   
   data <- data %>%
-    filter(producer %in% input$producers_checked)
+    filter(
+      producer %in% input$producers_checked)
   
   if(average){
     # Average over all iterations
@@ -64,14 +66,63 @@ plots[["marketinfo_prices"]] <- function(data, input, average = TRUE){
   }
   
   plot +
-    geom_line(mapping = aes(x = segment, linetype = type, color = producer)) +
+    geom_line(mapping = aes(x = segment, color = producer)) +
     scale_color_custom("producer_colors") +
     labs_default(
       y = "Price (Euro)",
       x = "Segment",
       subtitle = default_subtitle(average),
-      color = "Price type",
-      linetype = "Energy proudcer")
+      color = "Energy proudcer")
+}
+
+
+data[["marketinfo_electricity_prices"]] <- data[["marketinfo_prices"]] %>% 
+  filter(type ==  "electricity")
+
+
+plots[["marketinfo_electricity_prices"]] <- function(data, input, average = TRUE){
+  get_marketinfo_prices(data, input, average)
+}
+
+
+data[["marketinfo_co2_prices"]] <- data[["marketinfo_prices"]] %>% 
+  filter(type ==  "co2")
+
+plots[["marketinfo_co2_prices"]] <- function(data, input, average = TRUE){
+  get_marketinfo_prices(data, input, average)
+}
+
+
+
+# available capacity ------------------------------------------------------
+
+data[["marketinfo_capacity_available"]] <- raw_marketinformation_results %>% 
+  get_var_from_single_column(prefix = "capacity.available", value = "capacity")
+
+plots[["marketinfo_capacity_available"]] <- function(data, input, average = TRUE){
+  
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, market, producer, segment) %>% 
+      summarise(avg_capacity = mean(capacity)) %>% 
+      ggplot(mapping = aes(y = avg_capacity  * unit_factor())) +
+      facet_wrap(~ tick)
+    
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(y = capacity  * unit_factor())) +
+      facet_grid(iteration ~ tick)
+  }
+  
+  plot +
+    geom_line(mapping = aes(x = segment, color = producer)) +
+    scale_color_custom("producer_colors") +
+    labs_default(
+      y = glue("Expected available capacity ({input$unit_prefix}W)"),
+      x = "Segment",
+      subtitle = default_subtitle(average))
 }
 
 
