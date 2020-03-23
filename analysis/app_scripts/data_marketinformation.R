@@ -101,6 +101,10 @@ data[["marketinfo_capacity_available"]] <- raw_marketinformation_results %>%
 
 plots[["marketinfo_capacity_available"]] <- function(data, input, average = TRUE){
   
+  data <- data %>%
+    filter(
+      producer %in% input$producers_checked)
+  
   if(average){
     # Average over all iterations
     plot <- data %>% 
