@@ -9,6 +9,8 @@ output:
 
 This report show that the results can exported in an [R Markdown](http://rmarkdown.rstudio.com) Notebook.
 
+Please remove example_ and rename to report_(yourname). Your own config files are currently ignored in .gitignore.
+
 
 ```{r setup, include=FALSE}
 

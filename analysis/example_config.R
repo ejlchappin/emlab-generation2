@@ -1,4 +1,5 @@
 
+# Please remove example_ and rename to config_(yourname). Your own config files are currently ignored in .gitignore
 
 # Directories -------------------------------------------------------------
 
