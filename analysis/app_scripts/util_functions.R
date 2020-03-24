@@ -138,8 +138,8 @@ scale_color_custom <- function(manual_color_variable){
 
 
 
-geom_area_shaded <- function(){
-  geom_area(colour = "black", size = 0.2, alpha = 0.6)
+geom_area_shaded <- function(...){
+  geom_area(..., colour = "black", size = 0.2, alpha = 0.6)
 }
 
 

@@ -22,4 +22,3 @@ source(file = "app_scripts/init.R")
 
 # Run the application (ui and server are in the folder emlab)
 runApp("emlab")
-

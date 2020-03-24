@@ -40,11 +40,17 @@ public class DefaultCSVConverterHeaders extends AbstractCSVConverter {
         row.add("tick");
         row.add("duration");
         row.add("nr.of.powerplants");
-        row.add("operational.capacity.powerplants");
+        row.add("powerplants.operational.capacity");
         for (ElectricitySpotMarket market : schedule.reps.electricitySpotMarkets) {
             for (PowerGeneratingTechnology tech : schedule.reps.powerGeneratingTechnologies) {
-                row.add("operational.capacity." + market + "." + tech);
+                row.add("operational.capacity." + market + "." + tech + ".all" );
+                
+                for (EnergyProducer agent : schedule.reps.energyProducers) {
+                    row.add("operational.capacity." + market + "." + tech  + "." + agent.getName());
+                }
+                
                 row.add("production." + market + "." + tech);
+
             }
         }
         for (ElectricitySpotMarket market : schedule.reps.electricitySpotMarkets) {

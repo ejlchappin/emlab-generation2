@@ -7,47 +7,80 @@ meta_cols <- c("iteration", "tick")
 
 
 data[["operational_capacities"]] <- raw_main_results %>% 
-  get_data_by_prefix("operational.capacity", value = "capacity")
-
-data[["operational_capacities_total"]] <- data$operational_capacities %>% 
-  filter(key == "operational.capacity.powerplants")
+  get_var_from_single_column("powerplants.operational.capacity", value = "capacity")
 
 
-data[["operational_capacities_by_tech"]] <- data$operational_capacities %>% 
-  filter(key != "operational.capacity.powerplants") %>% 
-  separate(col = "key", into = c("var1", "var2", "market", "technology"), sep = "\\.") %>% 
-  select(-var1, -var2)
+data[["operational_capacities_by_tech_and_producer"]] <- raw_main_results %>% 
+  get_vars_from_multiple_columns(
+    prefix = "operational.capacity", 
+    vars = c("market", "technology", "producer"), 
+    value = "capacity")
+
+data[["operational_capacities_by_tech"]] <- data[["operational_capacities_by_tech_and_producer"]] %>% 
+  filter(producer == "all")
+  
 
 plots[["operational_capacities_by_tech"]] <- function(data, input, average = TRUE){
 
   data <- data %>%
     filter(technology %in% input$technologies_checked)
   
-  if(length(input$technologies_checked)==0) {
-    stop("Please select at least one filter value")
-  }
-  
   if(average){
     # Average over all iterations
     plot <- data %>% 
       group_by(tick, market, technology) %>% 
       summarise(avg_capacity = mean(capacity)) %>% 
-      ggplot(mapping = aes(x = tick, y = avg_capacity * unit_factor(), fill = technology)) +
+      ggplot(mapping = aes(y = avg_capacity * unit_factor())) +
         facet_grid(~ market)
   } else {
     # By Iterations
     plot <- data %>%
-      ggplot(mapping = aes(x = tick, y = capacity * unit_factor(), fill = technology)) +
+      ggplot(mapping = aes(y = capacity * unit_factor())) +
         facet_wrap(iteration ~ market)
   }
   plot +
-    geom_area_shaded() +
+    geom_area_shaded(mapping = aes(x = tick, fill = technology)) +
     scale_fill_technologies() + 
     labs_default(
       y = glue("Capacity ({input$unit_prefix}W)"),
       subtitle = default_subtitle(average),
       fill = "Technology")
 }
+
+
+data[["operational_capacities_by_producer"]] <- data[["operational_capacities_by_tech_and_producer"]] %>% 
+  filter(producer != "all")
+
+plots[["operational_capacities_by_producer"]] <- function(data, input, average = TRUE){
+  
+  data <- data %>%
+    filter(technology %in% input$technologies_checked) %>% 
+    filter(producer %in% input$producers_checked)
+  
+  
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, market, producer, technology) %>% 
+      summarise(avg_capacity = mean(capacity)) %>% 
+      ggplot(mapping = aes(y = avg_capacity * unit_factor())) +
+      facet_wrap(producer ~ market)
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(y = capacity * unit_factor())) +
+      facet_wrap(iteration ~ market + producer)
+  }
+  plot +
+    geom_area_shaded(mapping = aes(x = tick, fill = technology)) +
+    scale_fill_technologies() + 
+    labs_default(
+      y = glue("Capacity ({input$unit_prefix}W)"),
+      subtitle = default_subtitle(average),
+      fill = "Technology"
+      )
+}
+
 
 # Generation --------------------------------------------------------------
 
