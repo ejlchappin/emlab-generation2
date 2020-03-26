@@ -10,12 +10,13 @@
 #install.packages("shiny")
 #install.packages("shinyjs")
 #install.packages("shinydashboard")
+#install.packages("DT")
+#install.packages("RColorBrewer")
+#install.packages("plotly")
 
-
-remove(list = ls())
 
 library(shiny)
-library(shinyjs)
+#library(shinyjs)
 
 # In the init.R all results are read and common variables are prepared
 source(file = "app_scripts/init.R")

@@ -17,9 +17,20 @@ server <- function(input, output) {
   map(all_plots, function(plot_name){
     
     # get average of all iterations plot
-    output[[paste("plot", plot_name, sep = "_")]] <- renderPlot({
-      get_plot_filtered(plot_name, input, input$iteration_average)
+    
+    if(use_plotly){
+
+    output[[paste("plot", plot_name, sep = "_")]] <- renderPlotly({
+      plot <- get_plot_filtered(plot_name, input, input$iteration_average)
+      ggplotly(plot)
+      
     })
+    
+    } else {
+      output[[paste("plot", plot_name, sep = "_")]] <- renderPlot({
+        get_plot_filtered(plot_name, input, input$iteration_average)
+      })
+    }
     
     output$selected_single_plot <- renderPlot({
       get_plot_filtered(input$single_plot_selected, input, input$iteration_average)
@@ -31,12 +42,23 @@ server <- function(input, output) {
         str_to_title()
     })
     
-
-    
     # # get by iterations plot
     # output[[paste("plot", plot_name, "by_iterations", sep = "_")]] <- renderPlot({
     #   get_plot_filtered(plot_name, input, average = FALSE)
     # })
   })
-
+  
+  ## Log files and value boxes
+  
+  if(analyse_log){
+    log_table <- DT::datatable(emlab_log,  filter = list(position = 'top', clear = FALSE))
+  } else {
+    log_table <- tibble(info = "Logs analysis not activated in config.R.")
+ }
+  
+  output$dt_log_table = DT::renderDataTable({
+    log_table
+  })
+  
+  
 }

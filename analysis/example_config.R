@@ -1,11 +1,15 @@
 
 # Please remove example_ and rename to config_(yourname). Your own config files are currently ignored in .gitignore
 
-# Directories -------------------------------------------------------------
+# Directories and Files -------------------------------------------------------------
 
 # Set the file path to where your emlab result files are stored.
 # Use / throught and at the end
 emlab_results_directory <- "/Users/path/"
+
+# Comment to always load latest reporters and logs
+# Uncomment and specify to load specific reporters and logs
+#id_to_load <- "123456789"
 
 # Colors ------------------------------------------------------------------
 
@@ -37,4 +41,7 @@ fuel_color_palette <- "Dark2"
 # Misc --------------------------------------------------------------------
 
 app_title <- "EMLab2"
+
+# Analysing logs can take a long time!
+analyse_log <- FALSE
 

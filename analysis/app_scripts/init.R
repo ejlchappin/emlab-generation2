@@ -1,8 +1,8 @@
 
-library(tidyverse)
-library(glue)
-library(RColorBrewer)
 
+
+
+remove(list = ls())
 
 # Config ------------------------------------------------------------------
 
@@ -14,46 +14,88 @@ if(!file.exists(config_file)){
   source(file = config_file)
   
 }
+library(tidyverse)
+library(glue)
+library(RColorBrewer)
+library(DT)
+
+if(use_plotly){
+  library(plotly)
+}
+
+
 
 source(file = "app_scripts/util_functions.R")
 
 # Loading and preparing files ---------------------------------------------
 
-result_files <- get_result_files(emlab_results_directory)
-latest_files <- get_latest_result_files(result_files)
+reporter_files <- get_result_files(emlab_results_directory)
+log_files <- get_log_files(emlab_results_directory)
 
-prefix_list <- result_files %>% 
+prefix_list <- reporter_files %>% 
   arrange(desc(date)) %>% 
   select(id, scenario) %>% 
   distinct() %>% 
   mutate(prefix = paste(id, scenario, sep ="-"))
 
 
-# TODO selection, maybe in Shiny app
-#id = "1583329851748"
-#scenario = "Scenario_NL"
+files_to_analyse <- list()
 
-id <- latest_files %>% 
+# Get latest or selected one
+if(exists("id_to_load")){
+  files_to_analyse[["reporters"]] <- filter_selected_files(reporter_files, id_to_load)
+  files_to_analyse[["log"]] <- filter_selected_files(log_files, id_to_load)
+  file_loaded_text <- "Analysing config-file selected files: id = {id} and scenario = {scenario}."
+  
+} else {
+  files_to_analyse[["reporters"]] <- filter_latest_files(reporter_files)
+  files_to_analyse[["log"]] <- filter_latest_files(log_files)
+  file_loaded_text <- "Analysing latest files: id = {id} and scenario = {scenario}."
+  
+}
+
+id <- files_to_analyse$reporters %>% 
   slice(1) %>% 
   pull(id)
 
-scenario <- latest_files %>% 
+scenario <- files_to_analyse$reporters %>% 
   slice(1) %>% 
   pull(scenario)
 
-file_loaded_text <- glue("Analysing latest result file, id: {id} and scenario {scenario}")
-prefix = paste(id, scenario, sep = "-") 
-
-warning(file_loaded_text)
+prefix = paste(id, scenario, sep = "-")
+message(glue(file_loaded_text))
 
 
 
-# Get raw results ---------------------------------------------------------
+# Get raw data ---------------------------------------------------------
 
-raw_main_results <- read_results("main.csv")
-raw_marketinformation_results <- read_results(
-  "MarketInformation.csv", 
+raw_main_results <- read_emlab_results(files_to_analyse$reporters, "main.csv")
+
+raw_marketinformation_results <- read_emlab_results(files_to_analyse$reporters, "MarketInformation.csv", 
   custom_col_types = cols(.default = "n", producer = "c", market = "c"))
+
+
+# Read log files -----------------------------------------------------------
+
+if(analyse_log){
+  
+  # save to rds file as parsing is slow
+  log_rds_path <- paste0(emlab_results_directory,  id,".log.rds")
+  
+  if(file.exists(log_rds_path)){
+    message("Loading log file. This can take some time.")
+    emlab_log <- readRDS(file = log_rds_path)
+    
+  } else {
+    warning("Loading and parsing log files. This can take a very long time.")
+    emlab_log <- read_emlab_log(files_to_analyse$log) %>% 
+      parse_emlab_log()
+    
+    saveRDS(emlab_log, file = log_rds_path)
+  }
+
+}
+
 
 
 # Common variables --------------------------------------------------------
@@ -74,15 +116,15 @@ names(all_unit_prefixes) <- available_units$name
 
 # Cleanup -----------------------------------------------------------------
 
-rm(
-  emlab_results_directory,
-  config_file,
-  get_filepath,
-  latest_files,
-  result_files,
-  get_latest_result_files,
-  get_result_files
-)
+# rm(
+#   emlab_results_directory,
+#   config_file,
+#   get_filepath,
+#   latest_files,
+#   result_files,
+#   get_latest_result_files,
+#   get_result_files
+# )
 
 
 

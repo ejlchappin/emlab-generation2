@@ -12,9 +12,6 @@
 #' @param directory path to results files
 #'
 #' @return a tibble() of all result files
-#' @export
-#'
-#' @examples
 get_result_files <- function(directory){
   
   file_list <- list.files(path = directory, pattern = "*.csv")
@@ -28,46 +25,100 @@ get_result_files <- function(directory){
   
 }
 
-
-get_latest_result_files <- function(result_files){
+#' Get a list of all log files from the results folder
+#'
+#' @param directory path to results files
+#'
+#' @return a tibble() of all log files
+get_log_files <- function(directory){
   
-  lastest_results_id <- result_files %>% 
+  file_list <- list.files(path = directory, pattern = "*-log.txt$")
+  
+  tibble(
+    file = file_list,
+    date = file.info(paste0(directory,file_list))$ctime
+  ) %>% 
+    arrange(date) %>% 
+    separate(col = "file", into = c("id", "datatype"), sep = "-", remove = FALSE)
+}
+
+
+filter_latest_files <- function(file_df){
+  
+  lastest_id <- file_df %>% 
     select(id, date) %>% 
     filter(date == max(date)) %>% 
     slice(1) %>% 
     pull(id)
   
-  result_files %>%
-    filter(id == lastest_results_id)
+  
+  file_df %>%
+    filter(id == lastest_id)
 } 
 
-#' Get specific file of the current scenario and id. 
+filter_selected_files <- function(file_df, selected_id){
+  file_df %>%
+    filter(id == selected_id)
+} 
+
+
+#' Reads a specific file of the current scenario and id. 
 #'
+#' @param file_list list containting all csvs, with the columns datatype and file
 #' @param datafile the name  of the .csv, e.g. "main.csv"
 #'
 #' @return a filename
 #' @export
 #'
 #' @examples
-get_filepath <- function(datafile){
+#' @TODO generalise function
+read_emlab_results <- function(file_list, datatype, custom_col_types = cols(.default = "n")){
   
-  filename <- latest_files %>% 
-    filter(datatype == datafile) %>% 
-    pull(file);
-  
-  paste0(emlab_results_directory,filename)
-  
-}
+  filepath <- file_list %>% 
+    get_results_filepath(datatype)
 
-read_results <- function(filename, custom_col_types = cols(.default = "n")){
   read_delim(
-    file = get_filepath(filename),
+    file = filepath,
     delim = ";",
     col_types = custom_col_types,
     locale = locale(decimal_mark = ".", grouping_mark =  "'")) %>% 
     arrange(iteration, tick)
 }
 
+read_emlab_log <- function(file_list){
+  
+  filepath <- file_list %>% 
+    get_results_filepath("log.txt")
+
+  read_lines(file = filepath)
+}
+
+
+get_results_filepath <- function(file_list, datatype, directory = emlab_results_directory){
+  file <- file_list %>% 
+    filter(datatype == !!datatype) %>% 
+    pull(file)
+  
+  paste0(directory, file)
+}
+
+parse_emlab_log <- function(raw_log){
+  
+  ## TODO: ne able read multiple line plots
+  
+  regex_pattern <- "^([[:upper:]]+(?=:)):[[:blank:]](.+)$"
+  matching_lines <- str_which(string = raw_log, pattern = regex_pattern)
+  finally_something_useful <- str_match_all(string = raw_log[matching_lines], pattern = regex_pattern)
+  messages <- map_dfr(finally_something_useful,  ~ .x %>% as_tibble() %>% select(level = V2, message = V3))
+  
+  regex_pattern <- "^(.+(?=[[:blank:]]emlab\\.gen\\.))[[:blank:]]emlab.gen\\.(.+)[[:blank:]](.+)$"
+  matching_lines <- str_which(string = raw_log, pattern = regex_pattern)
+  finally_something_useful <- str_match_all(string = raw_log[matching_lines], pattern = regex_pattern)
+  meta <- map_dfr(finally_something_useful,  ~ .x %>% as_tibble() %>% select(date = V2, class = V3, fn = V4))
+  
+  bind_cols(messages, meta)
+  
+}
 
 
 # Plots -------------------------------------------------------------------
