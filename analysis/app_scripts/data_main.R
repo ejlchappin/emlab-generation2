@@ -164,11 +164,11 @@ plots[["cash_by_producers"]] <- function(data, input, average = TRUE){
     plot <- data %>% 
       group_by(tick, producer) %>%
       summarise(avg_cash = mean(cash)) %>%
-      ggplot(mapping = aes(x = tick, y = avg_cash * unit_factor(), color = producer))
+      ggplot(mapping = aes(x = tick, y = avg_cash / 1e6, color = producer))
   } else {
     # By Iterations
     plot <- data %>%
-      ggplot(mapping = aes(x = tick, y = cash * unit_factor(), color = producer)) +
+      ggplot(mapping = aes(x = tick, y = cash / 1e6, color = producer)) +
       facet_wrap( ~ iteration)
   }
   
@@ -176,7 +176,7 @@ plots[["cash_by_producers"]] <- function(data, input, average = TRUE){
     geom_line() +
     scale_color_custom("producer_colors") +
     labs_default(
-        y = "Cash (EUR)",
+        y = "Cash (Million EUR)",
         subtitle = default_subtitle(average),
         color = "Producer")
 }
@@ -195,19 +195,18 @@ plots[["cashflows"]] <- function(data, input, average = TRUE){
     plot <- data %>% 
       group_by(tick, type) %>%
       summarise(avg_cash = mean(cash)) %>%
-      ggplot(mapping = aes(x = tick, y = avg_cash * unit_factor(), color = type))
+      ggplot(mapping = aes(x = tick, y = avg_cash / 1e6, color = type))
   } else {
     # By Iterations
     plot <- data %>%
-      ggplot(mapping = aes(x = tick, y = cash * unit_factor(), color = type)) +
+      ggplot(mapping = aes(x = tick, y = cash / 1e6, color = type)) +
       facet_wrap( ~ iteration)
   }
   
   plot +
     geom_line() +
-    #scale_color_custom("producer_colors") +
     labs_default(
-      y = "Cashflow (EUR)",
+      y = "Cashflow (Million EUR)",
       subtitle = default_subtitle(average))
 }
 
@@ -260,11 +259,11 @@ plots[["fuel_prices"]] <- function(data, input, average = TRUE){
       plot <- data %>% 
         group_by(tick, fuel) %>%
         summarise(avg_price = mean(price)) %>%
-        ggplot(mapping = aes(x = tick, y = avg_price, color = fuel))
+        ggplot(mapping = aes(x = tick, y = avg_price / 1e6, color = fuel))
     } else {
       # By Iterations
       plot <- data %>%
-        ggplot(mapping = aes(x = tick, y = price, color = fuel)) +
+        ggplot(mapping = aes(x = tick, y = price / 1e6, color = fuel)) +
         facet_wrap( ~ iteration)
     }
   
@@ -272,7 +271,7 @@ plots[["fuel_prices"]] <- function(data, input, average = TRUE){
     geom_line() +
     scale_color_custom("fuel_colors") +
     labs_default(
-      y = "Price (EUR)",
+      y = "Price (Million EUR/ton)",
       subtitle = default_subtitle(average),
       color = "Fuel")
 }
@@ -308,7 +307,7 @@ plots[["fuel_volumes"]] <- function(data, input, average = TRUE){
     geom_line() +
     scale_color_custom("fuel_colors") +
     labs_default(
-      y = "Volume",
+      y = "Volume (tons)",
       subtitle = default_subtitle(average),
       color = "Fuel")
 }
@@ -338,7 +337,7 @@ plots[["CO2_prices"]] <- function(data, input, average = TRUE){
   plot +
     geom_line() +
     labs_default(
-      y = "Price (EUR)",
+      y = "Price (EUR/ton)",
       subtitle = default_subtitle(average))
 }
 
@@ -370,7 +369,7 @@ plots[["CO2_volumes"]] <- function(data, input, average = TRUE){
   plot +
     geom_line() +
     labs_default(
-      y = "Volume [t]",
+      y = "Volume (tons)",
       subtitle = default_subtitle(average))
 }
 
@@ -583,7 +582,7 @@ plots[["segment_load"]] <- function(data, input, average = TRUE){
   plot +
     geom_line() +
     labs_default(
-      y = glue("Load ({input$unit_prefix}Wh)"),
+      y = glue("Load ({input$unit_prefix}W)"),
       x = label_x,
       color = label_color,
       subtitle = default_subtitle(average))
@@ -607,7 +606,7 @@ plots[["segment_volume"]] <- function(data, input, average = TRUE){
     plot <- data %>% 
       group_by(tick, market, segment) %>%
       summarise(avg_volume = mean(volume)) %>% 
-      ggplot(mapping = aes(x = tick, y = avg_volume, color = segment))
+      ggplot(mapping = aes(y = avg_volume * unit_factor()))
       
       if(input$all_in_one_plot){
         plot <- plot +
@@ -622,15 +621,15 @@ plots[["segment_volume"]] <- function(data, input, average = TRUE){
   } else {
     # By Iterations
     plot <- data %>%
-      ggplot(mapping = aes(x = tick, y = volume, color = segment)) +
+      ggplot(mapping = aes(y = volume * unit_factor())) +
       facet_grid(market ~ iteration)
     
   }
   
   plot +
-    geom_line() +
+    geom_line(x = tick,  color = segment) +
     labs_default(
-      y = glue("Volume (??)"),
+      y = glue("Load ({input$unit_prefix}Wh)"),
       subtitle = default_subtitle(average))
 }
 
@@ -673,7 +672,7 @@ plots[["segment_hours"]] <- function(data, input, average = TRUE){
   plot +
     geom_line() +
     labs_default(
-      y = glue("Hours (??)"),
+      y = glue("Hours (h)"),
       subtitle = default_subtitle(average))
 }
 
