@@ -43,5 +43,10 @@ fuel_color_palette <- "Dark2"
 app_title <- "EMLab2"
 
 # Analysing logs can take a long time!
-analyse_log <- FALSE
+analyse_log <- TRUE
+save_log_tempfile <- TRUE
+
+# Experimental
+use_plotly <- FALSE
+
 

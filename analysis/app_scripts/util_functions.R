@@ -102,21 +102,18 @@ get_results_filepath <- function(file_list, datatype, directory = emlab_results_
   paste0(directory, file)
 }
 
-parse_emlab_log <- function(raw_log){
+
+read_emlab_csv_log <- function(file_list){
   
-  ## TODO: ne able read multiple line plots
   
-  regex_pattern <- "^([[:upper:]]+(?=:)):[[:blank:]](.+)$"
-  matching_lines <- str_which(string = raw_log, pattern = regex_pattern)
-  finally_something_useful <- str_match_all(string = raw_log[matching_lines], pattern = regex_pattern)
-  messages <- map_dfr(finally_something_useful,  ~ .x %>% as_tibble() %>% select(level = V2, message = V3))
+  filepath <- file_list %>% 
+    get_results_filepath("log.txt")
   
-  regex_pattern <- "^(.+(?=[[:blank:]]emlab\\.gen\\.))[[:blank:]]emlab.gen\\.(.+)[[:blank:]](.+)$"
-  matching_lines <- str_which(string = raw_log, pattern = regex_pattern)
-  finally_something_useful <- str_match_all(string = raw_log[matching_lines], pattern = regex_pattern)
-  meta <- map_dfr(finally_something_useful,  ~ .x %>% as_tibble() %>% select(date = V2, class = V3, fn = V4))
-  
-  bind_cols(messages, meta)
+  read_delim(file = filepath, delim = ";") %>% 
+    mutate(
+      time = as.POSIXct(time/1000, origin="1970-01-01"),
+      class = str_sub(class, 10) # remove emlab.gen. package name
+      )
   
 }
 

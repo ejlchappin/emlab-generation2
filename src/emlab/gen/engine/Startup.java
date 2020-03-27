@@ -43,12 +43,18 @@ public class Startup {
         String reporterDirectoryName = "results/";
         
         boolean haveGUI = false;
+        boolean logForApp = true;
 
 
         Logger.getGlobal().setLevel(Level.WARNING);
         try {
             FileHandler handler = new FileHandler(reporterDirectoryName + runID + "-log.txt");
-            handler.setFormatter(new SimpleFormatter());
+            
+            if(logForApp) {
+                handler.setFormatter(new CSVLogFormatter());
+            } else {
+            	handler.setFormatter(new SimpleFormatter());	
+            }
             Logger.getGlobal().addHandler(handler);//.java.util.logging.FileHandler.pattern   = 
         } catch (IOException ex) {
             Logger.getLogger(Startup.class.getName()).log(Level.SEVERE, null, ex);

@@ -82,16 +82,19 @@ if(analyse_log){
   # save to rds file as parsing is slow
   log_rds_path <- paste0(emlab_results_directory,  id,".log.rds")
   
-  if(file.exists(log_rds_path)){
-    message("Loading log file. This can take some time.")
+  if(file.exists(log_rds_path) & save_log_tempfile){
+    message("Loading temp log file.")
     emlab_log <- readRDS(file = log_rds_path)
     
   } else {
-    warning("Loading and parsing log files. This can take a very long time.")
-    emlab_log <- read_emlab_log(files_to_analyse$log) %>% 
-      parse_emlab_log()
+    warning("Loading and parsing raw log file.")
+
+    emlab_log <- read_emlab_csv_log(files_to_analyse$log) 
     
-    saveRDS(emlab_log, file = log_rds_path)
+    if(save_log_tempfile){
+      saveRDS(emlab_log, file = log_rds_path)
+    }
+    
   }
 
 }

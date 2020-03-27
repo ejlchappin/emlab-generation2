@@ -18,23 +18,39 @@ server <- function(input, output) {
     
     # get average of all iterations plot
     
-    if(use_plotly){
-
-    output[[paste("plot", plot_name, sep = "_")]] <- renderPlotly({
-      plot <- get_plot_filtered(plot_name, input, input$iteration_average)
-      ggplotly(plot)
-      
-    })
+    # if(use_plotly){
+    # 
+    # output[[paste("plot", plot_name, sep = "_")]] <- renderPlotly({
+    #   plot <- get_plot_filtered(plot_name, input, input$iteration_average)
+    #   ggplotly(plot)
+    #   
+    # })
+    # 
+    # } else {
+    #   output[[paste("plot", plot_name, sep = "_")]] <- renderPlot({
+    #     get_plot_filtered(plot_name, input, input$iteration_average)
+    #   })
+    # }
     
-    } else {
-      output[[paste("plot", plot_name, sep = "_")]] <- renderPlot({
-        get_plot_filtered(plot_name, input, input$iteration_average)
+    if(use_plotly){
+      
+      output$selected_single_plot <- renderUI({})
+      output$selected_single_plotly <- renderPlotly({
+        plot <- get_plot_filtered(input$single_plot_selected, input, input$iteration_average) %>% 
+          ggplotly()
+        plot
+        
       })
+      
+    } else {
+      output$selected_single_plotly <- renderUI({})
+      output$selected_single_plot <- renderPlot({
+        get_plot_filtered(input$single_plot_selected, input, input$iteration_average)
+      })
+      
+
     }
     
-    output$selected_single_plot <- renderPlot({
-      get_plot_filtered(input$single_plot_selected, input, input$iteration_average)
-    })
     
     output$selected_single_plot_title <- renderText({
       input$single_plot_selected %>% 

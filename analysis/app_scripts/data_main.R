@@ -64,7 +64,7 @@ plots[["operational_capacities_by_producer"]] <- function(data, input, average =
       group_by(tick, market, producer, technology) %>% 
       summarise(avg_capacity = mean(capacity)) %>% 
       ggplot(mapping = aes(y = avg_capacity * unit_factor())) +
-      facet_wrap(producer ~ market)
+      facet_grid(producer ~ market)
   } else {
     # By Iterations
     plot <- data %>%

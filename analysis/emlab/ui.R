@@ -54,11 +54,15 @@ ui <- dashboardPage(
                 selectInput(inputId = "single_plot_selected", label = "Choose the plot to display", choices = names(plots))
               ),
               hr(),
+              
+              
                 
               fluidRow(
                 column(width = 9,
                        box(title = textOutput("selected_single_plot_title"), status = "primary", width = 12, solidHeader = TRUE,
-                           ifelse(use_plotly, plotlyOutput("selected_single_plot"), plotOutput("selected_single_plot"))
+                           plotOutput("selected_single_plot")#,
+                           #plotlyOutput("selected_single_plotly")
+                           
                            )
                 ),
                 
