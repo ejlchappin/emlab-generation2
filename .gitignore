@@ -40,3 +40,6 @@ nbproject/private/
 # sustom analysis files
 analysis/config*
 analysis/report*
+
+# R files
+*.nb.html

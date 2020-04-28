@@ -25,7 +25,7 @@ if(use_plotly){
 
 
 
-source(file = "app_scripts/util_functions.R")
+source(file = "emlab/util_functions.R")
 
 # Loading and preparing files ---------------------------------------------
 
@@ -146,8 +146,8 @@ show_filters <- list()
 
 
 # Load plots for different types of data
-source(file = "app_scripts/data_main.R")
-source(file = "app_scripts/data_marketinformation.R")
+source(file = "emlab/data_main.R")
+source(file = "emlab/data_marketinformation.R")
 
 
 # theme for all ggplots

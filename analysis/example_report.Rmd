@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
   #out.width= 10
   )
 
-source(file = "app_scripts/init.R")
+source(file = "emlab/init.R")
 
 # theme for ggplot
 theme_set(
@@ -37,7 +37,7 @@ theme_set(
 # Load dynamic plots and pages  --------------------------------------------------------
 
 # All plots are defined in this script
-source(file = "app_scripts/main.R")
+source(file = "emlab/main.R")
 
 
 
