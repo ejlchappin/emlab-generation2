@@ -106,6 +106,11 @@ if(analyse_log){
 iteration_min <- min(raw_main_results$iteration)
 iteration_max <- max(raw_main_results$iteration)
 
+tick_expected_min <- min(raw_marketinformation_results$tick)
+tick_expected_max <- max(raw_marketinformation_results$tick)
+
+
+
 # Units
 available_units <- tribble(
   ~name, ~prefix, ~factor,
@@ -137,6 +142,7 @@ names(all_unit_prefixes) <- available_units$name
 
 data <- list()
 plots <- list()
+show_filters <- list()
 
 
 # Load plots for different types of data
@@ -146,7 +152,8 @@ source(file = "app_scripts/data_marketinformation.R")
 
 # theme for all ggplots
 theme_set(
-  theme_bw(base_size = 13) + 
+  theme_light(base_size = 13) +
+  #theme_bw(base_size = 13) + 
     theme(
       #legend.title=element_blank(),
       legend.spacing.x = unit(0.1, 'cm')

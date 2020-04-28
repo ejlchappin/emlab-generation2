@@ -15,10 +15,10 @@ ui <- dashboardPage(
       
      
       menuItem(
-        "Plots", tabName = "single_plots", icon = icon("lightbulb")
+        "Single plots", tabName = "single_plots", icon = icon("lightbulb")
       ),
       menuItem(
-        "Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+        "Custom pages", tabName = "dashboard", icon = icon("dashboard")),
       menuItem(
         "Logs", tabName = "logs", icon = icon("file-alt")),
       menuItem(
@@ -51,7 +51,7 @@ ui <- dashboardPage(
               h2("Single plots"),
               
               column(width = 6,
-                selectInput(inputId = "single_plot_selected", label = "Choose the plot to display", choices = names(plots))
+                selectInput(inputId = "single_plot_selected", label = "Choose the plot to display", choices = single_plot_select_names(names(plots)))
               ),
               hr(),
               
@@ -78,35 +78,58 @@ ui <- dashboardPage(
                   
                   # Filters
                   
-                  box(title = "Filter by Technologies", width = 12, collapsible = TRUE, collapsed = TRUE, solidHeader = FALSE,
-                    checkboxGroupInput("technologies_checked", label = "",
-                                       choices = all_technologies,
-                                       selected = all_technologies)),
+                  conditionalPanel(
+                    condition = "output.show_filter_technology == true",
+                    box(title = "Filter by Technologies", width = 12, collapsible = TRUE, collapsed = TRUE, solidHeader = FALSE,
+                        checkboxGroupInput("technologies_checked", label = "",
+                                           choices = all_technologies,
+                                           selected = selected_technologies))
+                  ),
                   
-                  box(title = "Filter by Producers", width = 12, collapsible = TRUE, collapsed = TRUE, solidHeader = FALSE,
-                      checkboxGroupInput("producers_checked", label = "",
-                                         choices = all_producers,
-                                         selected = all_producers)),
+                  conditionalPanel(
+                    condition = "output.show_filter_producer == true",
+                    box(title = "Filter by Producers", width = 12, collapsible = TRUE, collapsed = TRUE, solidHeader = FALSE,
+                        checkboxGroupInput("producers_checked", label = "",
+                                           choices = all_producers,
+                                           selected = selected_producers))
+                  ),
                   
-                  box(title = "Filter by Fuels", width = 12, collapsible = TRUE, collapsed = TRUE, solidHeader = FALSE,
-                      checkboxGroupInput("fuels_checked", label = "",
-                                         choices = all_fuels,
-                                         selected = all_fuels)),
-                  box(title = "Filter by Segment", width = 12, collapsible = TRUE, collapsed = TRUE, solidHeader = FALSE,
-                      
-                      checkboxInput(
-                        inputId = "all_in_one_plot",
-                        label = "Segments in one plot",
-                        value = TRUE),
-                      checkboxInput(
-                        inputId = "flip_tick_segment",
-                        label = "Flip tick and segment",
-                        value = TRUE),
-                      checkboxGroupInput("segments_checked", label = "",
-                                         choices = all_segments,
-                                         selected = all_segments))
+                  conditionalPanel(
+                    condition = "output.show_filter_fuel == true",
+                    box(title = "Filter by Fuels", width = 12, collapsible = TRUE, collapsed = TRUE, solidHeader = FALSE,
+                        checkboxGroupInput("fuels_checked", label = "",
+                                           choices = all_fuels,
+                                           selected = selected_fuels))
+                  ),
+                  
+                  conditionalPanel(
+                    condition = "output.show_filter_segment == true",
+                    box(title = "Filter by Segment", width = 12, collapsible = TRUE, collapsed = TRUE, solidHeader = FALSE,
+                        
+                        checkboxInput(
+                          inputId = "all_in_one_plot",
+                          label = "Segments in one plot",
+                          value = TRUE),
+                        checkboxInput(
+                          inputId = "flip_tick_segment",
+                          label = "Flip tick and segment",
+                          value = TRUE),
+                        checkboxGroupInput("segments_checked", label = "",
+                                           choices = all_segments,
+                                           selected = selected_segments))
+                  ),
+                  
+                  conditionalPanel(
+                    condition = "output.show_filter_tick_expected == true",
+                    box(title = "Tick for Expectations", width = 12, collapsible = TRUE, collapsed = TRUE, solidHeader = FALSE,
+                        sliderInput(
+                          "tick_expected",
+                          label = "Tick",
+                          min = tick_expected_min, max = tick_expected_max,
+                          value = c(tick_expected_min, tick_expected_max))))
                   )
-              )
+
+            )
               
       ),
       

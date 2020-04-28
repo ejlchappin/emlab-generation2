@@ -4,13 +4,19 @@ meta_cols <- c("iteration", "tick", "market", "producer", "segment")
 
 # Segment energy ----------------------------------------------------
 
-data[["marketinfo_segment_energy"]] <- raw_marketinformation_results %>% 
+data[["expected_power_per_segment"]] <- raw_marketinformation_results %>% 
   get_vars_from_multiple_columns(prefix = "segment", vars = "type", value = "energy")
 
-plots[["marketinfo_segment_energy"]] <- function(data, input, average = TRUE){
+
+show_filters[["expected_power_per_segment"]] <- c("segment", "producer", "tick_expected")
+
+
+plots[["expected_power_per_segment"]] <- function(data, input, average = TRUE){
   
   data <- data %>%
-    filter(producer %in% input$producers_checked)
+    filter(producer %in% input$producers_checked,
+           tick == seq(input$tick_expected[1],input$tick_expected[2]),
+           segment %in% input$segments_checked)
   
   if(average){
     # Average over all iterations
@@ -18,13 +24,13 @@ plots[["marketinfo_segment_energy"]] <- function(data, input, average = TRUE){
       group_by(tick, market, producer, type, segment) %>% 
       summarise(avg_energy = mean(energy)) %>% 
       ggplot(mapping = aes(y = avg_energy  * unit_factor())) +
-        facet_wrap(~ tick)
-
+      facet_grid(market ~ tick)
+    
   } else {
     # By Iterations
     plot <- data %>%
       ggplot(mapping = aes(y = energy  * unit_factor())) +
-      facet_grid(iteration ~ tick)
+      facet_wrap(vars(iteration, market, tick))
   }
   
   plot +
@@ -35,7 +41,7 @@ plots[["marketinfo_segment_energy"]] <- function(data, input, average = TRUE){
       x = "Segment",
       subtitle = default_subtitle(average),
       linetype = "Type",
-      color = "Energy proudcer")
+      color = "Energy producer")
 }
 
 # prices  ----------------------------------------------------
@@ -44,11 +50,14 @@ data[["marketinfo_prices"]] <- raw_marketinformation_results %>%
   get_vars_from_multiple_columns(prefix = "price", vars = "type", value = "price")
 
 
+
 get_marketinfo_prices <- function(data, input, average = TRUE){
   
   data <- data %>%
     filter(
-      producer %in% input$producers_checked)
+      producer %in% input$producers_checked,
+      tick == seq(input$tick_expected[1],input$tick_expected[2]),
+      segment %in% input$segments_checked)
   
   if(average){
     # Average over all iterations
@@ -56,14 +65,14 @@ get_marketinfo_prices <- function(data, input, average = TRUE){
       group_by(tick, market, producer, type, segment) %>% 
       summarise(avg_price = mean(price)) %>% 
       ggplot(mapping = aes(y = avg_price)) +
-      facet_wrap(~ tick)
+      facet_grid(market ~ tick)
     
   } else {
     # By Iterations
     plot <- data %>%
       ggplot(mapping = aes(y = price)) +
-      facet_grid(iteration ~ tick)
-  }
+      facet_wrap(vars(iteration, market, tick))
+    }
   
   plot +
     geom_line(mapping = aes(x = segment, color = producer)) +
@@ -76,19 +85,22 @@ get_marketinfo_prices <- function(data, input, average = TRUE){
 }
 
 
-data[["marketinfo_electricity_prices"]] <- data[["marketinfo_prices"]] %>% 
+data[["expected_electricity_prices_per_segment"]] <- data[["marketinfo_prices"]] %>% 
   filter(type ==  "electricity")
 
+show_filters[["expected_electricity_prices_per_segment"]] <- c("segment", "producer", "tick_expected")
 
-plots[["marketinfo_electricity_prices"]] <- function(data, input, average = TRUE){
+plots[["expected_electricity_prices_per_segment"]] <- function(data, input, average = TRUE){
   get_marketinfo_prices(data, input, average)
 }
 
 
-data[["marketinfo_co2_prices"]] <- data[["marketinfo_prices"]] %>% 
+data[["expected_CO2_prices_per_segment"]] <- data[["marketinfo_prices"]] %>% 
   filter(type ==  "co2")
 
-plots[["marketinfo_co2_prices"]] <- function(data, input, average = TRUE){
+show_filters[["expected_CO2_prices_per_segment"]] <- c("segment", "producer", "tick_expected")
+
+plots[["expected_CO2_prices_per_segment"]] <- function(data, input, average = TRUE){
   get_marketinfo_prices(data, input, average)
 }
 
@@ -96,14 +108,19 @@ plots[["marketinfo_co2_prices"]] <- function(data, input, average = TRUE){
 
 # available capacity ------------------------------------------------------
 
-data[["marketinfo_capacity_available"]] <- raw_marketinformation_results %>% 
+data[["expected_available_capacity_per_segment"]] <- raw_marketinformation_results %>% 
   get_var_from_single_column(prefix = "capacity.available", value = "capacity")
 
-plots[["marketinfo_capacity_available"]] <- function(data, input, average = TRUE){
+show_filters[["expected_available_capacity_per_segment"]] <- c("segment", "producer", "tick_expected")
+
+
+plots[["expected_available_capacity_per_segment"]] <- function(data, input, average = TRUE){
   
   data <- data %>%
     filter(
-      producer %in% input$producers_checked)
+      producer %in% input$producers_checked,
+      tick == seq(input$tick_expected[1],input$tick_expected[2]),
+      segment %in% input$segments_checked)
   
   if(average){
     # Average over all iterations
@@ -111,20 +128,20 @@ plots[["marketinfo_capacity_available"]] <- function(data, input, average = TRUE
       group_by(tick, market, producer, segment) %>% 
       summarise(avg_capacity = mean(capacity)) %>% 
       ggplot(mapping = aes(y = avg_capacity  * unit_factor())) +
-      facet_wrap(~ tick)
+      facet_grid(market ~ tick)
     
   } else {
     # By Iterations
     plot <- data %>%
       ggplot(mapping = aes(y = capacity  * unit_factor())) +
-      facet_grid(iteration ~ tick)
+      facet_wrap(vars(iteration, market, tick))
   }
   
   plot +
     geom_line(mapping = aes(x = segment, color = producer)) +
     scale_color_custom("producer_colors") +
     labs_default(
-      y = glue("Expected available capacity ({input$unit_prefix}W)"),
+      y = glue("Expected available capacity in year ({input$unit_prefix}W)"),
       x = "Segment",
       subtitle = default_subtitle(average))
 }

@@ -1,5 +1,6 @@
 server <- function(input, output) {
   
+  
   observeEvent(input$toggle_shared_options, {
     toggle("shared_filter_panel")
   })
@@ -54,8 +55,7 @@ server <- function(input, output) {
     
     output$selected_single_plot_title <- renderText({
       input$single_plot_selected %>% 
-        str_replace_all("_", " ") %>% 
-        str_to_title()
+        variable_name_to_title()
     })
     
     # # get by iterations plot
@@ -75,6 +75,43 @@ server <- function(input, output) {
   output$dt_log_table = DT::renderDataTable({
     log_table
   })
+  
+  toggle_filters <- function(filter_name, selected_plot){
+    if(selected_plot %in% names(show_filters)){
+      (filter_name %in% show_filters[[selected_plot]])
+    } else {
+      # If not defined show anyway
+      TRUE
+    }
+  }
+  
+  
+  output$show_filter_technology <- reactive({
+    toggle_filters("technology",input$single_plot_selected)
+  })
+  outputOptions(output, "show_filter_technology", suspendWhenHidden = FALSE)  
+  
+  output$show_filter_producer <- reactive({
+    toggle_filters("producer",input$single_plot_selected)
+  })
+  outputOptions(output, "show_filter_producer", suspendWhenHidden = FALSE)  
+  
+  output$show_filter_fuel <- reactive({
+    toggle_filters("fuel",input$single_plot_selected)
+  })
+  outputOptions(output, "show_filter_fuel", suspendWhenHidden = FALSE)  
+  
+  output$show_filter_segment <- reactive({
+    toggle_filters("segment",input$single_plot_selected)
+  })
+  outputOptions(output, "show_filter_segment", suspendWhenHidden = FALSE)  
+  
+  output$show_filter_tick_expected <- reactive({
+    toggle_filters("tick_expected",input$single_plot_selected)
+  })
+  outputOptions(output, "show_filter_tick_expected", suspendWhenHidden = FALSE)  
+  
+  
   
   
 }

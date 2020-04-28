@@ -140,9 +140,15 @@ set_colors <- function(items, named_colors_vector_name, palette_name){
       n = length(items), 
       name = get(palette_name)
     )
-    names(colors) <- items
-    return(colors)
-  
+    
+    if(length(colors) < length(items)){
+      stop(glue("There are not enough colors in the brewer palette {get(palette_name)} for your scenario. 
+                Please assign other palette to {palette_name} or assign own colors to {named_colors_vector_name} in config.R"))
+    } else {
+      names(colors) <- items
+      return(colors)
+    }
+
   } else {
     stop(glue("{named_colors_vector_name} and {palette_name} not set in config.R"))
   }
@@ -284,6 +290,21 @@ default_mainPanel <- function(title, data_name, ...){
 
 ui_more_button <- function(){
   actionButton("toggle_shared_options", "More options")
+}
+
+variable_name_to_title <- function(titles){
+  titles %>% 
+    str_replace_all("_", " ") %>% 
+    str_to_sentence()
+  
+}
+
+single_plot_select_names <- function(names){
+  
+  variable <- names
+  names(variable) <- variable_name_to_title(names)
+  variable
+  
 }
 
 # Data parsing ------------------------------------------------------------

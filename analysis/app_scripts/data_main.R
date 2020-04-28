@@ -16,11 +16,12 @@ data[["operational_capacities_by_tech_and_producer"]] <- raw_main_results %>%
     vars = c("market", "technology", "producer"), 
     value = "capacity")
 
-data[["operational_capacities_by_tech"]] <- data[["operational_capacities_by_tech_and_producer"]] %>% 
+data[["operational_capacities_by_technology"]] <- data[["operational_capacities_by_tech_and_producer"]] %>% 
   filter(producer == "all")
-  
 
-plots[["operational_capacities_by_tech"]] <- function(data, input, average = TRUE){
+show_filters[["operational_capacities_by_technology"]] <- c("technology")
+
+plots[["operational_capacities_by_technology"]] <- function(data, input, average = TRUE){
 
   data <- data %>%
     filter(technology %in% input$technologies_checked)
@@ -50,6 +51,8 @@ plots[["operational_capacities_by_tech"]] <- function(data, input, average = TRU
 
 data[["operational_capacities_by_producer"]] <- data[["operational_capacities_by_tech_and_producer"]] %>% 
   filter(producer != "all")
+
+show_filters[["operational_capacities_by_producer"]] <- c("technology", "producer")
 
 plots[["operational_capacities_by_producer"]] <- function(data, input, average = TRUE){
   
@@ -88,6 +91,8 @@ data[["generation_total"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "production", value = "generation") %>%
   separate(col = "key", into = c("var", "market", "technology"), sep = "\\.")
 
+show_filters[["generation_total"]] <- c("technology")
+
 plots[["generation_total"]] <- function(data, input, average = TRUE){
   
   data <- data %>%
@@ -123,6 +128,8 @@ data[["pipeline_capacities"]] <- raw_main_results %>%
   separate(col = "key", into = c("var1", "var2", "market"), sep = "\\.") %>%
   select(-var1, -var2)
 
+show_filters[["pipeline_capacities"]] <- c("")
+
 plots[["pipeline_capacities"]] <- function(data, input, average = TRUE){
   
   if(average){
@@ -153,6 +160,8 @@ plots[["pipeline_capacities"]] <- function(data, input, average = TRUE){
 data[["cash_by_producers"]] <- raw_main_results %>%
   get_data_by_prefix("cash", value = "cash") %>%
   separate(col = key, into = c("var", "producer"), sep = "\\.")
+
+show_filters[["cash_by_producers"]] <- c("producer")
 
 plots[["cash_by_producers"]] <- function(data, input, average = TRUE){
   
@@ -188,6 +197,8 @@ data[["cashflows"]] <- raw_main_results %>%
   separate(col = key, into = c("var", "type"), sep = "\\.") %>% 
   select(-var)
 
+show_filters[["cashflows"]] <- c("")
+
 plots[["cashflows"]] <- function(data, input, average = TRUE){
   
   if(average){
@@ -216,6 +227,8 @@ plots[["cashflows"]] <- function(data, input, average = TRUE){
 data[["nr_powerplants"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "nr.of.powerplants", value = "N", suffix = "") %>%
   select(-key)
+
+show_filters[["nr_powerplants"]] <- c("")
 
 plots[["nr_powerplants"]] <- function(data, input, average = TRUE){
     
@@ -248,6 +261,8 @@ data[["fuel_prices"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "substance.price", value = "price") %>%
   separate(col = "key", into = c("var1","var2", "fuel"), sep = "\\.") %>%
   select(-var1, -var2)
+
+show_filters[["fuel_prices"]] <- c("fuel")
 
 plots[["fuel_prices"]] <- function(data, input, average = TRUE){
   
@@ -284,6 +299,8 @@ data[["fuel_volumes"]] <- raw_main_results %>%
   separate(col = "key", into = c("var1","var2", "fuel"), sep = "\\.") %>%
   select(-var1, -var2)
 
+show_filters[["fuel_volumes"]] <- c("fuel")
+
 plots[["fuel_volumes"]] <- function(data, input, average = TRUE){
   
   data <- data %>%
@@ -319,6 +336,8 @@ data[["CO2_prices"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "price.co2", value = "price", suffix = "") %>%
   select(-key)
 
+show_filters[["CO2_prices"]] <- c("")
+
 plots[["CO2_prices"]] <- function(data, input, average = TRUE){
 
   if(average){
@@ -350,6 +369,8 @@ data[["CO2_volumes"]] <- raw_main_results %>%
   separate(col = "key", into = c("var1","var2", "type"), sep = "\\.") %>%
   select(-var1, -var2)
 
+show_filters[["CO2_volumes"]] <- c("")
+
 plots[["CO2_volumes"]] <- function(data, input, average = TRUE){
   
   if(average){
@@ -380,12 +401,14 @@ plots[["CO2_volumes"]] <- function(data, input, average = TRUE){
 # Market Average prices -------------------------------------------------------------
 
 
-data[["average_prices"]] <- raw_main_results %>%
+data[["average_electricity_prices"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "market.average price", value = "price") %>%
   separate(col = "key", into = c("var1","var2", "market"), sep = "\\.") %>%
   select(-var1, -var2)
 
-plots[["average_prices"]] <- function(data, input, average = TRUE){
+show_filters[["average_electricity_prices"]] <- c("")
+
+plots[["average_electricity_prices"]] <- function(data, input, average = TRUE){
   
   if(average){
     # Average over all iterations
@@ -413,12 +436,14 @@ plots[["average_prices"]] <- function(data, input, average = TRUE){
 # Market Average Volumes -------------------------------------------------------------
 
 
-data[["average_volumes"]] <- raw_main_results %>%
+data[["average_market_volumes"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "market.volume", value = "volume") %>%
   separate(col = "key", into = c("var1","var2", "market"), sep = "\\.") %>%
   select(-var1, -var2)
 
-plots[["average_volumes"]] <- function(data, input, average = TRUE){
+show_filters[["average_market_volumes"]] <- c("")
+
+plots[["average_market_volumes"]] <- function(data, input, average = TRUE){
   
   if(average){
     # Average over all iterations
@@ -468,7 +493,10 @@ get_segment_data <- function(data, segment_value){
 data[["segment_prices"]] <- raw_main_results %>%
   get_segment_data(segment_value = "price")
 
+show_filters[["segment_prices"]] <- c("segment")
+
 plots[["segment_prices"]] <- function(data, input, average = TRUE){
+  
   
   data <- data %>%
     filter(segment %in% input$segments_checked)
@@ -510,6 +538,8 @@ plots[["segment_prices"]] <- function(data, input, average = TRUE){
 
 data[["segment_load"]] <- raw_main_results %>%
   get_segment_data(segment_value = "load")
+
+show_filters[["segment_load"]] <- c("segment")
 
 plots[["segment_load"]] <- function(data, input, average = TRUE){
   
@@ -595,6 +625,8 @@ plots[["segment_load"]] <- function(data, input, average = TRUE){
 data[["segment_volume"]] <- raw_main_results %>%
   get_segment_data(segment_value = "volume")
 
+show_filters[["segment_volume"]] <- c("segment")
+
 
 plots[["segment_volume"]] <- function(data, input, average = TRUE){
   
@@ -638,6 +670,7 @@ plots[["segment_volume"]] <- function(data, input, average = TRUE){
 data[["segment_hours"]] <- raw_main_results %>%
   get_segment_data(segment_value = "hours")
 
+show_filters[["segment_hours"]] <- c("segment")
 
 plots[["segment_hours"]] <- function(data, input, average = TRUE){
   
@@ -679,13 +712,20 @@ plots[["segment_hours"]] <- function(data, input, average = TRUE){
 
 # Variables for app  ------------------------------------------------------------
 
-# variables for inputs based on data above
+# variables for inputs and filters
 
-
-all_technologies <- get_sinlge_variable(data$operational_capacities_by_tech, technology)
+all_technologies <- get_sinlge_variable(data$operational_capacities_by_technology, technology)
 all_producers <- get_sinlge_variable(data$cash_by_producers, producer)
 all_fuels <- get_sinlge_variable(data$fuel_prices, fuel)
 all_segments <- get_sinlge_variable(data$segment_prices, segment)
+
+
+# pre selected filter in config.R
+if(!exists("selected_technologies")){  selected_technologies <- all_technologies }
+if(!exists("selected_producers")){  selected_producers <- all_producers }
+if(!exists("selected_fuels")){  selected_fuels <- all_fuels }
+if(!exists("selected_segments")){  selected_segments <- all_segments }
+
 
 
 technology_colors <- set_colors(all_technologies, "custom_technology_colors", "technology_color_palette")
