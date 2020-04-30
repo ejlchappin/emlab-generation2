@@ -191,6 +191,24 @@ scale_color_custom <- function(manual_color_variable){
 }
 
 
+#' colors for fill. Takes either technology_colors or leaves standard
+#'
+#' @return
+#' @export
+#'
+#' @examples
+scale_fill_custom <- function(manual_color_variable){
+  
+  if(exists(manual_color_variable)){
+    scale <- scale_fill_manual(values = get(manual_color_variable))
+  } else {
+    scale <- scale_fill_brewer(type = "qual", palette = "Set3")
+  }
+  
+  return(scale)
+}
+
+
 
 geom_area_shaded <- function(...){
   geom_area(..., colour = "black", size = 0.2, alpha = 0.6)

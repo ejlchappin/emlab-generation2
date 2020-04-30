@@ -65,23 +65,25 @@ get_marketinfo_prices <- function(data, input, average = TRUE){
       group_by(tick, market, producer, type, segment) %>% 
       summarise(avg_price = mean(price)) %>% 
       ggplot(mapping = aes(y = avg_price)) +
-      facet_grid(tick ~ market)
+      facet_grid(tick ~ market, labeller = label_both)
     
   } else {
     # By Iterations
     plot <- data %>%
       ggplot(mapping = aes(y = price)) +
-      facet_wrap(vars(iteration, market, tick))
+      facet_wrap(vars(iteration, market, tick), labeller = label_both)
     }
   
   plot +
-    geom_line(mapping = aes(x = segment, color = producer)) +
-    scale_color_custom("producer_colors") +
+    #geom_line(mapping = aes(x = segment, color = producer)) +
+    geom_col(mapping = aes(x = segment, fill = producer), position = "dodge2") +
+    scale_fill_custom("producer_colors") +
+    #scale_color_custom("producer_colors") +
     labs_default(
       y = "Price (Euro)",
       x = "Segment",
       subtitle = default_subtitle(average),
-      color = "Energy proudcer")
+      color = "Energy producer")
 }
 
 
