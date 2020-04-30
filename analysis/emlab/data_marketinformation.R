@@ -24,7 +24,7 @@ plots[["expected_power_per_segment"]] <- function(data, input, average = TRUE){
       group_by(tick, market, producer, type, segment) %>% 
       summarise(avg_energy = mean(energy)) %>% 
       ggplot(mapping = aes(y = avg_energy  * unit_factor())) +
-      facet_grid(market ~ tick)
+      facet_grid(tick ~ market)
     
   } else {
     # By Iterations
@@ -65,7 +65,7 @@ get_marketinfo_prices <- function(data, input, average = TRUE){
       group_by(tick, market, producer, type, segment) %>% 
       summarise(avg_price = mean(price)) %>% 
       ggplot(mapping = aes(y = avg_price)) +
-      facet_grid(market ~ tick)
+      facet_grid(tick ~ market)
     
   } else {
     # By Iterations
@@ -128,7 +128,7 @@ plots[["expected_available_capacity_per_segment"]] <- function(data, input, aver
       group_by(tick, market, producer, segment) %>% 
       summarise(avg_capacity = mean(capacity)) %>% 
       ggplot(mapping = aes(y = avg_capacity  * unit_factor())) +
-      facet_grid(market ~ tick)
+      facet_grid(tick ~ market)
     
   } else {
     # By Iterations

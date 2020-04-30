@@ -5,6 +5,8 @@ output:
     df_print: paged
   html_notebook: default
   pdf_document: default
+editor_options: 
+  chunk_output_type: console
 ---
 
 This report show that the results can exported in an [R Markdown](http://rmarkdown.rstudio.com) Notebook.
@@ -56,13 +58,22 @@ assign("global_unit",filters$unit, envir = .GlobalEnv)
 In this market the capacity of all technologies develops like that
 
 
-```{r}
+```{r plot 1}
 
 filters$technologies_checked <- all_technologies
-
-get_plot_filtered("operational_capacities_by_tech", filters)
+get_plot_filtered("operational_capacities_by_technology", filters)
 
 ```
+
+```{r plot 2}
+
+filters$segments_checked <- all_segments
+filters$all_in_one_plot <- FALSE
+filters$flip_tick_segment <- TRUE
+get_plot_filtered("segment_volume", filters)
+
+```
+
 
 And only renewables develop like that on average (top) and in each iteration (bottom)
 
@@ -71,8 +82,8 @@ And only renewables develop like that on average (top) and in each iteration (bo
 # TODO Make sure that values are correct
 filters$technologies_checked <- c("Photovoltaic PGT", "Hydroelectric", "Onshore wind PGT", "Offshore wind PGT") 
 
-get_plot_filtered("operational_capacities_by_tech", filters)
-get_plot_filtered("operational_capacities_by_tech", filters,average = FALSE)
+get_plot_filtered("operational_capacities_by_technology", filters)
+get_plot_filtered("operational_capacities_by_technology", filters,average = FALSE)
 
 
 ```

@@ -628,11 +628,15 @@ data[["segment_volume"]] <- raw_main_results %>%
 show_filters[["segment_volume"]] <- c("segment")
 
 
+
+
 plots[["segment_volume"]] <- function(data, input, average = TRUE){
+  
   
   data <- data %>%
     filter(segment %in% input$segments_checked)
     
+  
   if(average){
     # Average over all iterations
     plot <- data %>% 
@@ -659,7 +663,7 @@ plots[["segment_volume"]] <- function(data, input, average = TRUE){
   }
   
   plot +
-    geom_line(x = tick,  color = segment) +
+    geom_line(mapping = aes(x = tick, color = segment)) +
     labs_default(
       y = glue("Load ({input$unit_prefix}Wh)"),
       subtitle = default_subtitle(average))

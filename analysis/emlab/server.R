@@ -45,14 +45,16 @@ server <- function(input, output) {
       
     } else {
       output$selected_single_plotly <- renderUI({})
-      output$selected_single_plot <- renderPlot({
-        get_plot_filtered(input$single_plot_selected, input, input$iteration_average)
+      
+      observe({
+        output$selected_single_plot <- renderPlot(
+          expr = {get_plot_filtered(input$single_plot_selected, input, input$iteration_average)}, 
+          height = input$selected_single_plot_height)
       })
       
 
     }
-    
-    
+
     output$selected_single_plot_title <- renderText({
       input$single_plot_selected %>% 
         variable_name_to_title()
