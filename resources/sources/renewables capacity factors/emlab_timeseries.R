@@ -3,6 +3,8 @@
 
 source("config.R")
 library(lubridate)
+library(tidyverse)
+
 
 outputFile = paste0(outputPath, "renewablesNinja2015Profiles.csv")
 
@@ -19,8 +21,8 @@ dateTimeEnd <-  as.POSIXct("2015-12-31 23:00:00", tz = "CET")
 
 # MERRA-2 is better suited for long-term stability and overall consistency, 
 # SARAH for higher precision on hourly to daily time scales (but it suffers from some missing data)
-timeSeriesNinjaPV <- read_csv(file = "input/ninja_europe_pv_v1/ninja_pv_europe_v1.1_merra2.csv")
-timeSeriesNinjaWind <- read_csv(file = "input/ninja_europe_wind_v1/ninja_wind_europe_v1.1_current_on-offshore.csv")
+timeSeriesNinjaPV <- read_csv(file = file.path(inputPath,"ninja_europe_pv_v1/ninja_pv_europe_v1.1_merra2.csv"))
+timeSeriesNinjaWind <- read_csv(file = file.path(inputPath,"ninja_europe_wind_v1/ninja_wind_europe_v1.1_current_on-offshore.csv"))
 
 
 # Wrangling ---------------------------------------------------------------
@@ -54,11 +56,32 @@ with_tz(head(myTimeSeriesNinjaPV$time),"CET")
 #   geom_line() +
 #   facet_grid(technology ~ region)
 
-# Output
-myTimeSeriesNinja %>% 
+
+# Write output in correct format
+write_profile <- function(variable_name){
+
+}
+
+write_profile("")
+
+
+
+# Aggregated version ------------------------------------------------------
+
+# aggregated version takes the average of my aggregation for FR and BENELUX
+
+myTimeSeriesNinja_FR_Benelux <- myTimeSeriesNinja %>% 
+  filter(region %in% c("BE","FR","LU","NL")) %>% 
+  group_by(time, technology, hours) %>% 
+  summarise(profile = mean(profile)) %>% 
+  ungroup() %>% 
+  add_column(region = "FR_Benelux")
+
+# Write to file ------------------------------------------------------
+  
+bind_rows(myTimeSeriesNinja_FR_Benelux, myTimeSeriesNinja) %>% 
   unite(technology, region, sep = "_", col = "variable") %>% 
   select(variable, profile, hours) %>% 
   spread(key = hours, value = profile) %>%
   rename(lengthInHours = variable) %>% 
   write_csv(path = outputFile)
-  
