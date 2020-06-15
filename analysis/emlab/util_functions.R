@@ -74,15 +74,21 @@ filter_selected_files <- function(file_df, selected_id){
 #' @TODO generalise function
 read_emlab_results <- function(file_list, datatype, custom_col_types = cols(.default = "n")){
   
-  filepath <- file_list %>% 
-    get_results_filepath(datatype)
-
-  read_delim(
-    file = filepath,
-    delim = ";",
-    col_types = custom_col_types,
-    locale = locale(decimal_mark = ".", grouping_mark =  "'")) %>% 
-    arrange(iteration, tick)
+  if(datatype %in% file_list$datatype){
+    filepath <- file_list %>% 
+      get_results_filepath(datatype)
+    
+    read_delim(
+      file = filepath,
+      delim = ";",
+      col_types = custom_col_types,
+      locale = locale(decimal_mark = ".", grouping_mark =  "'")) %>% 
+      arrange(iteration, tick)
+    
+  } else {
+    warning(paste(datatype, "does not exist for this prefix"))
+  }
+  
 }
 
 read_emlab_log <- function(file_list){
@@ -115,6 +121,55 @@ read_emlab_csv_log <- function(file_list){
       class = str_sub(class, 10) # remove emlab.gen. package name
       )
   
+}
+
+
+# Files: description ------------------------------------------------------
+
+
+#outputDir <- "test"
+
+
+
+# treat whole dataset, 
+
+
+save_to_description_file <- function(file, prefix, name, caption) {
+
+  if(prefix %in% scenario_descriptions$prefix){
+    
+    new_scenario_descriptions <-scenario_descriptions %>% 
+      mutate(
+        file_scenario_name = ifelse(prefix == !!prefix, name, file_scenario_name),
+        file_scenario_caption = ifelse(prefix == !!prefix, caption, file_scenario_caption)
+      )
+    } else {
+      new_scenario_descriptions <-scenario_descriptions %>% 
+        add_row(
+          prefix = !!prefix,
+          file_scenario_name = name,
+          file_scenario_caption = caption
+        )
+    }
+    
+  write_csv(
+    x = new_scenario_descriptions,
+    path = file)
+}
+
+load_description_file <- function(file) {
+  
+  if(file.exists(file)){
+    data <- read_csv(file)
+  }
+  else {
+    data <- tibble(
+      prefix = character(0),
+      file_scenario_name = character(0), 
+      file_scenario_caption = character(0))
+  }
+  
+  data
 }
 
 
@@ -317,6 +372,11 @@ variable_name_to_title <- function(titles){
   
 }
 
+get_title_of_selected_plot <- function(input){
+  input$single_plot_selected %>% variable_name_to_title()  
+}
+
+
 single_plot_select_names <- function(names){
   
   variable <- names
@@ -329,10 +389,15 @@ single_plot_select_names <- function(names){
 
 get_data_by_prefix <- function(data, col_prefix, value, suffix = "."){
   
-  col_prefix <- paste0(col_prefix, suffix)
-  data %>% 
-    select(one_of(meta_cols), starts_with(col_prefix)) %>% 
-    gather(starts_with(col_prefix), key = "key", value = !!value)
+  if(col_prefix != ""){
+    col_prefix <- paste0(col_prefix, suffix)
+    data %>% 
+      select(one_of(meta_cols), starts_with(col_prefix)) %>% 
+      gather(starts_with(col_prefix), key = "key", value = !!value)
+  } else {
+    warning("prefix for column must be given")
+  }
+
 }
 
 
@@ -365,11 +430,27 @@ get_vars_from_multiple_columns <- function(data, prefix, vars, value){
   
 }
 
+#' Gets one column and the meta_cols from a reporter file. 
+#'
+#' @param data reporter data
+#' @param prefix Either a prefix or NULL if no prefix give
+#' @param value name of the variable (part after the prefix) as character
+#'
+#' @return
+#' @export
+#'
+#' @examples
 get_var_from_single_column <- function(data, prefix, value){
   
-  data <- data %>% 
-    get_data_by_prefix(col_prefix = prefix, value = value, suffix = "") %>% 
-    select(-key)
+  if(!is.null(prefix)){
+    data <- data %>% 
+      get_data_by_prefix(col_prefix = prefix, value = value, suffix = "") %>% 
+      select(-key)
+  } else {
+    
+    data <- data %>% 
+      select(one_of(c(meta_cols, value)))
+  }
   
   return(data)
   

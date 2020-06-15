@@ -39,6 +39,7 @@ plots[["expected_power_per_segment"]] <- function(data, input, average = TRUE){
     labs_default(
       y = glue("Expected power ({input$unit_prefix}Wh)"),
       x = "Segment",
+      title = get_title_of_selected_plot(input),
       subtitle = default_subtitle(average),
       linetype = "Type",
       color = "Energy producer")
@@ -80,8 +81,9 @@ get_marketinfo_prices <- function(data, input, average = TRUE){
     scale_fill_custom("producer_colors") +
     #scale_color_custom("producer_colors") +
     labs_default(
-      y = "Price (Euro)",
+      y = "Price (Euro/MWh)",
       x = "Segment",
+      title = get_title_of_selected_plot(input),
       subtitle = default_subtitle(average),
       color = "Energy producer")
 }
@@ -145,6 +147,7 @@ plots[["expected_available_capacity_per_segment"]] <- function(data, input, aver
     labs_default(
       y = glue("Expected available capacity in year ({input$unit_prefix}W)"),
       x = "Segment",
+      title = get_title_of_selected_plot(input),
       subtitle = default_subtitle(average))
 }
 

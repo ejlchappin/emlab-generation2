@@ -1,11 +1,8 @@
 
 
-
-
 remove(list = ls())
 
 # Config ------------------------------------------------------------------
-
 
 config_file <- "config.R"
 if(!file.exists(config_file)){
@@ -23,11 +20,11 @@ if(use_plotly){
   library(plotly)
 }
 
-
-
 source(file = "emlab/util_functions.R")
 
 # Loading and preparing files ---------------------------------------------
+
+
 
 reporter_files <- get_result_files(emlab_results_directory)
 log_files <- get_log_files(emlab_results_directory)
@@ -99,6 +96,17 @@ if(analyse_log){
 
 }
 
+
+# Read description file ---------------------------------------------------
+
+description_filename <- "scenario_informations.csv"
+description_file <- file.path(emlab_results_meta_directory, description_filename)
+scenario_descriptions <- load_description_file(description_file)
+
+scenario_descriptions_initial_name <- scenario_descriptions %>% filter(prefix == !!prefix) %>% pull(file_scenario_name)
+scenario_descriptions_initial_caption <- scenario_descriptions %>% filter(prefix == !!prefix) %>% pull(file_scenario_caption)
+
+# name is reactive
 
 
 # Common variables --------------------------------------------------------

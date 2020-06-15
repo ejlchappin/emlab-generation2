@@ -1,14 +1,9 @@
 library(shinydashboard)
 
+
 ui <- dashboardPage(
   dashboardHeader(
-    title = if_else(exists("app_title"), app_title, "EMLab2"),
-    dropdownMenu(type = "notifications",icon = icon("info-circle"),
-                 notificationItem(
-                   text = paste("File:", prefix),
-                   icon("file")
-                 )
-    )
+    title = if_else(exists("app_title"), app_title, "EMLab2")
   ),
   dashboardSidebar(
     sidebarMenu(
@@ -46,9 +41,31 @@ ui <- dashboardPage(
       
       tabItem(tabName = "single_plots",
               
-              h2("Single plots"),
-              hr(),
-              
+              fluidRow(
+                box(
+                  title = textOutput("scenario_descriptions_title"), 
+                  width = 12, solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE, status ="info",
+                  column(
+                    width = 6, 
+                    textInput("file_scenario_name", label = "Custom name", value = scenario_descriptions_initial_name),
+                    br(),
+                    p(paste("Filename:", prefix, "(...)"))
+                  ),
+                  
+                  column(
+                    width = 6,
+                    textAreaInput(
+                      inputId = "file_scenario_caption", 
+                      label = "Description", 
+                      value = scenario_descriptions_initial_caption,
+                      rows = 3,
+                      resize = "vertical"),
+                    actionButton("submit", "Submit")
+                    )
+                    
+                )
+                       
+              ),
 
               fluidRow(
                 column(width = 9,

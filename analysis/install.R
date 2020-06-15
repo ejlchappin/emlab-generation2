@@ -10,7 +10,6 @@ install.packages("DT")
 install.packages("RColorBrewer")
 install.packages("plotly")
 
-
 if(!file.exists("config.R")){
   warning("Now, you have to create config.R from example_config.R")
 }

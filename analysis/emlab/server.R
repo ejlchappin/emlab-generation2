@@ -113,6 +113,39 @@ server <- function(input, output) {
   })
   outputOptions(output, "show_filter_tick_expected", suspendWhenHidden = FALSE)  
   
+  # Logic for saving data
+  
+  scenario_descriptions_title <- reactiveVal(
+    ifelse(identical(scenario_descriptions_initial_name, character(0)), prefix, scenario_descriptions_initial_name)
+  )
+      
+  output$scenario_descriptions_title <- renderText({
+    paste("Loaded Scenario:", scenario_descriptions_title())
+  })
+
+  
+  observeEvent(input$submit, {
+
+    save_to_description_file(
+      file = description_file,
+      prefix = prefix,
+      name = input[["file_scenario_name"]],
+      caption = input[["file_scenario_caption"]])
+    
+   scenario_descriptions_title(input[["file_scenario_name"]])
+    
+    
+  })
+  
+  
+  output$current_scenario_title <- renderText({
+    paste("Loaded scenario:", if_else(scenario_descriptions_current_name == "", prefix, scenario_descriptions_current_name))
+  })
+  
+  
+
+
+  
   
   
   
