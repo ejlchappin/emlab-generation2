@@ -43,3 +43,7 @@ analysis/report*
 
 # R files
 *.nb.html
+
+resources/sources/renewables capacity factors/config.R
+
+results_meta/scenario_informations.csv
