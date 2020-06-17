@@ -11,8 +11,8 @@ class CSVLogFormatter extends Formatter {
         builder.append(record.getMillis()).append(";");
         builder.append(record.getSourceClassName()).append(";");
         builder.append(record.getSourceMethodName()).append(";");
-        builder.append(record.getLevel()).append(";");
-        builder.append(formatMessage(record));
+        builder.append(record.getLevel()).append(";\"");
+        builder.append(formatMessage(record)).append("\"");
         builder.append("\n");
         return builder.toString();
     }

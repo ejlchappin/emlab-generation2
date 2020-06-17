@@ -4,6 +4,7 @@ import hep.aida.bin.DynamicBin1D;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
@@ -129,8 +130,8 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         // Is set to negative, since later on a max(-interconnector, Rload) is
         // applied.
         m.viewColumn(INTERCONNECTOR).assign(-interConnectorCapacity);
-
-        logger.info("First 10 values of matrix: \n " + m.viewPart(0, 0, 10, m.columns()).toString());
+        
+        logger.log(Level.FINER, "First 10 values of matrix: \n " + m.viewPart(0, 0, 10, m.columns()).toString());
 
         // 2. Build national load curves, by adding up grid node load curves in
         // each zone.
@@ -229,8 +230,10 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         // intermittent production if over supply.
         // In the end calculate the total residual load curve over all
         // countries.
-         logger.info("First 10 values of matrix: \n " + m.viewPart(0, 0, 10,
-         m.columns()).toString());
+        
+        logger.log(Level.FINER, "First 10 values of matrix: \n " + m.viewPart(0, 0, 10,
+                m.columns()).toString());
+
         Zone zoneA = getReps().zones.get(0);
         Zone zoneB = getReps().zones.get(1);
 
@@ -533,7 +536,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         // Printing of segments
         int it = 1;
         for (DynamicBin1D bin : segmentRloadBins) {
-             logger.info("Segment " + it + "\n      Size: " + bin.size() +
+             logger.finer("Segment " + it + "\n      Size: " + bin.size() +
              "\n      Mean RLOAD~: " + Math.round(bin.mean())
              + "\n      Max RLOAD~: " + Math.round(bin.max()) +
              "\n      Min RLOAD~: " + Math.round(bin.min())
@@ -543,7 +546,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
 
         it = 1;
         for (DynamicBin1D bin : segmentInterConnectorBins) {
-             logger.info("Segment " + it + "\n      Size: " + bin.size() +
+             logger.finer("Segment " + it + "\n      Size: " + bin.size() +
              "\n      Mean IntCapacity~: "
              + Math.round(bin.mean()) + "\n      Max IntCapacity~: " +
              Math.round(bin.max())
@@ -560,7 +563,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
             String meanLoad = new String("Load in " + zone.getName() + ":");
             String segmentLength = new String("Segment length " + zone.getName() + ":");
             for (DynamicBin1D bin : segmentRloadBinsByZone.get(zone)) {
-                 logger.info("Segment " + it + "\n      Size: " + bin.size() +
+                 logger.finer("Segment " + it + "\n      Size: " + bin.size() +
                  "\n      Mean RLOAD~: " + Math.round(bin.mean())
                  + "\n      Max RLOAD~: " + Math.round(bin.max()) +
                  "\n      Min RLOAD~: " + Math.round(bin.min())
@@ -575,7 +578,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
             }
             it = 1;
             for (DynamicBin1D bin : segmentLoadBinsByZone.get(zone)) {
-                 logger.info("Segment " + it + "\n      Size: " + bin.size() +
+                 logger.finer("Segment " + it + "\n      Size: " + bin.size() +
                  "\n      Mean LOAD~: "
                  + Math.round(bin.mean()) + "\n      Max LOAD~: " +
                  Math.round(bin.max())
@@ -606,7 +609,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
                     IntermittentTechnologyNodeLoadFactor intTechnologyNodeLoadFactor = getReps().findIntermittentTechnologyNodeLoadFactorForNodeAndTechnology(node, technology);
                     it = 1;
                     for (DynamicBin1D bin : loadFactorBinMap.get(zone).get(node).get(technology)) {
-                        logger.info("Segment " + it + "\n      Size: " +
+                        logger.finer("Segment " + it + "\n      Size: " +
                          bin.size() + "\n      Mean RLOAD~: "
                          + bin.mean() + "\n      Max RLOAD~: " + bin.max() +
                          "\n      Min RLOAD~: " + bin.min()
