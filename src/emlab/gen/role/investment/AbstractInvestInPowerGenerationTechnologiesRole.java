@@ -84,7 +84,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
     private void setTimeHorizon() {
 
         
-        logger.log(Level.INFO, 
+        logger.log(Level.FINER, 
         		agent + " is considering investment with horizon " + agent.getInvestmentFutureTimeHorizon());
         
         futureTimePoint = getCurrentTick() + agent.getInvestmentFutureTimeHorizon();
@@ -163,7 +163,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
 			
             for (PowerGridNode nodeItem : getReps().findAllPowerGridNodesByZone(market.getZone())) {
 			
-			logger.log(Level.FINE, "For PG Node limits: node is " + nodeItem.getName() + "technology is "
+			logger.log(Level.FINER, "For PG Node limits: node is " + nodeItem.getName() + "technology is "
 			 + technology.getName());
 			 
 			// PGNodeLimitlist.add(getReps().findPowerGeneratingTechnologyNodeLimitByNodeAndTechnology(nodeItem,
@@ -230,7 +230,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
 	
 	private void invest(PowerPlant plant) {
         
-		logger.log(Level.FINE, "{0} invests in technology {1} at tick {2}", new Object[]{agent, plant.getTechnology(), getCurrentTick()});
+		logger.log(Level.FINER, "{0} invests in technology {1} at tick {2}", new Object[]{agent, plant.getTechnology(), getCurrentTick()});
 
         getReps().createPowerPlantFromPlant(plant);
         
@@ -252,7 +252,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
 
         double amount = determineLoanAnnuities(investmentCostPayedByDebt, plant.getTechnology().getDepreciationTime(),
                 agent.getLoanInterestRate());
-        logger.log(Level.FINE, "Loan amount is: " + amount);
+        logger.log(Level.FINER, "Loan amount is: " + amount);
         Loan loan = getReps().createLoan(agent, bigbank, amount, plant.getTechnology().getDepreciationTime(),
                 getCurrentTick(), plant);
         plant.createOrUpdateLoan(loan);
@@ -261,7 +261,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
 	
 	private void dontInvest() {
 		
-		logger.log(Level.FINE, agent + " found no suitable technology anymore to invest in at tick " + getCurrentTick());
+		logger.log(Level.FINER, agent + " found no suitable technology anymore to invest in at tick " + getCurrentTick());
         
 		// agent will not participate in the next round of investment if he does not invest now
         setNotWillingToInvest(agent);
@@ -276,7 +276,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
         	dontInvest();
         }
 		
-        logger.log(Level.INFO, "Investment done for " + agent);
+        logger.log(Level.FINER, "Investment done for " + agent);
 		
 	}
 	
@@ -293,7 +293,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
         double co2Intensity = plant.calculateEmissionIntensity();
         mc += co2Intensity * expectedCO2Price.get(market);
         
-        logger.log(Level.FINE, "expected marginal cost of plant" + plant + " is " + mc);
+        logger.log(Level.FINER, "expected marginal cost of plant" + plant + " is " + mc);
         return mc;
 
     }
@@ -334,11 +334,11 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
 
 	public double determineExpectedMarginalFuelCost(PowerPlant powerPlant, Map<Substance, Double> expectedFuelPrices) {
 	      double fc = 0d;
-	      logger.info("Fuel mix of plant: " + powerPlant + " of owner " + powerPlant.getOwner() + " is " + powerPlant.getFuelMix());
+	      logger.finer("Fuel mix of plant: " + powerPlant + " of owner " + powerPlant.getOwner() + " is " + powerPlant.getFuelMix());
 	      for (SubstanceShareInFuelMix mix : powerPlant.getFuelMix()) {
 	          double amount = mix.getShare();
-	          logger.info("amount of fuel: " + amount);
-	          logger.info("fuel prices: " + expectedFuelPrices.size());
+	          logger.finer("amount of fuel: " + amount);
+	          logger.finer("fuel prices: " + expectedFuelPrices.size());
 	          double fuelPrice = expectedFuelPrices.get(mix.getSubstance());
 	          fc += amount * fuelPrice;
 	      }
@@ -522,7 +522,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
                     / (marketInformation.maxExpectedLoad + plant.getActualNominalCapacity()) > technology
                     .getMaximumInstalledCapacityFractionInCountry()) {
             	
-                logger.log(Level.FINE, 
+                logger.log(Level.FINER, 
                 		agent + " will not invest in {} technology because there's too much of this type in the market", technology);
             
             } else if ((expectedInstalledCapacityOfTechnologyInNode + plant.getActualNominalCapacity()) > pgtNodeLimit) {
@@ -532,24 +532,24 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
             } else if (expectedOwnedCapacityInMarketOfThisTechnology > expectedOwnedTotalCapacityInMarket
                     * technology.getMaximumInstalledCapacityFractionPerAgent()) {
                  
-            	logger.log(Level.FINE, 
+            	logger.log(Level.FINER, 
                 		 agent + " will not invest in {} technology because there's too much capacity planned by him", technology);
             
             } else if (capacityInPipelineInMarket > 0.2 * marketInformation.maxExpectedLoad) {
-            	logger.log(Level.FINE, "Not investing because more than 20% of demand in pipeline.");
+            	logger.log(Level.FINER, "Not investing because more than 20% of demand in pipeline.");
 
             
             } else if ((capacityOfTechnologyInPipeline > 2.0 * operationalCapacityOfTechnology)
                     && capacityOfTechnologyInPipeline > 9000) { // TODO: reflects that you cannot expand a technology out of zero.
-            	logger.log(Level.FINE, agent +" will not invest in {} technology because there's too much capacity in the pipeline", technology);
+            	logger.log(Level.FINER, agent +" will not invest in {} technology because there's too much capacity in the pipeline", technology);
             
             } else if (plant.getActualInvestedCapital() * (1 - agent.getDebtRatioOfInvestments()) > agent
                     .getDownpaymentFractionOfCash() * agent.getCash()) {
-            	logger.log(Level.FINE, agent +" will not invest in {} technology as he does not have enough money for downpayment", technology);
+            	logger.log(Level.FINER, agent +" will not invest in {} technology as he does not have enough money for downpayment", technology);
             
             } else {
             	
-            	logger.log(Level.FINE,  technology + " passes capacity limit. " + agent + " will now calculate financial viability.");
+            	logger.log(Level.FINER,  technology + " passes capacity limit. " + agent + " will now calculate financial viability.");
             	setViableInvestment(true);
             	
 	
@@ -702,7 +702,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
             double discountedCapitalCosts = calculateDiscountedCashFlowForPlant(
                     technology.getDepreciationTime(), plant.getActualInvestedCapital(), 0);
             
-            logger.log(Level.FINE, 
+            logger.log(Level.FINER, 
             		"Agent " + agent +  " found the discounted capital costs for " + technology + " to be " + discountedCapitalCosts);
             
             return discountedCapitalCosts;
@@ -719,7 +719,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
             double discountedOperatingProfit = calculateDiscountedCashFlowForPlant(
                     technology.getDepreciationTime(), 0, operatingProfit);
     	
-            logger.log(Level.FINE, 
+            logger.log(Level.FINER, 
             		"Agent " + agent +  " found the discounted operating profit for " + technology + " to be " + discountedOperatingProfit);
 
             return discountedOperatingProfit;  
@@ -740,7 +740,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
             double discountedProjectOperatingCost = calculateDiscountedCashFlowForPlant(
                     technology.getDepreciationTime(), 0, -operatingCost);
 		   
-		    logger.log(Level.FINE, 
+		    logger.log(Level.FINER, 
 		    		"Agent " + agent +  " found the discounted operating costs for " + technology + " to be " + discountedProjectOperatingCost);
 		
 		    return discountedProjectOperatingCost;  
@@ -759,7 +759,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
 
             double projectValue = discountedOperatingProfit + discountedCapitalCosts;
     		
-            logger.info(agent + " found the project value for technology " + technology + " to be " + Math.round(projectValue / (plant.getActualNominalCapacity() * 1e3)) / 1e3 + " million EUR/kW (running hours: " + runningHours + ")");
+            logger.finer(agent + " found the project value for technology " + technology + " to be " + Math.round(projectValue / (plant.getActualNominalCapacity() * 1e3)) / 1e3 + " million EUR/kW (running hours: " + runningHours + ")");
             // double projectTotalValue = projectValuePerMW *
             // plant.getActualNominalCapacity();
             // double projectReturnOnInvestment = discountedOpProfit
@@ -787,7 +787,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
     	public boolean plantHasRequiredRunningHours() {
             
     		if (getRunningHours() < plant.getTechnology().getMinimumRunningHours()) {
-                logger.log(Level.FINE, 
+                logger.log(Level.FINER, 
                 		agent + " will not invest in " + plant.getTechnology() + " technology as he expect to have " + getRunningHours() + " running hours, which is lower then required");
                 return false; 
              } else {

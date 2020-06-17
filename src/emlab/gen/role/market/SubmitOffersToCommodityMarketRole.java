@@ -38,7 +38,7 @@ public class SubmitOffersToCommodityMarketRole extends AbstractRole<CommoditySup
     }
 
     public void act(CommoditySupplier supplier) {
-        logger.info("Submitting offers to commodity market");
+        logger.finer("Submitting offers to commodity market");
 
         DecarbonizationMarket market = getReps().findMarketBySubstance(supplier.getSubstance());
 
@@ -46,6 +46,6 @@ public class SubmitOffersToCommodityMarketRole extends AbstractRole<CommoditySup
         double amount = supplier.getAmountOfCommodity();
 
         Bid bid = getReps().submitBidToMarket(market, supplier, getCurrentTick(), true, price, amount);
-        logger.info("Submitted " + bid);
+        logger.finer("Submitted " + bid);
     }
 }

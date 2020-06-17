@@ -105,16 +105,16 @@ public class EMlabModelRole extends AbstractRole<EMLabModel> implements Role<EML
          * Finish simulation
          */
         if (getCurrentTick() >= model.getSimulationLength()) {
-            logger.log(Level.WARNING, "Simulation is stopping");
+            logger.log(Level.INFO, "Simulation is stopping");
             schedule.stop();
             if (getCurrentTick() > model.getSimulationLength() && model.isExitSimulationAfterSimulationLength()) {
-                logger.log(Level.WARNING, "Simulation is terminating");
+                logger.log(Level.INFO, "Simulation is terminating");
                 System.exit(0);
             }
         }
 
         if (model.isDeletionOldPPDPBidsAndCashFlowsEnabled()){// && (getCurrentTick() - model.getDeletionAge() >= 0)) {
-            logger.log(Level.INFO, "  0. Delete old nodes in year {0}.", (getCurrentTick() - model.getDeletionAge()));
+            logger.log(Level.FINER, "  0. Delete old nodes in year {0}.", (getCurrentTick() - model.getDeletionAge()));
             getReps().removeBidsUpToTime(getCurrentTick() - 1);
             getReps().removeCashFlowsUpToTime(getCurrentTick() - 1);
             getReps().removePowerPlantsDismantledUpToTime(getCurrentTick() - 1);

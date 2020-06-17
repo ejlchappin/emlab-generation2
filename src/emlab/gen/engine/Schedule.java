@@ -51,22 +51,22 @@ public class Schedule {
             Logger.getLogger(Schedule.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        logger.warning("Main model role " + mainRole.getClass());
+        logger.info("Main model role " + mainRole.getClass());
         this.mainRole.setSchedule(this);
 
-        logger.warning("Building scenario " + this.getClass());
+        logger.info("Building scenario " + this.getClass());
         this.scenario.build(this);
-        logger.warning("Scenario built");
+        logger.info("Scenario built");
 
     }
 
     public void start() {
-        logger.warning("Starting simulation iteration " + getIteration());
+        logger.info("Starting simulation iteration " + getIteration());
 
         if (this.state == EngineState.STOPPED || this.state == EngineState.CRASHED) {
             this.state = EngineState.RUNNING;
             while (this.state != EngineState.STOPPING) {
-                logger.log(Level.WARNING, "***** ITERATION " + getIteration() + " STARTING TICK {0} *****", getCurrentTick());
+                logger.log(Level.INFO, "***** ITERATION " + getIteration() + " STARTING TICK {0} *****", getCurrentTick());
                 timer = new Timer();
                 timer.reset();
                 timer.start();
@@ -77,7 +77,7 @@ public class Schedule {
                     e.printStackTrace();
                 }
                 timer.stop();
-                logger.log(Level.WARNING, "Tick took {0} seconds.", timer.seconds());
+                logger.log(Level.INFO, "Tick took {0} seconds.", timer.seconds());
                 reporter.report(this);
                 
                 if(this.state == EngineState.PAUSING) {

@@ -159,7 +159,7 @@ public class PowerPlant {
                                 .getBaseSegmentDependentAvailability();
                         double segmentPortion = (numberOfSegments - segmentID)
                                 / (numberOfSegments - 1); 
-                        Logger.getGlobal().info("Segment portion for segment " + segmentID +  " is "+ segmentPortion);
+                        Logger.getGlobal().finer("Segment portion for segment " + segmentID +  " is "+ segmentPortion);
 
 // start
                         // counting
@@ -176,7 +176,7 @@ public class PowerPlant {
                 }
                 double cap = getActualNominalCapacity() * factor;
                 if (factor < 1) {
-                    Logger.getGlobal().info("Capacity factor for " + getTechnology() + " is " + cap + " for segment " + segment + " because load factor is " + factor);
+                    Logger.getGlobal().finer("Capacity factor for " + getTechnology() + " is " + cap + " for segment " + segment + " because load factor is " + factor);
                 }
                 return cap;
             }

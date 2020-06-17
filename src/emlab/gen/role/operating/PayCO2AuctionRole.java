@@ -42,7 +42,7 @@ public class PayCO2AuctionRole extends AbstractEnergyProducerRole<EnergyProducer
 
     @Override
     public void act(EnergyProducer producer) {
-        logger.info("Pay for the CO2 credits");
+        logger.finer("Pay for the CO2 credits");
 
         Government government = getReps().government;
 
@@ -50,12 +50,12 @@ public class PayCO2AuctionRole extends AbstractEnergyProducerRole<EnergyProducer
             double money = calculateCO2MarketCost(plant, false, getCurrentTick());
             CashFlow cf = getReps().createCashFlow(producer, government, money, CashFlow.CO2AUCTION,
                     getCurrentTick(), plant);
-            logger.log(Level.INFO, "Cash flow created: {0}", cf);
+            logger.log(Level.FINER, "Cash flow created: {0}", cf);
             double minCO2Money = calculatePaymentEffictiveCO2NationalMinimumPriceCost(plant, false, getCurrentTick());
             NationalGovernment nationalGovernment = getReps().findNationalGovernmentByPowerPlant(plant);
             CashFlow cf2 = getReps().createCashFlow(producer, nationalGovernment, minCO2Money,
                     CashFlow.NATIONALMINCO2, getCurrentTick(), plant);
-            logger.log(Level.INFO, "Cash flow created: {0}", cf2);
+            logger.log(Level.FINER, "Cash flow created: {0}", cf2);
         }
 
         CO2Auction auction = getReps().co2Auction;

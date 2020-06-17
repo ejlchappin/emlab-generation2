@@ -59,7 +59,7 @@ public class SelectLongTermElectricityContractsRole extends
 
     public void act(EnergyConsumer consumer) {
 
-        logger.log(Level.INFO, "{} will now accept offers or not", consumer);
+        logger.log(Level.FINER, "{} will now accept offers or not", consumer);
         existingContractsInformations = new HashMap<Zone, ExistingContractsInformation>();
 
         // Make an overview of the capacity of existing contracts per ltc type.

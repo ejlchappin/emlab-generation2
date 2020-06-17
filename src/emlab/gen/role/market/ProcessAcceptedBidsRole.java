@@ -48,7 +48,7 @@ public class ProcessAcceptedBidsRole extends AbstractMarketRole<DecarbonizationM
 
     public void act(DecarbonizationMarket market) {
 
-        logger.info("Process accepted bids to cash flow now");
+        logger.finer("Process accepted bids to cash flow now");
         int cashFlowType = 0;
         boolean isCO2Traded = false;
         if (market instanceof CO2Auction) {

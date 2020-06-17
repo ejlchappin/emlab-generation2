@@ -38,7 +38,7 @@ public class DismantlePowerPlantOperationalLossRole extends AbstractEnergyProduc
     @Override
     public void act(EnergyProducer producer) {
 
-        logger.info("Dismantling plants if out of merit");
+        logger.finer("Dismantling plants if out of merit");
 
         // dismantle plants when passed technical lifetime.
         for (PowerPlant plant : getReps().findOperationalPowerPlantsByOwner(producer, getCurrentTick())) {
@@ -46,7 +46,7 @@ public class DismantlePowerPlantOperationalLossRole extends AbstractEnergyProduc
             double requiredProfit = producer.getDismantlingRequiredOperatingProfit();
             double profit = calculateAveragePastOperatingProfit(plant, horizon);
             if (profit < requiredProfit) {
-                logger.info("Dismantling power plant because it has had an operating loss (incl O&M cost) on average in the last "
+                logger.finer("Dismantling power plant because it has had an operating loss (incl O&M cost) on average in the last "
                         + horizon + " years: " + plant + " was " + profit + " which is less than required: " + requiredProfit);
                 plant.dismantlePowerPlant(getCurrentTick());
 

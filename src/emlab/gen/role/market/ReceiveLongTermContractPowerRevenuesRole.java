@@ -46,7 +46,7 @@ public class ReceiveLongTermContractPowerRevenuesRole extends AbstractEnergyProd
    @Override
     public void act(EnergyProducer producer) {
 
-        logger.info("Process electricity revenues");
+        logger.finer("Process electricity revenues");
 
         // Receive revenues for all long term contracts
         for (Segment segment : getReps().segments) {
@@ -86,7 +86,7 @@ public class ReceiveLongTermContractPowerRevenuesRole extends AbstractEnergyProd
                 }
 
                 double pricePerMWh = updatedPrice / (longTermContract.getCapacity() * hours);
-                logger.info("Revenue from long term contract @ " + pricePerMWh + " euro/MWh");
+                logger.finer("Revenue from long term contract @ " + pricePerMWh + " euro/MWh");
             }
         }
 

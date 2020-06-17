@@ -51,7 +51,7 @@ public class CreatingFinancialReports extends AbstractClearElectricitySpotMarket
         for (Substance substance : getReps().substances) {
             fuelPriceMap.put(substance, findLastKnownPriceForSubstance(substance));
         }
-        logger.info(fuelPriceMap.toString());
+        logger.finer(fuelPriceMap.toString());
 
         createFinancialReportsForPowerPlantsAndTick(
                 getReps().findAllPowerPlantsWhichAreNotDismantledBeforeTick(getCurrentTick() - 2),
@@ -95,7 +95,7 @@ public class CreatingFinancialReports extends AbstractClearElectricitySpotMarket
                         + substanceCost);
 
             }
-            logger.info(" CO2 costs for " + plant);
+            logger.finer(" CO2 costs for " + plant);
 
             List<CashFlow> cashFlows = getReps().getCashFlowsForPowerPlant(plant, tick);
 
@@ -140,31 +140,31 @@ public class CreatingFinancialReports extends AbstractClearElectricitySpotMarket
 
     public double calculateSpotMarketRevenueOfPowerPlant(List<CashFlow> cashFlows) {
         double toReturn = cashFlows.stream().filter(p -> p.getType() == CashFlow.ELECTRICITY_SPOT).collect(Collectors.summarizingDouble(CashFlow::getMoney)).getSum();
-        Logger.getGlobal().info("Income Spot " + toReturn);
+        Logger.getGlobal().finer("Income Spot " + toReturn);
         return toReturn;
     }
 
     public double calculateLongTermContractRevenueOfPowerPlant(List<CashFlow> cashFlows) {
         double toReturn = cashFlows.stream().filter(p -> p.getType() == CashFlow.ELECTRICITY_LONGTERM).collect(Collectors.summarizingDouble(CashFlow::getMoney)).getSum();
-        Logger.getGlobal().info("Income LT " + toReturn);
+        Logger.getGlobal().finer("Income LT " + toReturn);
         return toReturn;
     }
 
     public double calculateStrategicReserveRevenueOfPowerPlant(List<CashFlow> cashFlows) {
         double toReturn = cashFlows.stream().filter(p -> p.getType() == CashFlow.STRRESPAYMENT).collect(Collectors.summarizingDouble(CashFlow::getMoney)).getSum();
-        Logger.getGlobal().info("Income strategic reserve " + toReturn);
+        Logger.getGlobal().finer("Income strategic reserve " + toReturn);
         return toReturn;
     }
 
     public double calculateCapacityMarketRevenueOfPowerPlant(List<CashFlow> cashFlows) {
         double toReturn = cashFlows.stream().filter(p -> p.getType() == CashFlow.CAPMARKETPAYMENT).collect(Collectors.summarizingDouble(CashFlow::getMoney)).getSum();
-        Logger.getGlobal().info("Income Capacity market " + toReturn);
+        Logger.getGlobal().finer("Income Capacity market " + toReturn);
         return toReturn;
     }
 
     public double calculateCO2HedgingRevenueOfPowerPlant(List<CashFlow> cashFlows) {
         double toReturn = cashFlows.stream().filter(p -> p.getType() == CashFlow.CO2HEDGING).collect(Collectors.summarizingDouble(CashFlow::getMoney)).getSum();
-        Logger.getGlobal().info("Income CO2 Hedging" + toReturn);
+        Logger.getGlobal().finer("Income CO2 Hedging" + toReturn);
         return toReturn;
     }
 

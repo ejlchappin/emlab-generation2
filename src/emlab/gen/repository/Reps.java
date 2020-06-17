@@ -837,7 +837,7 @@ public class Reps {
     public List<PowerPlantDispatchPlan> findSortedPowerPlantDispatchPlansForSegmentForTime(Segment segment,
             long time, boolean forecast) {
         List<PowerPlantDispatchPlan> list = powerPlantDispatchPlans.stream().filter(p -> p.getTime() == time).filter(p -> p.getSegment() == segment).filter(p -> p.isForecast() == forecast).collect(Collectors.toList());
-        Logger.getGlobal().info("NUmber of plans: " + list.size());
+        Logger.getGlobal().finer("NUmber of plans: " + list.size());
         list.sort(Comparator.comparing(o -> o.getPrice()));
         return list;
     }
@@ -1185,7 +1185,7 @@ public class Reps {
             PowerGeneratingTechnology technology, long tick) {
         double sum = powerPlants.stream().filter(p -> p.isInPipeline(tick)).filter(p -> p.getTechnology().equals(technology)).collect(Collectors.summarizingDouble(PowerPlant::getActualNominalCapacity)).getSum();
         if (sum > 0) {
-            logger.info("Pipeline capacity for " + technology + " is " + sum + " MW");
+            logger.finer("Pipeline capacity for " + technology + " is " + sum + " MW");
         }
         return sum;
 
@@ -1483,7 +1483,7 @@ public class Reps {
         plan.setStatus(status);
         plan.setForecast(forecast);
         powerPlantDispatchPlans.add(plan);
-        logger.info("Plans:" + powerPlantDispatchPlans.size());
+        logger.finer("Plans:" + powerPlantDispatchPlans.size());
         return plan;
     }
 

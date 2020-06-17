@@ -42,7 +42,7 @@ public class ClearCommodityMarketRole extends AbstractMarketRole<CommodityMarket
    
     public void act(CommodityMarket market) {
 
-        logger.log(Level.INFO, "Clearing the commodity market for {}", market.getSubstance());
+        logger.log(Level.FINER, "Clearing the commodity market for {}", market.getSubstance());
 
         // clear the market
         // Iterable<Bid> demandBids = getReps().bidRepository.findDemandBidsForMarketForTime(market, getCurrentTick());
@@ -52,7 +52,7 @@ public class ClearCommodityMarketRole extends AbstractMarketRole<CommodityMarket
 
         if (clearingPoint != null) {
             // clearingPoint.updateAbstractMarket(market); // TODO why is this line here, is this needed, it is already done before right?
-            logger.info("Clearing: price " + clearingPoint.getPrice() + " / volume " + clearingPoint.getVolume());
+            logger.finer("Clearing: price " + clearingPoint.getPrice() + " / volume " + clearingPoint.getVolume());
         } else {
             logger.log(Level.WARNING, "{} did not clear!", market);
         }

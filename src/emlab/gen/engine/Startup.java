@@ -46,7 +46,7 @@ public class Startup {
         boolean logForApp = true;
 
 
-        Logger.getGlobal().setLevel(Level.WARNING);
+        Logger.getGlobal().setLevel(Level.INFO);
         try {
             FileHandler handler = new FileHandler(reporterDirectoryName + runID + "-log.txt");
             
@@ -61,8 +61,8 @@ public class Startup {
         } catch (SecurityException ex) {
             Logger.getLogger(Startup.class.getName()).log(Level.SEVERE, null, ex);
         }
-        Logger.getGlobal().warning("Starting EMLab-Generation 2");
-        Logger.getGlobal().warning("Run id is " + runID);
+        Logger.getGlobal().info("Starting EMLab-Generation 2");
+        Logger.getGlobal().info("Run id is " + runID);
 
         for (int i = 0; i < args.length; i++) {
             if (args[i].contains("=")) {
@@ -107,7 +107,7 @@ public class Startup {
             Logger.getLogger(Schedule.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        logger.warning("Reporter enabled: " + reporter.getClass());
+        logger.info("Reporter enabled: " + reporter.getClass());
 
         
         
@@ -121,7 +121,7 @@ public class Startup {
                      //Check whether we need workers for new iterations and whether we have space for a new worker
             if ((activeWorkers.size() < numberOfParallelJobs && iteration < numberOfIterations)) {
                 iteration++;
-                Logger.getGlobal().warning("Starting worker for iteration " + iteration);
+                Logger.getGlobal().info("Starting worker for iteration " + iteration);
                 ScheduleWorker worker = new ScheduleWorker(runID, iteration, scenarioName, modelRole, reporter);
                 activeWorkers.add(worker);
                     worker.execute();
@@ -131,7 +131,7 @@ public class Startup {
             for (ScheduleWorker worker : activeWorkers) {
                
                 if (worker.isDone()) {
-                    Logger.getGlobal().warning("Worker was found completed.");
+                    Logger.getGlobal().info("Worker was found completed.");
                     doneWorkers.add(worker);
                 }
             }
@@ -146,6 +146,6 @@ public class Startup {
         }
 
         //Out of the loop, all iterations have been performed and all workers are done
-        Logger.getGlobal().warning("All is done.");
+        Logger.getGlobal().info("All is done.");
     }
 }

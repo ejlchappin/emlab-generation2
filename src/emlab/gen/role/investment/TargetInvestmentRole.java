@@ -44,7 +44,7 @@ public class TargetInvestmentRole extends GenericInvestmentRole<TargetInvestor> 
     public void act(TargetInvestor targetInvestor) {
 
         for (PowerGeneratingTechnologyTarget target : targetInvestor.getPowerGenerationTechnologyTargets()) {
-            logger.info(targetInvestor + " is looking at " + target);
+            logger.finer(targetInvestor + " is looking at " + target);
             PowerGeneratingTechnology pgt = target.getPowerGeneratingTechnology();
             long futureTimePoint = getCurrentTick() + pgt.getExpectedLeadtime() + pgt.getExpectedPermittime();
             double expectedInstalledCapacity = getReps().calculateCapacityOfExpectedOperationalPowerPlantsInMarketAndTechnology(targetInvestor.getInvestorMarket(), pgt, futureTimePoint);
@@ -64,7 +64,7 @@ public class TargetInvestmentRole extends GenericInvestmentRole<TargetInvestor> 
             }
 
             if (installedCapacityDeviation > 0 && installedCapacityDeviation > pgt.getCapacity()) {
-                logger.warning(targetInvestor + " needs to invest " + installedCapacityDeviation + " MW");
+                logger.finer(targetInvestor + " needs to invest " + installedCapacityDeviation + " MW");
                 double powerPlantCapacityRatio = installedCapacityDeviation / pgt.getCapacity();
 
                 PowerGridNode installationNode = targetInvestor.getSpecificPowerGridNode();

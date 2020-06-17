@@ -40,15 +40,15 @@ public class PayCO2TaxRole extends AbstractEnergyProducerRole<EnergyProducer> im
 
     @Override
     public void act(EnergyProducer producer) {
-        logger.info("Pay the CO2 tax");
+        logger.finer("Pay the CO2 tax");
 
         Government government = getReps().government;
 
         for (PowerPlant plant : getReps().findOperationalPowerPlantsByOwner(producer, getCurrentTick())) {
-            logger.info("co2 tax for " + plant);
+            logger.finer("co2 tax for " + plant);
             double money = calculateCO2Tax(plant, false, getCurrentTick());
             CashFlow cf = getReps().createCashFlow(producer, government, money, CashFlow.CO2TAX, getCurrentTick(), plant);
-            logger.info("Cash flow created: {}" + cf);
+            logger.finer("Cash flow created: {}" + cf);
         }
     }
 

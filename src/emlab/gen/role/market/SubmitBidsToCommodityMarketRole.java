@@ -49,7 +49,7 @@ public class SubmitBidsToCommodityMarketRole extends AbstractEnergyProducerRole<
     @Override
     public void act(EnergyProducer producer) {
 
-        logger.info("Purchasing commodities");
+        logger.finer("Purchasing commodities");
 
         HashMap<Substance, Double> fuelAmounts = new HashMap<Substance, Double>();
 
@@ -77,7 +77,7 @@ public class SubmitBidsToCommodityMarketRole extends AbstractEnergyProducerRole<
                 Bid bid = getReps().submitBidToMarket(
                         getReps().findMarketBySubstance(substance), producer, getCurrentTick(), false, Double.MAX_VALUE,
                         fuelAmounts.get(substance));
-                logger.info("Submited bid " + bid);
+                logger.finer("Submited bid " + bid);
             }
         }
     }

@@ -30,7 +30,7 @@ public class TimeSeriesCSVReader extends TimeSeriesImpl {
 
     private void readSingleColumn() {
 
-        logger.warning("Trying to read single column CSV file: " + filename);
+        logger.info("Trying to read single column CSV file: " + filename);
 
         String data = new String();
 
@@ -63,7 +63,7 @@ public class TimeSeriesCSVReader extends TimeSeriesImpl {
     }
 
     private void readVariableFromCSV() {
-        logger.warning("Trying to read variable " + variableName + " from CSV file: " + filename + " with delimiter "
+        logger.info("Trying to read variable " + variableName + " from CSV file: " + filename + " with delimiter "
                 + delimiter);
 
         // Save the data in a long String

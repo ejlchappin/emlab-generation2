@@ -46,7 +46,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
 
         long clearingTick = getCurrentTick();
 
-        logger.info("0. Determining the residual load duration curve");
+        logger.finer("0. Determining the residual load duration curve");
 
         // 1. Create big matrix which contains columns for the information later
         // used.
@@ -97,13 +97,13 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
 
         Map<Zone, Map<PowerGridNode, Map<PowerGeneratingTechnology, Integer>>> TECHNOLOGYLOADFACTORSFORZONEANDNODE = new HashMap<Zone, Map<PowerGridNode, Map<PowerGeneratingTechnology, Integer>>>();
         for (Zone zone : getReps().zones) {
-            logger.info("Found a zone " + zone);
+            logger.finer("Found a zone " + zone);
             Map<PowerGridNode, Map<PowerGeneratingTechnology, Integer>> NODETOTECHNOLOGY = new HashMap<PowerGridNode, Map<PowerGeneratingTechnology, Integer>>();
             for (PowerGridNode node : getReps().findAllPowerGridNodesByZone(zone)) {
-                logger.info("Found a node " + node + " for zone " + zone);
+                logger.finer("Found a node " + node + " for zone " + zone);
                 Map<PowerGeneratingTechnology, Integer> technologyToColumn = new HashMap<PowerGeneratingTechnology, Integer>();
                 for (PowerGeneratingTechnology technology : getReps().findAllIntermittentPowerGeneratingTechnologies()) {
-                    logger.info("Found an intermittent pgt " + technology);
+                    logger.finer("Found an intermittent pgt " + technology);
 
                     technologyToColumn.put(technology, columnIterator);
                     columnIterator++;
@@ -178,7 +178,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
                     IntermittentResourceProfile intermittentResourceProfile = getReps()
                             .findIntermittentResourceProfileByTechnologyAndNode(technology, node);
 
-                    logger.info("Tech" + technology + " in node " + node);
+                    logger.finer("Tech" + technology + " in node " + node);
                     // Calculates hourly production of intermittent renewable
                     // technology per node
                     DoubleMatrix1D hourlyProductionPerNode = new DenseDoubleMatrix1D(
@@ -336,7 +336,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         DoubleMatrix1D differenceVector = m.viewColumn(12).copy();
         differenceVector.assign(m.viewColumn(13), Functions.minus);
         double result = differenceVector.aggregate(Functions.plus, Functions.identity);
-        logger.info("Result: " + result);
+        logger.finer("Result: " + result);
         // Divide all the technology load factors in the zone by the spill
         // factors above
         for (Zone zone : getReps().zones) {
@@ -351,9 +351,9 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
         // Make the interconnector capacity postive
         m.viewColumn(INTERCONNECTOR).assign(Functions.mult(-1));
 
-         logger.info("Number of hours where both countries of negative residual load: "
+         logger.finer("Number of hours where both countries of negative residual load: "
          + numberOfHoursWereBothCountriesHaveNegativeResidualLoad);
-         logger.info("Number of hours where one country exports to the other: "
+         logger.finer("Number of hours where one country exports to the other: "
          + numberOfHoursWhereOneCountryExportsREStoTheOther);
         // 5. Order the hours in the global residual load curve. Peak load
         // first, base load last.
@@ -437,9 +437,9 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
             loadFactorBinMap.put(zone, NODETOTECHNOLOGY);
         }
 
-         logger.info("Max: " + max + "\n" + "Min: " + min);
+         logger.finer("Max: " + max + "\n" + "Min: " + min);
          for (double value : upperBoundSplit) {
-         logger.info("Split-Value:" + value);
+         logger.finer("Split-Value:" + value);
          }
         // Assign hours and load to bins and segments
         int currentSegmentID = 1;
@@ -520,11 +520,11 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
                 averageSegmentDeviation = averageSegmentDeviation * 1000;
                 averageSegmentDeviation = Math.round(averageSegmentDeviation);
                 averageSegmentDeviation = averageSegmentDeviation / 1000;
-                logger.info("For " + zone + ", " + hoursInDifferentSegment
+                logger.finer("For " + zone + ", " + hoursInDifferentSegment
                         + " hours would have been in different segments, and on average " + averageSegmentDeviation
                         + " Segments away from the segment they were in.");
             } else {
-                logger.info("For " + zone + ", all hours were in the same segment, as for combined sorting!");
+                logger.finer("For " + zone + ", all hours were in the same segment, as for combined sorting!");
             }
 
         }
@@ -622,7 +622,7 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
                         it++;
                     }
                     getReps().intermittentTechnologyNodeLoadFactors.add(intTechnologyNodeLoadFactor);
-                    logger.info(loadFactorString);
+                    logger.finer(loadFactorString);
                 }
 
             }
@@ -636,10 +636,10 @@ public class DetermineResidualLoadCurvesForTwoCountriesRole extends AbstractRole
             Zone zone = segmentLoad.getElectricitySpotMarket().getZone();
             double demandGrowthFactor = getReps().findElectricitySpotMarketForZone(zone)
                     .getDemandGrowthTrend().getValue(clearingTick);
-            logger.info("Segment-----" + segment.getSegmentID());
+            logger.finer("Segment-----" + segment.getSegmentID());
             segmentLoad.setBaseLoad(segmentLoadBinsByZone.get(zone)[segment.getSegmentID() - 1].mean()
                     / demandGrowthFactor);
-             logger.info("Segment " + segment.getSegmentID() + ": " +
+             logger.finer("Segment " + segment.getSegmentID() + ": " +
              segmentLoad.getBaseLoad() + "MW");
         }
 

@@ -33,7 +33,7 @@ public class HourlyCSVTimeSeries implements HourlyTimeSeries {
 
     private void readData() {
 
-        logger.warning("Trying to read CSV file: " + filename);
+        logger.info("Trying to read CSV file: " + filename);
 
         String data = new String();
 

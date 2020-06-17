@@ -46,7 +46,7 @@ public class MarketVerificationRole extends AbstractMarketRole<ElectricitySpotMa
 
     public void act(ElectricitySpotMarket aRandomMarketNotToBeUsed) {
 
-        logger.info("Validating the markets");
+        logger.finer("Validating the markets");
 
         // find all power plants and store the ones operational to a list.
         List<PowerPlant> powerPlants = new ArrayList<PowerPlant>();

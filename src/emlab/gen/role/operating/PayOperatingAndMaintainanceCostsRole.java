@@ -40,7 +40,7 @@ public class PayOperatingAndMaintainanceCostsRole extends AbstractEnergyProducer
 
     @Override
     public void act(EnergyProducer producer) {
-        logger.info("Pay the Operating and Maintainance cost tax");
+        logger.finer("Pay the Operating and Maintainance cost tax");
 
         PowerPlantMaintainer maintainer = getReps().powerPlantMaintainer;
         int i = 0;
@@ -48,9 +48,9 @@ public class PayOperatingAndMaintainanceCostsRole extends AbstractEnergyProducer
             i++;
 			double money = plant.getActualFixedOperatingCost();
             // TODO calculate actual based on modifier.
-            logger.log(Level.INFO, "Im paying {0} for O and M of plant {1}", new Object[]{money, plant.getName()});
+            logger.log(Level.FINER, "Im paying {0} for O and M of plant {1}", new Object[]{money, plant.getName()});
             getReps().createCashFlow(producer, maintainer, money, CashFlow.FIXEDOMCOST, getCurrentTick(), plant);
         }
-        logger.log(Level.INFO, "I: {0} have paid for {1} plants", new Object[]{producer, i});
+        logger.log(Level.FINER, "I: {0} have paid for {1} plants", new Object[]{producer, i});
     }
 }

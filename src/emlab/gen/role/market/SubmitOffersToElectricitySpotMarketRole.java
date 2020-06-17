@@ -106,7 +106,7 @@ public class SubmitOffersToElectricitySpotMarketRole extends AbstractEnergyProdu
                 price = mc * producer.getPriceMarkUp();
             }
 
-            logger.info("Submitting offers for " + plant.getName() + " with technology " + plant.getTechnology().getName() + " in market " + market);
+            logger.finer("Submitting offers for " + plant.getName() + " with technology " + plant.getTechnology().getName() + " in market " + market);
 
 //            List<PowerPlantDispatchPlan> plans = getReps().findPowerPlantDispatchPlansForPowerPlantForTime(plant, tick, forecast);
 
@@ -119,7 +119,7 @@ public class SubmitOffersToElectricitySpotMarketRole extends AbstractEnergyProdu
                     capacity = plant.getExpectedAvailableCapacity(tick, segment, numberOfSegments);
                 }
 
-                logger.info("I bid capacity: " + capacity + " and price: " + mc + " in market " + market);
+                logger.finer("I bid capacity: " + capacity + " and price: " + mc + " in market " + market);
 
                 //TODO THIS BREAKS!
 //                getReps().findPowerPlantDispatchPlansForPowerPlantForTime(plant, tick, forecast).
@@ -139,7 +139,7 @@ public class SubmitOffersToElectricitySpotMarketRole extends AbstractEnergyProdu
                 plan.setForecast(forecast);
                 plan.setSegment(segment);
                 
-                logger.info("I bid capacity: " + capacity + " and price: " + mc + " in market " + market + " in plan " + plan);
+                logger.finer("I bid capacity: " + capacity + " and price: " + mc + " in market " + market + " in plan " + plan);
 //                ppdpList.add(plan);
 
             }

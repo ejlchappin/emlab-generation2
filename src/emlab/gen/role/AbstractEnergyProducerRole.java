@@ -127,19 +127,19 @@ public abstract class AbstractEnergyProducerRole<T extends EnergyProducer> exten
         Substance substance = market.getSubstance();
 
         if (average != null) {
-            logger.info("Average price found on market for this tick for " + substance.getName());
+            logger.finer("Average price found on market for this tick for " + substance.getName());
             return average;
         }
 
         average = calculateAverageMarketPriceBasedOnClearingPoints(getReps().findClearingPointsForMarketAndTime(
                 market, clearingTick - 1, false));
         if (average != null) {
-            logger.info("Average price found on market for previous tick for "+ substance.getName());
+            logger.finer("Average price found on market for previous tick for "+ substance.getName());
             return average;
         }
 
         if (market.getReferencePrice() > 0) {
-            logger.info("Found a reference price found for market for " + substance.getName());
+            logger.finer("Found a reference price found for market for " + substance.getName());
             return market.getReferencePrice();
         }
 
@@ -290,16 +290,16 @@ public abstract class AbstractEnergyProducerRole<T extends EnergyProducer> exten
         for (long i = -horizon; i <= 0; i++) { 
             averagePastOperatingProfit += calculatePastOperatingProfitInclFixedOMCost(pp, getCurrentTick() + i) / horizon;
         }
-        logger.info(pp + " has had an average operating profit of " + averagePastOperatingProfit);
+        logger.finer(pp + " has had an average operating profit of " + averagePastOperatingProfit);
         return averagePastOperatingProfit;
     }
 
     public double calculatePastOperatingProfitInclFixedOMCost(PowerPlant plant, long clearingTick) {
         FinancialPowerPlantReport rep = getReps().findFinancialPowerPlantReportsForPlantForTime(plant, clearingTick);
         if (rep != null) { 
-            logger.info(plant + " report: tick " + clearingTick + " revenue: " + rep.getOverallRevenue() + " var cost: " + rep.getVariableCosts() + " fixed om cost: " + rep.getFixedOMCosts());
+            logger.finer(plant + " report: tick " + clearingTick + " revenue: " + rep.getOverallRevenue() + " var cost: " + rep.getVariableCosts() + " fixed om cost: " + rep.getFixedOMCosts());
             return rep.getOverallRevenue() - rep.getVariableCosts() - rep.getFixedOMCosts();}
-        logger.info("No financial report for " + plant + " for tick " + clearingTick + " so returning 0");
+        logger.finer("No financial report for " + plant + " for tick " + clearingTick + " so returning 0");
         return Double.MAX_VALUE; //TODO avoid dismantling simply becuase you have no data for the full horizon?
     }
     /**
@@ -317,7 +317,7 @@ public abstract class AbstractEnergyProducerRole<T extends EnergyProducer> exten
      */
     public Set<SubstanceShareInFuelMix> calculateFuelMix(PowerPlant plant, Map<Substance, Double> substancePriceMap, double co2Price) {
 
-        logger.log(Level.INFO, "Calculating fuel mix for {0}", plant);
+        logger.log(Level.FINER, "Calculating fuel mix for {0}", plant);
         double efficiency = plant.getActualEfficiency();
 
         Set<SubstanceShareInFuelMix> fuelMix = (plant.getFuelMix() == null) ? new HashSet<SubstanceShareInFuelMix>() : plant.getFuelMix();
@@ -325,7 +325,7 @@ public abstract class AbstractEnergyProducerRole<T extends EnergyProducer> exten
         int numberOfFuels = substancePriceMap.size();
         if (numberOfFuels == 0) {
         	if(plant.getTechnology().isIntermittent()) {
-                logger.log(Level.FINE, "Technology is intermittent, so empty fuel mix is returned");
+                logger.log(Level.FINER, "Technology is intermittent, so empty fuel mix is returned");
         	} else {
         		logger.log(Level.WARNING, "No fuels, so no operation mode is set. Empty fuel mix is returned");
         	}        		
@@ -609,7 +609,7 @@ public abstract class AbstractEnergyProducerRole<T extends EnergyProducer> exten
         // Fuel Prices
         Map<Substance, Double> expectedFuelPrices = new HashMap<Substance, Double>();
         for (Substance substance : getReps().substancesOnCommodityMarkets) {
-            logger.info("Predicting price for " + substance);
+            logger.finer("Predicting price for " + substance);
             //Find Clearing Points for the last 5 years (counting current year as one of the last 5 years).
             Iterable<ClearingPoint> cps = getReps().findAllClearingPointsForSubstanceTradedOnCommodityMarkesAndTimeRange(substance, getCurrentTick()
                     - (agent.getNumberOfYearsBacklookingForForecasting() - 1), getCurrentTick(), false);

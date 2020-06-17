@@ -275,10 +275,10 @@ public abstract class AbstractClearElectricitySpotMarketRole<T extends EMLabMode
         double marginalPlantMarginalCost = Double.MAX_VALUE;
 
         int i = getReps().powerPlantDispatchPlans.size();
-        logger.info("Number of plans: " + i);
+        logger.finer("Number of plans: " + i);
         for (PowerPlantDispatchPlan plan : getReps().findSortedPowerPlantDispatchPlansForSegmentForTime(
                 segment, clearingTick, forecast)) {
-            logger.info("Next plant: " + plan); //TODO Plan is broken.
+            logger.finer("Next plant: " + plan); //TODO Plan is broken.
             
             //TODO EMILE HERE ALREADY BROKEN
             ElectricitySpotMarket myMarket = getReps().findElectricitySpotMarketByPowerPlant(plan.getPowerPlant());
@@ -298,7 +298,7 @@ public abstract class AbstractClearElectricitySpotMarketRole<T extends EMLabMode
                 marginalPlantMarginalCost = plan.getPrice();
                 globalOutcome.supplies.put(myMarket, globalOutcome.supplies.get(myMarket) + plantSupply);
                 globalOutcome.globalSupply = +globalOutcome.globalSupply + plantSupply;
-                logger.info("Storing price: " + plan.getPrice() + " for plant " + plan.getPowerPlant() + " in market " + myMarket);
+                logger.finer("Storing price: " + plan.getPrice() + " for plant " + plan.getPowerPlant() + " in market " + myMarket);
 
             }
         }
@@ -539,36 +539,36 @@ public abstract class AbstractClearElectricitySpotMarketRole<T extends EMLabMode
         double deviation = (co2PriceStability.co2Emissions - co2Cap) / co2Cap;
 
         // Determine the deviation from the cap.
-        logger.info("Tick " + clearingTick + " Deviation: " + deviation * 100 + " %");
+        logger.finer("Tick " + clearingTick + " Deviation: " + deviation * 100 + " %");
 
         // check if the deviation is smaller then the criterion --> 1.
         // Close to the cap or almost stopped moving
         if (Math.abs(deviation) < capDeviationCriterion) {
-            logger.info("Deviation is less than capDeviationCriterion");
+            logger.finer("Deviation is less than capDeviationCriterion");
             co2PriceStability.stable = true;
         } else if (co2PriceStability.iterationSpeedFactor < iterationSpeedCriterion) {
-            logger.info("Deviation iterationSpeedFactor is less than iterationSpeedCriterion");
+            logger.finer("Deviation iterationSpeedFactor is less than iterationSpeedCriterion");
             co2PriceStability.stable = true;
         } else if (co2PriceStability.co2Price == minimumCo2Price && co2PriceStability.co2Emissions < co2Cap) {
-            logger.info("Deviation CO2 price has reached minimum");
+            logger.finer("Deviation CO2 price has reached minimum");
             // check if stable enough --> 2. Cap is met with a co2Price
             // equal to the minimum co2 price
             co2PriceStability.stable = true;
 
         } else if (co2PriceStability.co2Price >= co2Penalty && co2PriceStability.co2Emissions >= co2Cap) {
             // Only if above the cap...
-            logger.info("CO2 price ceiling reached " + co2PriceStability.co2Price);
+            logger.finer("CO2 price ceiling reached " + co2PriceStability.co2Price);
             co2PriceStability.stable = true;
         } else {
             co2PriceStability.co2Price = co2PriceStability.co2Price * (1 + deviation * co2PriceStability.iterationSpeedFactor);
-            logger.info("Deviation updated CO2 price to {}" + co2PriceStability.co2Price);
+            logger.finer("Deviation updated CO2 price to {}" + co2PriceStability.co2Price);
         }
 
         // if price is 0, but the cap is not met, we have to
         // change it, otherwise, you could never get out of 0.
         // In that case assume stability and assume a price of 2.
         if (co2PriceStability.co2Price == 0 && co2PriceStability.co2Emissions >= co2Cap) {
-            logger.info("Deviation resetting CO2 price to 2");
+            logger.finer("Deviation resetting CO2 price to 2");
             co2PriceStability.co2Price = 2;
             co2PriceStability.stable = true;
         }
@@ -576,7 +576,7 @@ public abstract class AbstractClearElectricitySpotMarketRole<T extends EMLabMode
         // make the speed smaller if we passed by the target
         if ((co2PriceStability.positive && deviation < 0) || (!co2PriceStability.positive && deviation > 0)) {
             co2PriceStability.iterationSpeedFactor = co2PriceStability.iterationSpeedFactor / 2;
-            logger.info("Deviation speed factor decreased " + co2PriceStability.iterationSpeedFactor);
+            logger.finer("Deviation speed factor decreased " + co2PriceStability.iterationSpeedFactor);
         }
 
         // If we are below the cap and close to or below the minimum
@@ -584,7 +584,7 @@ public abstract class AbstractClearElectricitySpotMarketRole<T extends EMLabMode
         // price set the price to the minimum co2
         // price.
         if ((co2PriceStability.co2Price < (0.1 + minimumCo2Price)) && (co2PriceStability.co2Emissions < co2Cap)) {
-            logger.info("Deviation reseting CO2 price to minimum");
+            logger.finer("Deviation reseting CO2 price to minimum");
             co2PriceStability.co2Price = minimumCo2Price;
         }
 
@@ -612,7 +612,7 @@ public abstract class AbstractClearElectricitySpotMarketRole<T extends EMLabMode
 
         DecarbonizationMarket market = getReps().findMarketBySubstance(substance);
         if (market == null) {
-            logger.info("No market found so no price can be found for " + substance.getName());
+            logger.finer("No market found so no price can be found for " + substance.getName());
             return 0d;
         } else {
             return findLastKnownPriceOnMarket(market);
@@ -635,29 +635,29 @@ public abstract class AbstractClearElectricitySpotMarketRole<T extends EMLabMode
         for (CommoditySupplier supplier : getReps().commoditySuppliers) {
             if (supplier.getSubstance().equals(substance)) {
 
-                logger.info("Price found for " + substance.getName() + " by asking the supplier " + supplier.getName());
+                logger.finer("Price found for " + substance.getName() + " by asking the supplier " + supplier.getName());
                 return supplier.getPriceOfCommodity().getValue(getCurrentTick());
             }
         }
 
         if (average != null) {
-            logger.info("Average price found on market for this tick for " + substance.getName());
+            logger.finer("Average price found on market for this tick for " + substance.getName());
             return average;
         }
 
         average = calculateAverageMarketPriceBasedOnClearingPoints(getReps().findClearingPointsForMarketAndTime(
                 market, getCurrentTick() - 1, false));
         if (average != null) {
-            logger.info("Average price found on market for previous tick for " + substance.getName());
+            logger.finer("Average price found on market for previous tick for " + substance.getName());
             return average;
         }
 
         if (market.getReferencePrice() > 0) {
-            logger.info("Found a reference price found for market for " + substance.getName());
+            logger.finer("Found a reference price found for market for " + substance.getName());
             return market.getReferencePrice();
         }
 
-        logger.info("No price has been found for " + substance.getName());
+        logger.finer("No price has been found for " + substance.getName());
         return 0d;
     }
 

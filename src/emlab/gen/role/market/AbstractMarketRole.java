@@ -41,9 +41,9 @@ public abstract class AbstractMarketRole<T extends DecarbonizationMarket> extend
         double clearedPrice = 0d;
         double totalSupplyPrice = calculateTotalSupplyPriceForMarketForTime(market, time);
         double totalSupply = calculateTotalSupplyForMarketForTime(market, time);
-        logger.info("total supply " + totalSupply + " total price " + totalSupplyPrice);
+        logger.finer("total supply " + totalSupply + " total price " + totalSupplyPrice);
         double totalDemandForPrice = calculateTotalDemandForMarketForTimeForPrice(market, time, totalSupplyPrice);
-        logger.info("total demand " + totalDemandForPrice + " for price " + totalSupplyPrice);
+        logger.finer("total demand " + totalDemandForPrice + " for price " + totalSupplyPrice);
 
         double minimumSupplyPrice = calculateMinimumSupplyPriceForMarketForTime(market, time);
         double demandAtMinimumSupplyPrice = calculateTotalDemandForMarketForTimeForPrice(market, time, totalSupplyPrice);
@@ -92,7 +92,7 @@ public abstract class AbstractMarketRole<T extends DecarbonizationMarket> extend
             }
         }
         ClearingPoint point = getReps().createOrUpdateClearingPoint(market, Math.max(0, clearedPrice), clearedVolume, time, false);
-        logger.info("clearing point for: " + market.getName() + " volume "+ clearedVolume + " and price " + clearedPrice);
+        logger.finer("clearing point for: " + market.getName() + " volume "+ clearedVolume + " and price " + clearedPrice);
         // set bids to accepted and check for partial acceptance
         // DEMAND
         double previousPrice = markAcceptedBids(point, false);

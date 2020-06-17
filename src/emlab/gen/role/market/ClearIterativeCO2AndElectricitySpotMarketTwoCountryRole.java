@@ -118,7 +118,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
 
         Iterable<PowerPlantDispatchPlan> ppdps = getReps().powerPlantDispatchPlans;
         for (PowerPlantDispatchPlan ppdp : ppdps) {
-            logger.info(ppdp.toString() + " in " + ppdp.getBiddingMarket() + " accepted: " + ppdp.getAcceptedAmount());
+            logger.finer(ppdp.toString() + " in " + ppdp.getBiddingMarket() + " accepted: " + ppdp.getAcceptedAmount());
         }
 
         double previouslyBankedCertificates = getReps().determineTotallyBankedCO2Certificates();
@@ -161,7 +161,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
 
         // find all operational power plants and store the ones operational to a
         // list.
-        logger.info("Clearing the CO2 and electricity spot markets using iteration for 2 countries ");
+        logger.finer("Clearing the CO2 and electricity spot markets using iteration for 2 countries ");
 
         // find all fuel prices
         // find all interconnectors
@@ -208,10 +208,10 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
 
             int breakOffIterator = 0;
             while (!co2SecantSearch.stable) {
-                logger.info("Clearing secant search iteration " + breakOffIterator);
+                logger.finer("Clearing secant search iteration " + breakOffIterator);
                 
                 if (breakOffIterator > 15) {
-                    logger.info("Iteration cancelled, last found CO2 Price is used.");
+                    logger.finer("Iteration cancelled, last found CO2 Price is used.");
                     break;
                 }
 
@@ -223,7 +223,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
                 co2SecantSearch = co2PriceSecantSearchUpdate(co2SecantSearch, model, government, forecast,
                         clearingTick, co2CapAdjustment);
                 breakOffIterator++;
-                logger.info("Secant search iteration outcome: " + co2SecantSearch);
+                logger.finer("Secant search iteration outcome: " + co2SecantSearch);
             }
 
             getReps().createOrUpdateClearingPoint(co2Auction, co2SecantSearch.co2Price,
@@ -255,7 +255,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
             Segment segment, Government government, long clearingTick, boolean forecast,
             Map<ElectricitySpotMarket, Double> demandGrowthMap) {
 
-        logger.info("Clearing segment " + segment );
+        logger.finer("Clearing segment " + segment );
         GlobalSegmentClearingOutcome globalOutcome = new GlobalSegmentClearingOutcome();
 
         globalOutcome.loads = determineActualDemandForSpotMarkets(segment, demandGrowthMap);
@@ -271,7 +271,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
         double marginalPlantMarginalCost = clearGlobalMarketWithNoCapacityConstraints(segment, globalOutcome, forecast,
                 clearingTick);
 
-        logger.info("Global loads: " + globalOutcome.loads.entrySet().toString());
+        logger.finer("Global loads: " + globalOutcome.loads.entrySet().toString());
         // For each plant in the cost-ordered list
         // Determine the flow over the interconnector.
         ElectricitySpotMarket firstMarket = getReps().electricitySpotMarkets.iterator().next();
@@ -281,7 +281,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
         // Interconnector flow defined as from market A --> market B = positive
         double interconnectorFlow = supplyInFirstMarket - loadInFirstMarket;
 
-        logger.info("Before market coupling interconnector flow: " + interconnectorFlow + " available interconnector capacity " + interconnectorCapacity);
+        logger.finer("Before market coupling interconnector flow: " + interconnectorFlow + " available interconnector capacity " + interconnectorCapacity);
 
         // if interconnector is not limiting or there is only one market, there
         // is one price
@@ -305,7 +305,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
                         globalOutcome.globalPrice,
                         (supplyInThisMarket + interconenctorFlowForCurrentMarket) * segment.getLengthInHours(),
                         (interconenctorFlowForCurrentMarket * segment.getLengthInHours()), clearingTick, forecast);
-                logger.info("Stored a system-uniform price for market " + market + " / segment " + segment
+                logger.finer("Stored a system-uniform price for market " + market + " / segment " + segment
                         + " -- supply " + supplyInThisMarket + " -- price: " + globalOutcome.globalPrice);
             }
 
@@ -318,7 +318,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
             }
 
             // else there are two prices
-            logger.info("There should be multiple prices, but first we should do market coupling.");
+            logger.finer("There should be multiple prices, but first we should do market coupling.");
 
             boolean firstImporting = true;
             if (interconnectorFlow > 0) {
@@ -337,7 +337,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
                 }
 
             }
-            logger.info("Loads: " + marketOutcomes.loads.entrySet().toString());
+            logger.finer("Loads: " + marketOutcomes.loads.entrySet().toString());
 
             // For each plant in the cost-ordered list
             clearTwoInterconnectedMarketsGivenAnInterconnectorAdjustedLoad(segment, marketOutcomes, clearingTick,
@@ -359,7 +359,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
                         (marketOutcomes.supplies.get(market) + interconenctorFlowForCurrentMarket)
                         * segment.getLengthInHours(),
                         (interconenctorFlowForCurrentMarket * segment.getLengthInHours()), clearingTick, forecast);
-                logger.info("Stored a market specific price for market " + market + " / segment " + segment
+                logger.finer("Stored a market specific price for market " + market + " / segment " + segment
                         + " -- supply " + marketOutcomes.supplies.get(market) + " -- demand: "
                         + marketOutcomes.loads.get(market) + " -- price: " + marketOutcomes.prices.get(market));
             }
@@ -396,7 +396,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
             
             ElectricitySpotMarket myMarket = (ElectricitySpotMarket) plan.getBiddingMarket();//Why on this market?
             
-            logger.info("Supply for market: " + myMarket + " equals " + marketOutcomes.supplies.get(myMarket));
+            logger.finer("Supply for market: " + myMarket + " equals " + marketOutcomes.supplies.get(myMarket));
             // Make it produce as long as there is load.
             double plantSupply = determineProductionOnSpotMarket(plan, marketOutcomes.supplies.get(myMarket),
                     marketOutcomes.loads.get(myMarket));
@@ -405,9 +405,9 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
                 // determine price and so on.
                 marketOutcomes.supplies.put(myMarket, marketOutcomes.supplies.get(myMarket) + plantSupply);
                 marketOutcomes.prices.put(myMarket, plan.getPrice());
-                logger.info("1Storing price: " + plan.getPrice() + " and supply " + plantSupply +  " for plant " + plan.getPowerPlant() + " in market " + myMarket);
+                logger.finer("1Storing price: " + plan.getPrice() + " and supply " + plantSupply +  " for plant " + plan.getPowerPlant() + " in market " + myMarket);
             } else {
-                logger.info("2Storing price: " + plan.getPrice() + " and supply " + plantSupply +  " for plant " + plan.getPowerPlant() + " in market " + myMarket);
+                logger.finer("2Storing price: " + plan.getPrice() + " and supply " + plantSupply +  " for plant " + plan.getPowerPlant() + " in market " + myMarket);
             }
         }
 
@@ -447,7 +447,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
 
         double fundamentalCO2Price = calculateFundamentalCO2PriceForEnergyProducers(clearingTick, model, co2Auction,
                 co2SecantSearch);
-        logger.info("Fundanmental price: " + fundamentalCO2Price);
+        logger.finer("Fundanmental price: " + fundamentalCO2Price);
 
         // find national minimum CO2 prices. Initial Map size is 2.
         Map<ElectricitySpotMarket, Double> nationalMinCo2Prices = new HashMap<ElectricitySpotMarket, Double>(2);
@@ -491,7 +491,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
                     * calculateCO2PriceReductionFactor(government, maximumEnergyProducerBanking,
                             previouslyBankedCertificates + deltaBankedEmissionCertificates, 10, clearingTick);
 
-            logger.info("CO2 Fundamental Price iteration " + i + ", Old: " + previousAdjustedFundamentalCO2Price + " New: " + adjustedFundamentalCO2Price);
+            logger.finer("CO2 Fundamental Price iteration " + i + ", Old: " + previousAdjustedFundamentalCO2Price + " New: " + adjustedFundamentalCO2Price);
 
         } while (Math.abs(adjustedFundamentalCO2Price - previousAdjustedFundamentalCO2Price) > 1);
 
@@ -532,7 +532,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
             fuelPriceMap.put(substance, findLastKnownPriceForSubstance(substance));
         }
 
-        logger.info(fuelPriceMap.toString());
+        logger.finer(fuelPriceMap.toString());
 
         Map<Substance, Double> futureFuelPriceMap = predictFuelPrices(model.getCentralForecastBacklookingYears(),
                 clearingTick + model.getCentralForecastingYear());
@@ -556,7 +556,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
 
         // find all operational power plants and store the ones operational to a
         // list.
-        logger.info("Clearing the CO2 and electricity spot markets using iteration for 2 countries ");
+        logger.finer("Clearing the CO2 and electricity spot markets using iteration for 2 countries ");
 
         // find all fuel prices
         // find all interconnectors
@@ -589,7 +589,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
 
         double targetEnergyProducerBanking = calculateTargetCO2EmissionBankingOfEnergyProducers(clearingTick,
                 clearingTick + model.getCentralForecastingYear(), government, model);
-        logger.info("Hedging Target: " + targetEnergyProducerBanking + " Relative Hedging: " + targetEnergyProducerBanking / government.getCo2Cap(getCurrentTick()));
+        logger.finer("Hedging Target: " + targetEnergyProducerBanking + " Relative Hedging: " + targetEnergyProducerBanking / government.getCo2Cap(getCurrentTick()));
 
         double deltaBankedEmissionCertificateToReachBankingTarget = (targetEnergyProducerBanking - previouslyBankedCertificates)
                 / model.getCentralCO2TargetReversionSpeedFactor();
@@ -635,14 +635,14 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
         while (breakOffIterator < 2 || !co2SecantSearch.stable) {
 
             if (breakOffIterator > 15) {
-                logger.info("Iteration cancelled, last found CO2 Price is used.");
+                logger.finer("Iteration cancelled, last found CO2 Price is used.");
                 break;
             }
 
             futureCO2Price = co2SecantSearch.co2Price
                     * Math.pow(1 + model.getCentralPrivateDiscountingRate(), model.getCentralForecastingYear());
 
-            logger.info("Iteration " + breakOffIterator + ", CO2Price for clearing: " + co2SecantSearch.co2Price);
+            logger.finer("Iteration " + breakOffIterator + ", CO2Price for clearing: " + co2SecantSearch.co2Price);
             clearOneOrTwoConnectedElectricityMarketsAtAGivenCO2PriceForSegments(government,
                     clearingTick + model.getCentralForecastingYear(), true, futureDemandGrowthMap, futureFuelPriceMap,
                     futureCO2Price, futureNationalMinCo2Prices, segments, interconnector, model);
@@ -668,8 +668,8 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
             }
 
             if (co2SecantSearch.stable || breakOffIterator >= 15) {
-                logger.info("Average price last 2 years: " + averageCO2PriceOfLastTwoYears + " Clearing price " + co2SecantSearch.co2Price);
-                logger.info("StabilityReserveActive: "
+                logger.finer("Average price last 2 years: " + averageCO2PriceOfLastTwoYears + " Clearing price " + co2SecantSearch.co2Price);
+                logger.finer("StabilityReserveActive: "
                         + model.isStabilityReserveIsActive()
                         + ", InOperation: "
                         + (model.getStabilityReserveFirstYearOfOperation() <= clearingTick
@@ -684,7 +684,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
                     emergencyPriceTriggerActive = true;
                     emergencyAllowancesToBeReleased = Math.min(government.getStabilityReserve(), government
                             .getStabilityReserveReleaseQuantityTrend().getValue(clearingTick));
-                    logger.info(
+                    logger.finer(
                             "Stability Reserve releasing " + emergencyAllowancesToBeReleased
                             + " credits since price would be " + co2SecantSearch.co2Price + " which has 3x time higher than "
                             + averageCO2PriceOfLastTwoYears);
@@ -738,7 +738,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
             }
         }
 
-        logger.info("CO2Price that is saved: " + co2SecantSearch.co2Price);
+        logger.finer("CO2Price that is saved: " + co2SecantSearch.co2Price);
         getReps().createOrUpdateCO2MarketClearingPoint(co2Auction, co2SecantSearch.co2Price,
                 currentEmissions, emergencyPriceTriggerActive, emergencyAllowancesToBeReleased, clearingTick, false);
         getReps().createOrUpdateCO2MarketClearingPoint(co2Auction,
@@ -763,7 +763,7 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
                 producer.setCo2Allowances(bankedEmissionsOfProducer);
             }
         } else {
-            logger.info("Banking exhausted.");
+            logger.finer("Banking exhausted.");
             clearIterativeCO2AndElectricitySpotMarketTwoCountryForTimestepAndFuelPrices(model, true, clearingTick
                     + model.getCentralForecastingYear(), futureFuelPriceMap, futureDemandGrowthMap, 0);
             clearIterativeCO2AndElectricitySpotMarketTwoCountryForTimestepAndFuelPrices(model, false, clearingTick,
@@ -856,10 +856,10 @@ public class ClearIterativeCO2AndElectricitySpotMarketTwoCountryRole extends
         }
         double[] priceInterpolation = interpolateLinearDiscountedPricesBetweenClearingPoints(lastCO2Clearing,
                 forecastedCO2Clearing, model.getCentralPrivateDiscountingRate());
-        logger.info("Price interpolation: " + priceInterpolation);
+        logger.finer("Price interpolation: " + priceInterpolation);
         double[] volumeInterpolation = interpolateLinearVolumesBetweenClearingPoints(lastCO2Clearing,
                 forecastedCO2Clearing);
-        logger.info("Volume interpolation: " + volumeInterpolation);
+        logger.finer("Volume interpolation: " + volumeInterpolation);
         double totalEmissions = 0;
         double fundamentalPrice = 0;
         for (int i = 0; i < volumeInterpolation.length; i++) {

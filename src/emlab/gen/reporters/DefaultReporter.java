@@ -40,7 +40,7 @@ public class DefaultReporter extends AbstractReporter {
     public void report(Schedule schedule) {
 
         //Default file of reporters over time
-        logger.warning("Writing log for tick " + schedule.getCurrentTick());
+        logger.info("Writing log for tick " + schedule.getCurrentTick());
 
         
         

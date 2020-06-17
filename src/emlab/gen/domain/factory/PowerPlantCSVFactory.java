@@ -49,7 +49,7 @@ public class PowerPlantCSVFactory extends AbstractFactory {
     }
 
     public List<PowerPlant> read() {
-        logger.log(Level.WARNING, "Reading power plant from CSV file: {0}", csvFile);
+        logger.log(Level.INFO, "Reading power plant from CSV file: {0}", csvFile);
         List<PowerPlant> powerplants = null;
         InputStreamReader inputStreamReader = new InputStreamReader(this.getClass().getResourceAsStream(csvFile));
 

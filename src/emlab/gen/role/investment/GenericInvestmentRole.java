@@ -35,7 +35,7 @@ public class GenericInvestmentRole<T extends EnergyProducer> extends AbstractEne
     @SuppressWarnings("unchecked")
 	public void act(T agent) {
     	
-        logger.log(Level.INFO, agent.getName() + " does " +
+        logger.log(Level.FINER, agent.getName() + " does " +
                 agent.getInvestmentRole().getClass().toString());
             	
         agent.getInvestmentRole().act(agent);

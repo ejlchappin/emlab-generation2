@@ -63,11 +63,11 @@ public class ElectricityProducerFactory extends AbstractFactory {
             }
         }
         double requiredCapacity = maxLoad * (1 + capacityMargin);
-        logger.log(Level.INFO, "required capacity for market {0} is {1}", new Object[]{market, requiredCapacity});
+        logger.log(Level.FINER, "required capacity for market {0} is {1}", new Object[]{market, requiredCapacity});
         for (PowerGeneratingTechnology technology : portfolioShares.keySet()) {
             double pctValue = portfolioShares.get(technology);
             double requiredCapacityForTechnology = pctValue * requiredCapacity;
-            logger.log(Level.INFO, "required capacity within this market for technology {0} is {1}", new Object[]{technology, requiredCapacityForTechnology});
+            logger.log(Level.FINER, "required capacity within this market for technology {0} is {1}", new Object[]{technology, requiredCapacityForTechnology});
             // logger.info("required capacity: {} for technology {} before creating",
             // requiredCapacityForTechnology, technology);
             while (requiredCapacityForTechnology > 0) {
@@ -131,7 +131,7 @@ public class ElectricityProducerFactory extends AbstractFactory {
     }
 
     public void setMarket(ElectricitySpotMarket market) {
-        logger.log(Level.INFO, "setting market {0}", market);
+        logger.log(Level.FINER, "setting market {0}", market);
         this.market = market;
     }
 

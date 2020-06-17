@@ -40,13 +40,13 @@ public class PayForLoansRole extends AbstractRole<EnergyProducer> implements Rol
 
     public void act(EnergyProducer producer) {
 
-        logger.info("Process accepted bids to cash flow now");
+        logger.finer("Process accepted bids to cash flow now");
 
         // for (Loan loan : loanRepository.findLoansFromAgent(producer)) {
         for (PowerPlant plant : getReps().findPowerPlantsByOwner(producer)) {
             Loan loan = plant.getLoan();
             if (loan != null) {
-                logger.info("Found a loan: {}" + loan);
+                logger.finer("Found a loan: {}" + loan);
                 if (loan.getNumberOfPaymentsDone() < loan.getTotalNumberOfPayments()) {
 
                     double payment = loan.getAmountPerPayment();
@@ -55,21 +55,21 @@ public class PayForLoansRole extends AbstractRole<EnergyProducer> implements Rol
 
                     loan.setNumberOfPaymentsDone(loan.getNumberOfPaymentsDone() + 1);
 
-                    logger.log(Level.INFO, "Paying {0} (euro) for loan {1}", new Object[]{payment, loan});
-                    logger.log(Level.INFO, "Number of payments done {0}, total needed: {1}", new Object[]{loan.getNumberOfPaymentsDone(), loan.getTotalNumberOfPayments()});
+                    logger.log(Level.FINER, "Paying {0} (euro) for loan {1}", new Object[]{payment, loan});
+                    logger.log(Level.FINER, "Number of payments done {0}, total needed: {1}", new Object[]{loan.getNumberOfPaymentsDone(), loan.getTotalNumberOfPayments()});
                 }
             }
             Loan downpayment = plant.getDownpayment();
             if (downpayment != null) {
-                logger.info("Found downpayment");
+                logger.finer("Found downpayment");
                 if (downpayment.getNumberOfPaymentsDone() < downpayment.getTotalNumberOfPayments()) {
                     double payment = downpayment.getAmountPerPayment();
                     getReps().createCashFlow(producer, downpayment.getTo(), payment,
                             CashFlow.DOWNPAYMENT, getCurrentTick(),
                             downpayment.getRegardingPowerPlant());
                     downpayment.setNumberOfPaymentsDone(downpayment.getNumberOfPaymentsDone() + 1);
-                    logger.log(Level.INFO, "Paying {0} (euro) for downpayment {1}", new Object[]{payment, downpayment});
-                    logger.log(Level.INFO, "Number of payments done {0}, total needed: {1}", new Object[]{downpayment.getNumberOfPaymentsDone(), downpayment.getTotalNumberOfPayments()});
+                    logger.log(Level.FINER, "Paying {0} (euro) for downpayment {1}", new Object[]{payment, downpayment});
+                    logger.log(Level.FINER, "Number of payments done {0}, total needed: {1}", new Object[]{downpayment.getNumberOfPaymentsDone(), downpayment.getTotalNumberOfPayments()});
                 }
             }
         }

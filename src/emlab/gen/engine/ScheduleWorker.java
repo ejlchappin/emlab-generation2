@@ -36,7 +36,7 @@ public class ScheduleWorker extends SwingWorker<Void, Integer> {
         schedule.runID = runID + "-" + scenarioName + "-" + modelRole + "-" + reporter.getClass().getSimpleName();
         schedule.build(iteration, scenarioName, modelRole, reporter);
         schedule.start();
-        Logger.getGlobal().warning("Worker for iteration " + iteration + " is now completed.");
+        Logger.getGlobal().info("Worker for iteration " + iteration + " is now completed.");
         return null;
     }
 

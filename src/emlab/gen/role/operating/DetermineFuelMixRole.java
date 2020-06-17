@@ -56,7 +56,7 @@ public class DetermineFuelMixRole extends AbstractEnergyProducerRole<EnergyProdu
         // logger.warn("Expected CO2 price: " + expectedCO2Prices.toString());
 
         for (PowerPlant plant : getReps().findOperationalPowerPlantsByOwner(producer, getCurrentTick())) {
-            logger.log(Level.INFO, "Found operational power plant {0}", plant.getTechnology());
+            logger.log(Level.FINER, "Found operational power plant {0}", plant.getTechnology());
 
             // Fuels
             Set<Substance> possibleFuels = plant.getTechnology().getFuels();
@@ -94,7 +94,7 @@ public class DetermineFuelMixRole extends AbstractEnergyProducerRole<EnergyProdu
         for (ElectricitySpotMarket market : getReps().electricitySpotMarkets) {
             for (PowerPlant plant : getReps().findExpectedOperationalPowerPlantsInMarket(market,
                     clearingTick)) {
-                logger.log(Level.INFO, "Found operational power plant {0}", plant.getTechnology());
+                logger.log(Level.FINER, "Found operational power plant {0}", plant.getTechnology());
 
                 double effectiveCO2Price;
 
