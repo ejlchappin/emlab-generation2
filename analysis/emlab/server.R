@@ -69,7 +69,7 @@ server <- function(input, output) {
   ## Log files and value boxes
   
   if(analyse_log){
-    log_table <- DT::datatable(emlab_log,  filter = list(position = 'top', clear = FALSE))
+    log_table <- DT::datatable(emlab_log,  filter = list(position = 'top', clear = FALSE), options = list(scrollX = T))
   } else {
     log_table <- tibble(info = "Logs analysis not activated in config.R.")
  }
