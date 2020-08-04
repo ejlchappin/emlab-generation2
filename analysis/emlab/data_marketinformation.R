@@ -15,8 +15,10 @@ plots[["expected_power_per_segment"]] <- function(data, input, average = TRUE){
   
   data <- data %>%
     filter(producer %in% input$producers_checked,
-           tick == seq(input$tick_expected[1],input$tick_expected[2]),
            segment %in% input$segments_checked)
+
+  # data <- data %>%
+  #   filter(tick == seq(input$tick_expected[1],input$tick_expected[2]))
   
   if(average){
     # Average over all iterations
@@ -35,7 +37,7 @@ plots[["expected_power_per_segment"]] <- function(data, input, average = TRUE){
   
   plot +
     geom_line(mapping = aes(x = segment, linetype = type, color = producer)) +
-    scale_color_custom("producer_colors") +
+    #scale_color_custom("producer_colors") +
     labs_default(
       y = glue("Expected power ({input$unit_prefix}Wh)"),
       x = "Segment",

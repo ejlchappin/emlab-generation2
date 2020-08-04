@@ -215,9 +215,11 @@ plots[["cashflows"]] <- function(data, input, average = TRUE){
   }
   
   plot +
-    geom_line() +
+    geom_line(size = 2) +
+    scale_color_brewer(type = "qual") +
     labs_default(
       y = "Cashflow (Million EUR)",
+      title = "Cashflows",
       subtitle = default_subtitle(average))
 }
 
@@ -428,6 +430,7 @@ plots[["average_electricity_prices"]] <- function(data, input, average = TRUE){
   
   plot +
     geom_line() +
+    scale_y_continuous(limits = c(0,NA)) +
     labs_default(
       y = glue("Electricity price (EUR/{input$unit_prefix}Wh)"),
       subtitle = default_subtitle(average))
