@@ -47,3 +47,7 @@ analysis/report*
 resources/sources/renewables capacity factors/config.R
 
 results_meta/scenario_informations.csv
+
+results_meta/
+
+analysis/manual_analyses.Rmd
