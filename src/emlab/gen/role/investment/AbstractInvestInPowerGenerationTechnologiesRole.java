@@ -59,7 +59,7 @@ public abstract class AbstractInvestInPowerGenerationTechnologiesRole<T extends 
     private Map<ElectricitySpotMarket, Double> expectedDemand;
     
     private ElectricitySpotMarket market;
-    private MarketInformation marketInformation;
+    protected MarketInformation marketInformation;
     protected EnergyProducer agent;
     	
 	public AbstractInvestInPowerGenerationTechnologiesRole(Schedule schedule) {
