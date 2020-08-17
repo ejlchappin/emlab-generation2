@@ -7,13 +7,10 @@
 # Use / throught and at the end
 emlab_results_directory <- "/Users/path/"
 
-# Comment to always load latest reporters and logs
-# Uncomment and specify to load specific reporters and logs
-#id_to_load <- "123456789"
-
 # Colors ------------------------------------------------------------------
 
-# Wet to Name of ColorBrewer Palette or 
+# Name of ColorBrewer Palette for colors of these filters. 
+# Alternatively uncomment to use custom color settings (or if more than 12 categories)
 technology_color_palette <- "Set3"
 producer_color_palette <- "Dark2"
 fuel_color_palette <- "Dark2"

@@ -182,7 +182,7 @@ plots[["cash_by_producers"]] <- function(data, input, average = TRUE){
   }
   
   plot +
-    geom_line() +
+    geom_line(size = 2) +
     scale_color_custom("producer_colors") +
     labs_default(
         y = "Cash (Million EUR)",
@@ -734,11 +734,18 @@ if(!exists("selected_fuels")){  selected_fuels <- all_fuels }
 if(!exists("selected_segments")){  selected_segments <- all_segments }
 
 
-
-technology_colors <- set_colors(all_technologies, "custom_technology_colors", "technology_color_palette")
-producer_colors <- set_colors(all_producers, "custom_producer_colors", "producer_color_palette")
-fuel_colors <- set_colors(all_fuels, "custom_fuel_colors", "fuel_color_palette")
-#segment_colors <- set_colors(all_segments, "custom_segment_colors", "segment_color_palette")
+if(exists("custom_technology_colors") | exists("technology_color_palette")){
+  technology_colors <- set_colors(all_technologies, "custom_technology_colors", "technology_color_palette")
+}
+if(exists("custom_producer_colors") | exists("producer_color_palette")){
+  producer_colors <- set_colors(all_producers, "custom_producer_colors", "producer_color_palette")  
+}
+if(exists("custom_fuel_colors") | exists("fuel_color_palette")){
+  fuel_colors <- set_colors(all_fuels, "custom_fuel_colors", "fuel_color_palette")
+}
+if(exists("custom_segment_colors") | exists("segment_color_palette")){
+  segment_colors <- set_colors(all_segments, "custom_segment_colors", "segment_color_palette")
+}
 
 
 

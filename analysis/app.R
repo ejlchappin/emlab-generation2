@@ -5,7 +5,9 @@
 
 library(shiny)
 
-#id_to_load <- 1597331960209
+# Comment to always load latest reporters and logs
+# Uncomment and specify to load specific reporters and logs
+#id_to_load <- 123456789
 
 source(file = "emlab/init.R")
 
