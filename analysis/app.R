@@ -4,6 +4,9 @@
 #
 
 library(shiny)
+
+#id_to_load <- 1597331960209
+
 source(file = "emlab/init.R")
 
 # Run the application (ui and server are in the folder emlab)
