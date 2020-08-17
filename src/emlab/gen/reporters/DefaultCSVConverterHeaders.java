@@ -46,7 +46,9 @@ public class DefaultCSVConverterHeaders extends AbstractCSVConverter {
                 row.add("operational.capacity." + market + "." + tech + ".all" );
                 
                 for (EnergyProducer agent : schedule.reps.energyProducers) {
-                    row.add("operational.capacity." + market + "." + tech  + "." + agent.getName());
+                	if(agent.getInvestorMarket().equals(market)){
+                		row.add("operational.capacity." + market + "." + tech  + "." + agent.getName());
+                	}
                 }
                 
                 row.add("production." + market + "." + tech);

@@ -44,8 +44,10 @@ public class DefaultCSVConverter extends AbstractCSVConverter {
             for (PowerGeneratingTechnology tech : schedule.reps.powerGeneratingTechnologies) {
                 row.add(String.valueOf(reps.calculateCapacityOfOperationalPowerPlantsByTechnologyInMarket(tech, market, schedule.getCurrentTick())));
                 
-                for (EnergyProducer agent : reps.energyProducers) {                	                	
-                    row.add(String.valueOf(reps.calculateCapacityOfOperationalPowerPlantsByOwnerAndTechnology(tech, schedule.getCurrentTick(), agent)));
+                for (EnergyProducer agent : reps.energyProducers) {
+                	if(agent.getInvestorMarket().equals(market)){                	
+                		row.add(String.valueOf(reps.calculateCapacityOfOperationalPowerPlantsByOwnerAndTechnology(tech, schedule.getCurrentTick(), agent)));
+                	}
 
                 }
                 
