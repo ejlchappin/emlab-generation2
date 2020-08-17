@@ -6,7 +6,13 @@
 package emlab.gen.engine;
 
 import static emlab.gen.engine.Schedule.logger;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,8 +98,17 @@ public class Startup {
                 Logger.getGlobal().warning("Argument not correct:" + args[i]);
             }
         }
-
         
+        // Make a copy of the scenario file for reproducibility
+        try {
+        	File scenarioFile = new File("src/emlab/gen/scenarios/" + scenarioName + ".java"); 
+        	File scenarioFileCopy = new File(reporterDirectoryName + runID + "-" + scenarioName + ".java-copy.txt"); 
+        	copyFileUsingStream(scenarioFile, scenarioFileCopy);
+        } catch (IOException ex) {
+        	Logger.getGlobal().severe("Could not copy scenario file");
+        }
+        
+        // Reporters
         Class<?> reporterClass = null;
         AbstractReporter reporter = null;
         try {
@@ -148,4 +163,24 @@ public class Startup {
         //Out of the loop, all iterations have been performed and all workers are done
         Logger.getGlobal().info("All is done.");
     }
+    
+
+	private static void copyFileUsingStream(File source, File dest) throws IOException {
+	    InputStream is = null;
+	    OutputStream os = null;
+	    try {
+	        is = new FileInputStream(source);
+	        os = new FileOutputStream(dest);
+	        byte[] buffer = new byte[1024];
+	        int length;
+	        while ((length = is.read(buffer)) > 0) {
+	            os.write(buffer, 0, length);
+	        }
+	    } finally {
+	        is.close();
+	        os.close();
+	    }
+}
+    
+    
 }
