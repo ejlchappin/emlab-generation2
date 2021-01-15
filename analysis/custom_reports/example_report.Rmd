@@ -6,26 +6,34 @@ output:
   html_notebook: default
   pdf_document: default
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
-This report show that the results can exported in an [R Markdown](http://rmarkdown.rstudio.com) Notebook.
+This report show that the results can exported in an [R Markdown](http://rmarkdown.rstudio.com) Notebook. Execute with Run All or Knit to HTML in RStudio.
 
-Please remove example_ and rename to report_(yourname). Your own config files are currently ignored in .gitignore.
+Please also remove example_ and rename to report_(yourname). Your own config files are currently ignored in .gitignore.
 
+```{r setup}
 
-```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 
 knitr::opts_chunk$set(
-  echo = FALSE, 
-  message = FALSE, 
-  warning = FALSE,
-  fig.width= 10,
-  fig.asp=0.5
-  #out.width= 10
-  )
+	fig.asp = 0.5,
+	fig.width = 10,
+	message = FALSE,
+	warning = FALSE,
+	include = TRUE
+)
 
-source(file = "emlab/init.R")
+```
+
+
+```{r load files, include=FALSE}
+
+# Please set rund and config
+config_file <- "config.R"  
+id_to_load <- 1604416986386
+source(file = "app_scripts/init.R")
 
 # theme for ggplot
 theme_set(
@@ -39,9 +47,7 @@ theme_set(
 # Load dynamic plots and pages  --------------------------------------------------------
 
 # All plots are defined in this script
-source(file = "emlab/main.R")
-
-
+source(file = "app_plots/data_main.R")
 
 # global vars
 filters <- list(
@@ -95,6 +101,3 @@ Other plots are in the vector plots[]. Use these names in get_plot_filtered()
 ```{r}
 names(plots)
 ```
-
-
-

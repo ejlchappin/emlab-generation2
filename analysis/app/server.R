@@ -18,43 +18,13 @@ server <- function(input, output) {
   map(all_plots, function(plot_name){
     
     # get average of all iterations plot
+  
+    observe({
+      output$selected_single_plot <- renderPlot(
+        expr = {get_plot_filtered(input$single_plot_selected, input, input$iteration_average)}, 
+        height = input$selected_single_plot_height)
+    })
     
-    # if(use_plotly){
-    # 
-    # output[[paste("plot", plot_name, sep = "_")]] <- renderPlotly({
-    #   plot <- get_plot_filtered(plot_name, input, input$iteration_average)
-    #   ggplotly(plot)
-    #   
-    # })
-    # 
-    # } else {
-    #   output[[paste("plot", plot_name, sep = "_")]] <- renderPlot({
-    #     get_plot_filtered(plot_name, input, input$iteration_average)
-    #   })
-    # }
-    
-    if(use_plotly){
-      
-      output$selected_single_plot <- renderUI({})
-      output$selected_single_plotly <- renderPlotly({
-        plot <- get_plot_filtered(input$single_plot_selected, input, input$iteration_average) %>% 
-          ggplotly()
-        plot
-        
-      })
-      
-    } else {
-      output$selected_single_plotly <- renderUI({})
-      
-      observe({
-        output$selected_single_plot <- renderPlot(
-          expr = {get_plot_filtered(input$single_plot_selected, input, input$iteration_average)}, 
-          height = input$selected_single_plot_height)
-      })
-      
-
-    }
-
     output$selected_single_plot_title <- renderText({
       input$single_plot_selected %>% 
         variable_name_to_title()
@@ -68,7 +38,7 @@ server <- function(input, output) {
   
   ## Log files and value boxes
   
-  if(analyse_log){
+  if(config_params[["analyse_log"]]){
     log_table <- DT::datatable(emlab_log,  filter = list(position = 'top', clear = FALSE), options = list(scrollX = T))
   } else {
     log_table <- tibble(info = "Logs analysis not activated in config.R.")
@@ -87,31 +57,70 @@ server <- function(input, output) {
     }
   }
   
+  ## Custom filters
   
+  ### Filter for market
+  output$show_filter_market <- reactive({
+    toggle_filters("market",input$single_plot_selected)
+  })
+  outputOptions(output, "show_filter_market", suspendWhenHidden = FALSE)  
+  
+  ### Filter for technology
   output$show_filter_technology <- reactive({
     toggle_filters("technology",input$single_plot_selected)
   })
   outputOptions(output, "show_filter_technology", suspendWhenHidden = FALSE)  
   
+  ### Filter for producer
   output$show_filter_producer <- reactive({
     toggle_filters("producer",input$single_plot_selected)
   })
   outputOptions(output, "show_filter_producer", suspendWhenHidden = FALSE)  
   
+  ### Filter for cashflow
+  output$show_filter_cashflow <- reactive({
+    toggle_filters("cashflow",input$single_plot_selected)
+  })
+  outputOptions(output, "show_filter_cashflow", suspendWhenHidden = FALSE)
+  
+  ### Filter for fuel
   output$show_filter_fuel <- reactive({
     toggle_filters("fuel",input$single_plot_selected)
   })
   outputOptions(output, "show_filter_fuel", suspendWhenHidden = FALSE)  
   
+  ### Filter for segment
   output$show_filter_segment <- reactive({
     toggle_filters("segment",input$single_plot_selected)
   })
   outputOptions(output, "show_filter_segment", suspendWhenHidden = FALSE)  
   
+  ### Filter for tick_expected
   output$show_filter_tick_expected <- reactive({
     toggle_filters("tick_expected",input$single_plot_selected)
   })
   outputOptions(output, "show_filter_tick_expected", suspendWhenHidden = FALSE)  
+  
+  ### Filter for tick
+  output$show_filter_tick <- reactive({
+    toggle_filters("tick_filter",input$single_plot_selected)
+  })
+  outputOptions(output, "show_filter_tick", suspendWhenHidden = FALSE)  
+  
+  ### Filter for single iteration
+  output$show_filter_single_iteration <- reactive({
+    toggle_filters("iterations",input$single_plot_selected)
+  })
+  outputOptions(output, "show_filter_single_iteration", suspendWhenHidden = FALSE)  
+  
+  ### Filter for range
+  output$hide_filter_iteration_range <- reactive({
+    toggle_filters("hide_iterations_range",input$single_plot_selected)
+  })
+  
+  outputOptions(output, "hide_filter_iteration_range", suspendWhenHidden = FALSE)  
+  
+  
   
   # Logic for saving data
   

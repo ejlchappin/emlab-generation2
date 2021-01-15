@@ -1,0 +1,146 @@
+---
+title: "Example Report"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+editor_options: 
+  chunk_output_type: inline
+---
+
+This report show that the results can exported in an [R Markdown](http://rmarkdown.rstudio.com) Notebook. Execute with Run All or Knit to HTML in RStudio.
+
+Please also remove example_ and rename to report_(yourname). Your own config files are currently ignored in .gitignore.
+
+```{r setup}
+
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+
+knitr::opts_chunk$set(
+	fig.asp = 0.5,
+	fig.width = 10,
+	message = FALSE,
+	warning = FALSE,
+	include = TRUE
+)
+
+```
+
+
+```{r load files, include=FALSE}
+
+# Please set rund and config
+config_file <- "config.R"  
+id_to_load <- 1606468261035  #MM01BothAllTech10Y
+source(file = "app_scripts/init.R")
+
+# theme for ggplot
+theme_set(
+  theme_bw(base_size = 13) + 
+    theme(
+      legend.title=element_blank(),
+      legend.spacing.x = unit(0.1, 'cm')
+    )
+)
+
+# Load dynamic plots and pages  --------------------------------------------------------
+
+# All plots are defined in this script
+source(file = "app_plots/data_main.R")
+
+# global vars
+filters <- list(
+  iterations = c(iteration_min,iteration_max),
+  unit_prefix = "M")
+# needed for report
+assign("global_unit",filters$unit, envir = .GlobalEnv)
+```
+
+
+
+## Operational Capacity
+
+In this market the capacity of all technologies develops like that
+
+
+```{r plot 1}
+
+filters$technologies_checked <- all_technologies
+get_plot_filtered("operational_capacities_by_technology", filters)
+
+```
+
+```{r plot 2}
+
+filters$segments_checked <- all_segments
+filters$all_in_one_plot <- FALSE
+filters$flip_tick_segment <- TRUE
+get_plot_filtered("segment_volume", filters)
+
+```
+
+
+And only renewables develop like that on average (top) and in each iteration (bottom)
+
+```{r}
+
+# TODO Make sure that values are correct
+filters$technologies_checked <- c("Photovoltaic PGT", "Hydroelectric", "Onshore wind PGT", "Offshore wind PGT") 
+
+get_plot_filtered("operational_capacities_by_technology", filters)
+get_plot_filtered("operational_capacities_by_technology", filters,average = FALSE)
+
+
+```
+
+## Other plots
+
+Other plots are in the vector plots[]. Use these names in get_plot_filtered()
+
+```{r}
+names(plots)
+```
+
+
+```{r}
+
+
+# Expected expected_ROEs_mapped_vs_modelled ----------------------------------------------------
+
+data[["expected_ROEs_mapped_vs_modelled"]]  %>% 
+  filter(
+    # producer %in% input$producers_checked,
+    # technology %in% input$technologies_checked,
+    iteration == 1
+  ) %>% 
+  mutate(
+    type = fct_rev(type),
+    type = fct_recode(type, Modelled = "modelled", Mapped = "mapped"),
+    market = fct_recode(market, Netherlands = "DutchMarket", Germany = "GermanMarket"),
+    year = tick + 2015
+  ) %>% 
+  ggplot(mapping = aes(y = ROE, x = tick)) +
+  geom_point(mapping = aes(colour = technology)) +
+  facet_grid(market ~ type) +
+  #scale_y_continuous(labels = scales::percent, limits = c(NA, 0.5)) +
+  # 
+  scale_y_log10(
+    labels = scales::percent,
+    limits = c(0.1/100,50/100)
+  ) +
+  labs_default(
+    y = glue("Expected ROE"),
+    x = NULL,
+    #title = get_title_of_selected_plot(input),
+    #subtitle = glue("Showing iteration 1"),
+    fill = "Technology"
+  ) + 
+  theme(legend.position = "bottom")
+
+ggsave(filename = "mapped_vs_modelled.pdf", width = 5, height = 5)
+
+ 
+
+```
+

@@ -4,6 +4,29 @@
 
 # Files -------------------------------------------------------------------
 
+#' Internal helper function to load file
+#'
+#' @param directory 
+#' @param ending 
+get_file_list <- function(directory, ending){
+  
+  if(dir.exists(directory)){
+    file_list <- list.files(path = directory, pattern = ending)
+    
+    if(length(file_list) != 0){
+      tibble(
+        file = file_list,
+        date = file.info(file.path(directory,file_list))$ctime
+      ) %>% 
+        arrange(date) 
+    } else {
+      stop(glue("No files with ending {ending} found in results directory {directory}."), call. = F)
+    }
+
+  } else {
+    stop("Results directory not found. Please point adjust config_params[[\"emlab_results_directory\"]] in config.")
+  }
+}
 
 #' Get a list of all results csv files from the results folder
 #' The filenames need to follow the following scheme and use "-" as separator
@@ -14,15 +37,9 @@
 #' @return a tibble() of all result files
 get_result_files <- function(directory){
   
-  file_list <- list.files(path = directory, pattern = "*.csv")
-  
-  tibble(
-    file = file_list,
-    date = file.info(paste0(directory,file_list))$ctime
-  ) %>% 
-    arrange(date) %>% 
+  get_file_list(directory, "*.csv") %>% 
     separate(col = "file", into = c("id", "scenario", "model", "reporter", "datatype"), sep = "-", remove = FALSE)
-  
+
 }
 
 #' Get a list of all log files from the results folder
@@ -32,14 +49,9 @@ get_result_files <- function(directory){
 #' @return a tibble() of all log files
 get_log_files <- function(directory){
   
-  file_list <- list.files(path = directory, pattern = "*-log.txt$")
-  
-  tibble(
-    file = file_list,
-    date = file.info(paste0(directory,file_list))$ctime
-  ) %>% 
-    arrange(date) %>% 
+  get_file_list(directory, "*-log.txt$") %>% 
     separate(col = "file", into = c("id", "datatype"), sep = "-", remove = FALSE)
+  
 }
 
 
@@ -50,7 +62,6 @@ filter_latest_files <- function(file_df){
     filter(date == max(date)) %>% 
     slice(1) %>% 
     pull(id)
-  
   
   file_df %>%
     filter(id == lastest_id)
@@ -100,7 +111,7 @@ read_emlab_log <- function(file_list){
 }
 
 
-get_results_filepath <- function(file_list, datatype, directory = emlab_results_directory){
+get_results_filepath <- function(file_list, datatype, directory = config_params[["emlab_results_directory"]]){
   file <- file_list %>% 
     filter(datatype == !!datatype) %>% 
     pull(file)
@@ -172,6 +183,13 @@ load_description_file <- function(file) {
   data
 }
 
+
+
+# Config ------------------------------------------------------------------
+
+exists_config_param <- function(param){
+  param %in% names(config_params)
+}
 
 # Plots -------------------------------------------------------------------
 
@@ -387,6 +405,30 @@ single_plot_select_names <- function(names){
 
 # Data parsing ------------------------------------------------------------
 
+# decide if data should be processes or not
+process_data <- function(data_name){
+  
+  if("data_to_process" %in% names(config_params)){
+    data_to_process_merged <- c(process_data_required, config_params[["data_to_process"]] )
+    process <- data_name %in% data_to_process_merged
+    
+  } else {s
+    # if variable is not set in config.R process all
+    process <- TRUE
+  }
+  
+  browser
+  
+  if(process){
+    message(glue("{data_name} is being processed"))
+    return(TRUE)
+  } else {
+    return(FALSE)
+  }
+  
+
+}
+
 get_data_by_prefix <- function(data, col_prefix, value, suffix = "."){
   
   if(col_prefix != ""){
@@ -423,6 +465,7 @@ get_vars_from_multiple_columns <- function(data, prefix, vars, value){
   
   data <- data %>% 
     get_data_by_prefix(col_prefix = prefix, value = value) %>% 
+    # TODO expensive function
     separate(col = "key", into = c(prefix_cols,vars), sep = "\\.") %>% 
     select(-one_of(prefix_cols))
   

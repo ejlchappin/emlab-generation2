@@ -1,102 +1,117 @@
 
+# Load data ---------------------------------------------------------------
+
+raw_main_results <- read_emlab_results(files_to_analyse$reporters, "main.csv")
+
+# set some filters
+iteration_min <- min(raw_main_results$iteration)
+iteration_max <- max(raw_main_results$iteration)
+
 # columns to include in every data obtained by (get_data_by_prefix)
 meta_cols <- c("iteration", "tick")
 
-
 # Operational capacity ----------------------------------------------------
 
-
-data[["operational_capacities"]] <- raw_main_results %>% 
-  get_var_from_single_column("powerplants.operational.capacity", value = "capacity")
-
-
-data[["operational_capacities_by_tech_and_producer"]] <- raw_main_results %>% 
-  get_vars_from_multiple_columns(
-    prefix = "operational.capacity", 
-    vars = c("market", "technology", "producer"), 
-    value = "capacity")
-
-data[["operational_capacities_by_technology"]] <- data[["operational_capacities_by_tech_and_producer"]] %>% 
-  filter(producer == "all")
-
-show_filters[["operational_capacities_by_technology"]] <- c("technology")
-
-plots[["operational_capacities_by_technology"]] <- function(data, input, average = TRUE){
-
-  data <- data %>%
-    filter(technology %in% input$technologies_checked)
+if(process_data("operational_capacities")){
   
-  if(average){
-    # Average over all iterations
-    plot <- data %>% 
-      group_by(tick, market, technology) %>% 
-      summarise(avg_capacity = mean(capacity)) %>% 
-      ggplot(mapping = aes(y = avg_capacity * unit_factor())) +
+  data[["operational_capacities"]] <- raw_main_results %>% 
+    get_var_from_single_column("powerplants.operational.capacity", value = "capacity")
+  
+  
+  data[["operational_capacities_by_tech_and_producer"]] <- raw_main_results %>% 
+    get_vars_from_multiple_columns(
+      prefix = "operational.capacity", 
+      vars = c("market", "technology", "producer"), 
+      value = "capacity")
+  
+  data[["operational_capacities_by_technology"]] <- data[["operational_capacities_by_tech_and_producer"]] %>% 
+    filter(producer == "all")
+  
+  show_filters[["operational_capacities_by_technology"]] <- c("technology")
+  
+  plots[["operational_capacities_by_technology"]] <- function(data, input, average = TRUE){
+    
+    data <- data %>%
+      filter(technology %in% input$technologies_checked)
+    
+    if(average){
+      # Average over all iterations
+      plot <- data %>% 
+        group_by(tick, market, technology) %>% 
+        summarise(avg_capacity = mean(capacity)) %>% 
+        ggplot(mapping = aes(y = avg_capacity * unit_factor())) +
         facet_grid(~ market)
-  } else {
-    # By Iterations
-    plot <- data %>%
-      ggplot(mapping = aes(y = capacity * unit_factor())) +
+    } else {
+      # By Iterations
+      plot <- data %>%
+        ggplot(mapping = aes(y = capacity * unit_factor())) +
         facet_wrap(iteration ~ market)
+    }
+    plot +
+      geom_area_shaded(mapping = aes(x = tick, fill = technology)) +
+      scale_fill_technologies() + 
+      #scale_y_continuous(limits = c(NA, 5e5)) +
+      labs_default(
+        y = glue("Capacity ({input$unit_prefix}W)"),
+        subtitle = default_subtitle(average),
+        fill = "Technology")
   }
-  plot +
-    geom_area_shaded(mapping = aes(x = tick, fill = technology)) +
-    scale_fill_technologies() + 
-    labs_default(
-      y = glue("Capacity ({input$unit_prefix}W)"),
-      subtitle = default_subtitle(average),
-      fill = "Technology")
-}
-
-
-data[["operational_capacities_by_producer"]] <- data[["operational_capacities_by_tech_and_producer"]] %>% 
-  filter(producer != "all")
-
-show_filters[["operational_capacities_by_producer"]] <- c("technology", "producer")
-
-plots[["operational_capacities_by_producer"]] <- function(data, input, average = TRUE){
-  
-  data <- data %>%
-    filter(technology %in% input$technologies_checked) %>% 
-    filter(producer %in% input$producers_checked)
   
   
-  if(average){
-    # Average over all iterations
-    plot <- data %>% 
-      group_by(tick, market, producer, technology) %>% 
-      summarise(avg_capacity = mean(capacity)) %>% 
-      ggplot(mapping = aes(y = avg_capacity * unit_factor())) +
-      facet_grid(producer ~ market)
-  } else {
-    # By Iterations
-    plot <- data %>%
-      ggplot(mapping = aes(y = capacity * unit_factor())) +
-      facet_wrap(iteration ~ market + producer)
-  }
-  plot +
-    geom_area_shaded(mapping = aes(x = tick, fill = technology)) +
-    scale_fill_technologies() + 
-    labs_default(
-      y = glue("Capacity ({input$unit_prefix}W)"),
-      subtitle = default_subtitle(average),
-      fill = "Technology"
+  data[["operational_capacities_by_producer"]] <- data[["operational_capacities_by_tech_and_producer"]] %>% 
+    filter(producer != "all")
+  
+  show_filters[["operational_capacities_by_producer"]] <- c("technology", "producer")
+  
+  plots[["operational_capacities_by_producer"]] <- function(data, input, average = TRUE){
+    
+    data <- data %>%
+      filter(technology %in% input$technologies_checked) %>% 
+      filter(producer %in% input$producers_checked)
+    
+    
+    if(average){
+      # Average over all iterations
+      plot <- data %>% 
+        group_by(tick, market, producer, technology) %>% 
+        summarise(avg_capacity = mean(capacity)) %>% 
+        ggplot(mapping = aes(y = avg_capacity * unit_factor())) +
+        facet_grid(producer ~ market)
+    } else {
+      # By Iterations
+      plot <- data %>%
+        ggplot(mapping = aes(y = capacity * unit_factor())) +
+        facet_wrap(iteration ~ market + producer)
+    }
+    plot +
+      geom_area_shaded(mapping = aes(x = tick, fill = technology)) +
+      scale_fill_technologies() + 
+      labs_default(
+        y = glue("Capacity ({input$unit_prefix}W)"),
+        subtitle = default_subtitle(average),
+        fill = "Technology"
       )
+  }
+  
 }
 
 
 # Generation --------------------------------------------------------------
 
+if(process_data("generation_total")){
+  
 data[["generation_total"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "production", value = "generation") %>%
   separate(col = "key", into = c("var", "market", "technology"), sep = "\\.")
 
-show_filters[["generation_total"]] <- c("technology")
+show_filters[["generation_total"]] <- c("technology", "market")
 
 plots[["generation_total"]] <- function(data, input, average = TRUE){
   
   data <- data %>%
-    filter(technology %in% input$technologies_checked) 
+    filter(technology %in% input$technologies_checked) %>% 
+    filter(market %in% input$markets_checked) 
+  
   
   if(average){
     # Average over all iterations
@@ -120,8 +135,12 @@ plots[["generation_total"]] <- function(data, input, average = TRUE){
       subtitle = default_subtitle(average),
       fill = "Technology")
 }
+}
 
 # Pipeline Capacity -------------------------------------------------------
+
+if(process_data("pipeline_capacities")){
+  
 
 data[["pipeline_capacities"]] <- raw_main_results %>%
   get_data_by_prefix("pipeline.capacity", value = "capacity") %>%
@@ -154,9 +173,12 @@ plots[["pipeline_capacities"]] <- function(data, input, average = TRUE){
       fill = "Technology")
 }
 
+}
 
 # Cash --------------------------------------------------------------------
 
+if(process_data("cash_by_producers")){
+  
 data[["cash_by_producers"]] <- raw_main_results %>%
   get_data_by_prefix("cash", value = "cash") %>%
   separate(col = key, into = c("var", "producer"), sep = "\\.")
@@ -173,25 +195,30 @@ plots[["cash_by_producers"]] <- function(data, input, average = TRUE){
     plot <- data %>% 
       group_by(tick, producer) %>%
       summarise(avg_cash = mean(cash)) %>%
-      ggplot(mapping = aes(x = tick, y = avg_cash / 1e6, color = producer))
+      ggplot(mapping = aes(x = tick, y = avg_cash / 1e9, color = producer))
+    
   } else {
     # By Iterations
     plot <- data %>%
-      ggplot(mapping = aes(x = tick, y = cash / 1e6, color = producer)) +
+      ggplot(mapping = aes(x = tick, y = cash / 1e9, color = producer)) +
       facet_wrap( ~ iteration)
   }
   
   plot +
     geom_line(size = 2) +
-    scale_color_custom("producer_colors") +
+    geom_hline(yintercept = 0, lwd = 1) +
+    #scale_color_custom("producer_colors") +
     labs_default(
-        y = "Cash (Million EUR)",
+        y = "Cash (Billion EUR)",
         subtitle = default_subtitle(average),
         color = "Producer")
 }
 
+}
 # Cashflow --------------------------------------------------------------------
 
+if(process_data("cashflows")){
+  
 data[["cashflows"]] <- raw_main_results %>%
   get_data_by_prefix("cashflow", value = "cash") %>%
   separate(col = key, into = c("var", "type"), sep = "\\.") %>% 
@@ -223,9 +250,56 @@ plots[["cashflows"]] <- function(data, input, average = TRUE){
       subtitle = default_subtitle(average))
 }
 
+}
+
+# Cashflow per producer --------------------------------------------------------------------
+
+if(process_data("cashflows_per_producer")){
+  
+data[["cashflows_per_producer"]] <- raw_main_results %>%
+  get_data_by_prefix("prodcashflow", value = "cash") %>%
+  separate(col = key, into = c("var", "direction", "producer", "type"), sep = "\\.") %>% 
+  select(-var)
+
+show_filters[["cashflows_per_producer"]] <- c("producer", "cashflow")
+
+plots[["cashflows_per_producer"]] <- function(data, input, average = TRUE){
+  
+  data <- data %>% 
+    mutate(cash = if_else(direction == "from", -cash, cash)) %>% 
+    filter(
+      type %in% input$cashflows_checked,
+      producer %in% input$producers_checked
+      )
+  
+  if(average){
+    # Average over all iterations
+    plot <- data %>% 
+      group_by(tick, type, producer, direction) %>%
+      summarise(avg_cash = mean(cash)) %>%
+      ggplot(mapping = aes(x = tick, y = avg_cash / 1e6, color = type, linetype = direction)) +
+        facet_wrap(~ producer)
+  } else {
+    # By Iterations
+    plot <- data %>%
+      ggplot(mapping = aes(x = tick, y = cash / 1e6, color = type, linetype = direction)) +
+      facet_wrap(producer ~ iteration)
+  }
+  
+  plot +
+    geom_line(size = 2) +
+    #scale_color_brewer(type = "qual") +
+    labs_default(
+      y = "Cashflow (Million EUR)",
+      title = "Cashflows per Producer",
+      subtitle = default_subtitle(average))
+}
+}
 
 # Power plants ------------------------------------------------------------
 
+if(process_data("nr_powerplants")){
+  
 data[["nr_powerplants"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "nr.of.powerplants", value = "N", suffix = "") %>%
   select(-key)
@@ -254,10 +328,12 @@ plots[["nr_powerplants"]] <- function(data, input, average = TRUE){
       subtitle = default_subtitle(average))
 }
 
-
+}
 
 # Fuel Prices -------------------------------------------------------------
 
+if(process_data("fuel_prices")){
+  
 
 data[["fuel_prices"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "substance.price", value = "price") %>%
@@ -293,9 +369,11 @@ plots[["fuel_prices"]] <- function(data, input, average = TRUE){
       color = "Fuel")
 }
 
-
+}
 # Fuel Volumes ------------------------------------------------------------
 
+if(process_data("fuel_volumes")){
+  
 data[["fuel_volumes"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "substance.volume", value = "volume") %>%
   separate(col = "key", into = c("var1","var2", "fuel"), sep = "\\.") %>%
@@ -331,9 +409,11 @@ plots[["fuel_volumes"]] <- function(data, input, average = TRUE){
       color = "Fuel")
 }
 
- 
+}
 # CO2 Prices -------------------------------------------------------------
 
+if(process_data("CO2_prices")){
+  
 data[["CO2_prices"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "price.co2", value = "price", suffix = "") %>%
   select(-key)
@@ -362,10 +442,12 @@ plots[["CO2_prices"]] <- function(data, input, average = TRUE){
       subtitle = default_subtitle(average))
 }
 
-
+}
 
 # CO2 Volumes ------------------------------------------------------------
 
+if(process_data("CO2_volumes")){
+  
 data[["CO2_volumes"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "co2.emissions", value = "volume") %>%
   separate(col = "key", into = c("var1","var2", "type"), sep = "\\.") %>%
@@ -398,11 +480,12 @@ plots[["CO2_volumes"]] <- function(data, input, average = TRUE){
 
 
 
-
+}
 
 # Market Average prices -------------------------------------------------------------
 
-
+if(process_data("average_electricity_prices")){
+  
 data[["average_electricity_prices"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "market.average price", value = "price") %>%
   separate(col = "key", into = c("var1","var2", "market"), sep = "\\.") %>%
@@ -436,8 +519,12 @@ plots[["average_electricity_prices"]] <- function(data, input, average = TRUE){
       subtitle = default_subtitle(average))
 }
 
+}
+
 # Market Average Volumes -------------------------------------------------------------
 
+if(process_data("average_market_volumes")){
+  
 
 data[["average_market_volumes"]] <- raw_main_results %>%
   get_data_by_prefix(col_prefix = "market.volume", value = "volume") %>%
@@ -471,7 +558,11 @@ plots[["average_market_volumes"]] <- function(data, input, average = TRUE){
       subtitle = default_subtitle(average))
 }
 
+}
+
 # Segment prices -------------------------------------------------------------
+if(process_data("segment_prices")){
+  
 
 # ..   segment.price.DutchMarket.segment20 = col_number(),
 # ..   segment.hours.DutchMarket.segment20 = col_number(),
@@ -509,7 +600,7 @@ plots[["segment_prices"]] <- function(data, input, average = TRUE){
     plot <- data %>% 
       group_by(tick, market, segment) %>%
       summarise(avg_price = mean(price)) %>% 
-      ggplot(mapping = aes(x = tick, y = avg_price / unit_factor(), color = segment)) +
+      ggplot(mapping = aes(x = tick, y = avg_price / unit_factor(), color = segment))
 
     if(input$all_in_one_plot){
       plot <- plot +
@@ -536,9 +627,11 @@ plots[["segment_prices"]] <- function(data, input, average = TRUE){
       subtitle = default_subtitle(average))
 }
 
-
+}
 # Electricity load -------------------------------------------------------------
 
+if(process_data("segment_load")){
+  
 data[["segment_load"]] <- raw_main_results %>%
   get_segment_data(segment_value = "load")
 
@@ -621,10 +714,12 @@ plots[["segment_load"]] <- function(data, input, average = TRUE){
       subtitle = default_subtitle(average))
 }
 
-
+}
 
 # Segment volume -------------------------------------------------------------
 
+if(process_data("segment_volume")){
+  
 data[["segment_volume"]] <- raw_main_results %>%
   get_segment_data(segment_value = "volume")
 
@@ -671,9 +766,11 @@ plots[["segment_volume"]] <- function(data, input, average = TRUE){
       y = glue("Load ({input$unit_prefix}Wh)"),
       subtitle = default_subtitle(average))
 }
-
+}
 # Segment volume -------------------------------------------------------------
 
+if(process_data("segment_hours")){
+  
 data[["segment_hours"]] <- raw_main_results %>%
   get_segment_data(segment_value = "hours")
 
@@ -716,36 +813,47 @@ plots[["segment_hours"]] <- function(data, input, average = TRUE){
       subtitle = default_subtitle(average))
 }
 
-
+}
 # Variables for app  ------------------------------------------------------------
 
 # variables for inputs and filters
 
-all_technologies <- get_sinlge_variable(data$operational_capacities_by_technology, technology)
-all_producers <- get_sinlge_variable(data$cash_by_producers, producer)
-all_fuels <- get_sinlge_variable(data$fuel_prices, fuel)
-all_segments <- get_sinlge_variable(data$segment_prices, segment)
-
-
 # pre selected filter in config.R
+# TODO problem -> used in several places!!
+# TODO as array
+
+all_markets <- get_sinlge_variable(data$operational_capacities_by_technology, market)
+if(!exists("selected_markets")){  selected_markets <- all_markets }
+if(exists("custom_market_colors") | exists("market_color_palette")){
+  market_colors <- set_colors(all_market, "custom_market_colors", "market_color_palette")
+}
+
+all_technologies <- get_sinlge_variable(data$operational_capacities_by_technology, technology)
 if(!exists("selected_technologies")){  selected_technologies <- all_technologies }
-if(!exists("selected_producers")){  selected_producers <- all_producers }
-if(!exists("selected_fuels")){  selected_fuels <- all_fuels }
-if(!exists("selected_segments")){  selected_segments <- all_segments }
-
-
 if(exists("custom_technology_colors") | exists("technology_color_palette")){
   technology_colors <- set_colors(all_technologies, "custom_technology_colors", "technology_color_palette")
 }
+
+all_producers <- get_sinlge_variable(data$cash_by_producers, producer)
+if(!exists("selected_producers")){  selected_producers <- all_producers }
 if(exists("custom_producer_colors") | exists("producer_color_palette")){
   producer_colors <- set_colors(all_producers, "custom_producer_colors", "producer_color_palette")  
 }
+
+all_fuels <- get_sinlge_variable(data$fuel_prices, fuel)
+if(!exists("selected_fuels")){  selected_fuels <- all_fuels }
 if(exists("custom_fuel_colors") | exists("fuel_color_palette")){
   fuel_colors <- set_colors(all_fuels, "custom_fuel_colors", "fuel_color_palette")
 }
+
+all_segments <- get_sinlge_variable(data$segment_prices, segment)
+if(!exists("selected_segments")){  selected_segments <- all_segments }
 if(exists("custom_segment_colors") | exists("segment_color_palette")){
   segment_colors <- set_colors(all_segments, "custom_segment_colors", "segment_color_palette")
 }
 
-
+# all_cashflows <- get_sinlge_variable(data$cashflows_per_producer, type)
+# if(!exists("selected_cashflows")){  selected_cashflows <- all_cashflows }
+all_cashflows <- get_sinlge_variable(data$cashflows, type)
+if(!exists("selected_cashflows")){  selected_cashflows <- all_cashflows }
 
