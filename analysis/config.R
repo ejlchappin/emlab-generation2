@@ -9,7 +9,8 @@ config_params[["save_log_tempfile"]] <- TRUE
 
 config_params[["app_title"]] <- "EMLab-Generation2"
 
-config_params[["data_to_load"]] <- c("main", "financialexpectations", "marketinformation")
+config_params[["data_to_load"]] <- c("main", "marketinformation")
+#config_params[["data_to_load"]] <- c("main", "financialexpectations", "marketinformation")
 #config_params[["data_to_load"]] <- c("main", "financialexpectations")
 
 #config_params[["data_to_process"]]  <- c(")
